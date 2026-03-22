@@ -1,5 +1,5 @@
 [build]
-  command = "cd CreditRoot && npm run build"
+  command = "cd CreditRoot && npm install && npm run build"
   publish = "CreditRoot/dist"
 
 [functions]
