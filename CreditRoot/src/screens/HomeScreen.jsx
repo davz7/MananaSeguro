@@ -11,17 +11,17 @@ export function HomeScreen() {
           <div className="col-lg-6">
             <div className="badge rounded-pill mb-3 px-3 py-2"
               style={{ backgroundColor: 'rgba(59,130,246,0.1)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.2)' }}>
-              🔒 Ahorro voluntario protegido en Stellar
+              🔒 Ahorro para retiro · Etherfuse CETES · Stellar
             </div>
 
             <h2 className="fw-bold mb-4" style={{ letterSpacing: '-2px', lineHeight: 1, fontSize: '3rem' }}>
-              Tu retiro,<br />
-              <span style={{ opacity: 0.4 }}>empieza aquí.</span>
+              Mañana Seguro,<br />
+              <span style={{ opacity: 0.4 }}>empieza hoy.</span>
             </h2>
 
             <p className="text-white-50 fs-5 mb-5 pe-lg-4">
-              Conecta tu wallet Freighter, deposita en USDC y bloquea tu ahorro.
-              Sin banco, sin IMSS, sin burocracia.
+              Conecta tu wallet Freighter, deposita desde $2 USDC y bloquea
+              tu ahorro en contrato inteligente. Sin banco, sin IMSS, sin burocracia.
             </p>
 
             <div className="d-flex gap-3 flex-wrap mb-5">
@@ -32,17 +32,17 @@ export function HomeScreen() {
               </a>
               <a href="#dashboard"
                 className="btn btn-outline-secondary btn-lg px-5 py-3 rounded-4 fw-bold">
-                Ver dashboard
+                Mi dashboard
               </a>
             </div>
 
-            {/* Stats */}
+            {/* Stats alineadas al modelo */}
             <div className="row g-3">
               {[
                 { val: '32M', label: 'Mexicanos sin pensión', color: 'text-primary' },
-                { val: '~9% APY', label: 'Rendimiento CETES', color: 'text-success' },
-                { val: '$50 MXN', label: 'Para empezar', color: 'text-warning' },
-                { val: '0%', label: 'Comisiones', color: 'text-info' },
+                { val: '4.7% APY', label: 'Rendimiento en USDC', color: 'text-success' },
+                { val: '$2 USDC', label: 'Para empezar', color: 'text-warning' },
+                { val: '1%', label: 'Comisión plataforma', color: 'text-info' },
               ].map((s) => (
                 <div className="col-6" key={s.label}>
                   <div className="p-3 rounded-4"

@@ -6,9 +6,10 @@ import { AuthScreen } from '../screens/AuthScreen'
 import { HomeScreen } from '../screens/HomeScreen'
 import { PlannerScreen } from '../screens/PlannerScreen'
 import { DashboardScreen } from '../screens/DashboardScreen'
+import { WithdrawalScreen } from '../screens/WithdrawalScreen'
 
 export function AppShell() {
-  const [pantalla, setPantalla] = useState('landing') // landing | login | register | app
+  const [pantalla, setPantalla] = useState('landing')
   const [usuario, setUsuario] = useState(null)
 
   function handleAuth(datos) {
@@ -31,6 +32,7 @@ export function AppShell() {
         <HomeScreen />
         <PlannerScreen />
         <DashboardScreen />
+        <WithdrawalScreen />
       </main>
       <AppFooter />
     </div>

@@ -1,6 +1,6 @@
 [package]
-name = "retiro_chain"
-version = "0.0.0"
+name = "manana_seguro"
+version = "0.1.0"
 edition = "2021"
 publish = false
 

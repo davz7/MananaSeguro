@@ -10,15 +10,14 @@ export function useRetirementProjection(initialScenario) {
   )
 
   function updateScenario(field, value) {
-    setScenario((currentScenario) => ({
-      ...currentScenario,
-      [field]: Number(value),
+    setScenario((current) => ({
+      ...current,
+      // Campos numéricos
+      [field]: ['monthlyDepositUsd', 'yearsToRetirement', 'annualYieldRate'].includes(field)
+        ? Number(value)
+        : value,
     }))
   }
 
-  return {
-    scenario,
-    projection,
-    updateScenario,
-  }
+  return { scenario, projection, updateScenario }
 }
