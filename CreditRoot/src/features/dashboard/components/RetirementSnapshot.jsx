@@ -110,11 +110,29 @@ export function RetirementSnapshot() {
         </div>
       )}
       {error && (
-        <div className="p-3 rounded-4 mb-4 small"
-          style={{ backgroundColor: 'rgba(220,53,69,0.1)', border: '1px dashed rgba(220,53,69,0.4)', color: '#ff6b6b' }}>
-          ⚠️ {error} — Conecta tu wallet en la sección de inicio
-        </div>
-      )}
+  <div className="error-container" style={{ backgroundColor: '#1a1a1a', color: '#f59e0b', padding: '12px', borderRadius: '8px', marginBottom: '16px' }}>
+    {error?.includes('Freighter') || error?.includes('not installed') ? (
+      <>
+        <strong>⚠️ Freighter wallet not detected</strong>
+        <p style={{ marginTop: '8px', marginBottom: '8px' }}>To use this app, you need the Freighter wallet extension.</p>
+        <a href="https://freighter.app/" target="_blank" rel="noopener noreferrer" style={{ color: '#f59e0b' }}>Install Freighter →</a>
+      </>
+    ) : error?.includes('connected') ? (
+      <>
+        <strong>⚠️ Wallet not connected</strong>
+        <p style={{ marginTop: '8px', marginBottom: '8px' }}>Please connect your wallet to continue.</p>
+        <button className="connect-wallet-btn" style={{ backgroundColor: '#f59e0b', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', color: '#000', fontWeight: 'bold' }}>
+          Connect Wallet
+        </button>
+      </>
+    ) : (
+      <>
+        <strong>⚠️ {error}</strong>
+        <p style={{ marginTop: '8px', marginBottom: '8px' }}>Something went wrong. Please try again.</p>
+      </>
+    )}
+  </div>
+)}
 
       {balances && (
         <>
