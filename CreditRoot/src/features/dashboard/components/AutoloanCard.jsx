@@ -186,10 +186,11 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
 
           <div className="mb-4">
             <div className="d-flex justify-content-between mb-2">
-              <label className="small text-white-50">Monto a solicitar</label>
+              <label id="loan-amount-label" className="small text-white-50">Monto a solicitar</label>
               <span className="fw-bold" style={{ color: '#fbbf24' }}>{formatCurrencyUsd(requested)}</span>
             </div>
             <input type="range" className="form-range mb-1"
+              aria-labelledby="loan-amount-label"
               min={10} max={Math.max(10, Math.floor(maxLoan))} step={5}
               value={requested}
               onChange={e => setRequested(Number(e.target.value))}
@@ -232,13 +233,15 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
           {enoughBalance && (
             <button className="btn btn-sm w-100 rounded-3 mb-4"
               style={{ border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', backgroundColor: 'transparent' }}
-              onClick={() => setShowSchedule(!showSchedule)}>
+              onClick={() => setShowSchedule(!showSchedule)}
+              aria-expanded={showSchedule}
+              aria-controls="payment-schedule">
               {showSchedule ? '▲ Ocultar tabla de pagos' : '▼ Ver tabla de pagos (24 meses)'}
             </button>
           )}
 
           {showSchedule && (
-            <div className="mb-4" style={{ maxHeight: 200, overflowY: 'auto' }}>
+            <div id="payment-schedule" className="mb-4" style={{ maxHeight: 200, overflowY: 'auto' }}>
               <table className="table table-dark table-borderless mb-0" style={{ fontSize: 12 }}>
                 <thead style={{ position: 'sticky', top: 0, backgroundColor: '#0c0c0c' }}>
                   <tr className="text-white-50">
@@ -266,7 +269,8 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
               border: 'none', color: enoughBalance ? '#000' : 'rgba(255,255,255,0.2)',
               cursor: enoughBalance ? 'pointer' : 'not-allowed',
             }}
-            onClick={() => enoughBalance && setFase('confirmando')} disabled={!enoughBalance}>
+            onClick={() => enoughBalance && setFase('confirmando')} disabled={!enoughBalance}
+            aria-label={enoughBalance ? `Solicitar préstamo de ${formatCurrencyUsd(loan.amount)}` : 'Solicitar préstamo'}>
             🚨 Solicitar {enoughBalance ? formatCurrencyUsd(loan.amount) : '—'} de emergencia
           </button>
         </>
@@ -285,12 +289,14 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
           <div className="d-flex gap-3 justify-content-center">
             <button className="btn btn-sm rounded-3 px-4"
               style={{ border: '1px solid rgba(255,255,255,0.15)', color: '#fff', backgroundColor: 'transparent' }}
-              onClick={() => setFase('form')}>
+              onClick={() => setFase('form')}
+              aria-label="Cancelar solicitud de préstamo">
               Cancelar
             </button>
             <button className="btn btn-sm rounded-3 px-4 fw-bold"
               style={{ background: 'linear-gradient(45deg, #d97706, #fbbf24)', border: 'none', color: '#000' }}
-              onClick={handleConfirmar}>
+              onClick={handleConfirmar}
+              aria-label="Confirmar y firmar préstamo">
               Confirmar y firmar
             </button>
           </div>
@@ -313,7 +319,8 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
           <p className="small mb-3" style={{ color: '#f87171' }}>{errorMsg}</p>
           <button className="btn btn-sm rounded-3 px-4"
             style={{ border: '1px solid rgba(255,255,255,0.15)', color: '#fff', backgroundColor: 'transparent' }}
-            onClick={handleReset}>
+            onClick={handleReset}
+            aria-label="Intentar de nuevo">
             Intentar de nuevo
           </button>
         </div>
@@ -389,13 +396,15 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
               {/* Pagar mes → transacción real */}
               <button className="btn btn-sm flex-fill rounded-3 fw-bold"
                 style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', color: '#22c55e' }}
-                onClick={handlePagarMes}>
+                onClick={handlePagarMes}
+                aria-label={`Pagar mes ${mesesPagadosReal + 1} del préstamo`}>
                 ✓ Pagar mes {mesesPagadosReal + 1}
               </button>
               {/* Fallar mes → solo actualiza UI de penalización, no hay tx */}
               <button className="btn btn-sm flex-fill rounded-3 fw-bold"
                 style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171' }}
-                onClick={() => setMesesImpago(i => i + 1)}>
+                onClick={() => setMesesImpago(i => i + 1)}
+                aria-label="Fallar mes de pago (demo)">
                 ✗ Fallar mes (demo)
               </button>
             </div>
@@ -421,7 +430,8 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
 
           <button className="btn btn-sm w-100 rounded-3"
             style={{ border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', backgroundColor: 'transparent' }}
-            onClick={handleReset}>
+            onClick={handleReset}
+            aria-label="Crear nueva solicitud de préstamo">
             Nueva solicitud
           </button>
         </>
