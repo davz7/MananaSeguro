@@ -45,11 +45,12 @@ function CalculadoraHero({ onRegister }) {
         {/* Sliders */}
         <div className="mb-4">
           <div className="d-flex justify-content-between mb-2">
-            <label className="small text-white-50">Aporte mensual</label>
+            <label id="cuota-label" className="small text-white-50">Aporte mensual</label>
             <span className="fw-bold small">${cuota} USDC</span>
           </div>
           <input type="range" className="form-range" min={2} max={500} step={1}
             value={cuota} onChange={e => setCuota(Number(e.target.value))}
+            aria-labelledby="cuota-label"
             style={{ accentColor: '#f59e0b' }} />
           <div className="d-flex justify-content-between">
             <span className="text-white-50" style={{ fontSize: 11 }}>$2 USDC</span>
@@ -59,11 +60,12 @@ function CalculadoraHero({ onRegister }) {
 
         <div className="mb-5">
           <div className="d-flex justify-content-between mb-2">
-            <label className="small text-white-50">Tiempo de ahorro</label>
+            <label id="anios-label" className="small text-white-50">Tiempo de ahorro</label>
             <span className="fw-bold small">{anios} años</span>
           </div>
           <input type="range" className="form-range" min={1} max={40}
             value={anios} onChange={e => setAnios(Number(e.target.value))}
+            aria-labelledby="anios-label"
             style={{ accentColor: '#f59e0b' }} />
           <div className="d-flex justify-content-between">
             <span className="text-white-50" style={{ fontSize: 11 }}>1 año</span>
@@ -74,7 +76,8 @@ function CalculadoraHero({ onRegister }) {
         <button
           className="btn btn-primary w-100 py-3 rounded-4 fw-bold fs-6"
           style={{ background: 'linear-gradient(45deg, #d97706, #f59e0b)', border: 'none' }}
-          onClick={onRegister}>
+          onClick={onRegister}
+          aria-label="Empezar a ahorrar">
           Empezar a ahorrar →
         </button>
       </div>
@@ -153,11 +156,13 @@ function CtaFinal({ onRegister, onLogin }) {
         <div className="d-flex gap-3 justify-content-center flex-wrap">
           <button className="btn btn-primary btn-lg px-5 py-3 rounded-4 fw-bold"
             style={{ background: 'linear-gradient(45deg, #d97706, #f59e0b)', border: 'none' }}
-            onClick={onRegister}>
+            onClick={onRegister}
+            aria-label="Crear cuenta gratis">
             Crear cuenta gratis
           </button>
           <button className="btn btn-outline-secondary btn-lg px-5 py-3 rounded-4 fw-bold"
-            onClick={onLogin}>
+            onClick={onLogin}
+            aria-label="Iniciar sesión con cuenta existente">
             Ya tengo cuenta
           </button>
         </div>
@@ -211,11 +216,13 @@ export function LandingScreen({ onLogin, onRegister }) {
             <div className="d-flex gap-3 flex-wrap d-lg-none">
               <button className="btn btn-primary btn-lg px-5 py-3 rounded-4 fw-bold"
                 style={{ background: 'linear-gradient(45deg, #d97706, #f59e0b)', border: 'none' }}
-                onClick={onRegister}>
+                onClick={onRegister}
+                aria-label="Comenzar ahora">
                 Comenzar ahora
               </button>
               <button className="btn btn-outline-secondary btn-lg px-4 py-3 rounded-4 fw-bold"
-                onClick={onLogin}>
+                onClick={onLogin}
+                aria-label="Iniciar sesión">
                 Iniciar sesión
               </button>
             </div>

@@ -26,6 +26,32 @@ export function RetirementSnapshot() {
 
   const { cetesRate, userRate, platformRate, isLive } = useEtherfuseRate()
 
+  // Keyboard navigation for tabs
+  const handleTabKeyDown = (e, currentIndex) => {
+    let newIndex = currentIndex
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault()
+      newIndex = (currentIndex + 1) % tabs.length
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault()
+      newIndex = (currentIndex - 1 + tabs.length) % tabs.length
+    } else if (e.key === 'Home') {
+      e.preventDefault()
+      newIndex = 0
+    } else if (e.key === 'End') {
+      e.preventDefault()
+      newIndex = tabs.length - 1
+    } else {
+      return
+    }
+    setActiveTab(tabs[newIndex].key)
+    // Focus the new tab after state update
+    setTimeout(() => {
+      const newTab = document.getElementById(`tab-${tabs[newIndex].key}`)
+      if (newTab) newTab.focus()
+    }, 0)
+  }
+
   useEffect(() => {
     async function cargarDatos() {
       try {
@@ -169,9 +195,14 @@ export function RetirementSnapshot() {
             </div>
           </div>
 
-          <div className="d-flex gap-2 mb-4 pb-1" style={{ overflowX: 'auto', flexWrap: 'nowrap' }}>
-            {tabs.map((t) => (
+          <div role="tablist" className="d-flex gap-2 mb-4 pb-1" style={{ overflowX: 'auto', flexWrap: 'nowrap' }} aria-label="Dashboard sections">
+            {tabs.map((t, index) => (
               <button key={t.key}
+                id={`tab-${t.key}`}
+                role="tab"
+                aria-selected={activeTab === t.key}
+                aria-controls={`panel-${t.key}`}
+                tabIndex={activeTab === t.key ? 0 : -1}
                 className="btn btn-sm rounded-3 fw-bold flex-shrink-0"
                 style={{
                   backgroundColor: activeTab === t.key ? 'rgba(59,130,246,0.15)' : 'transparent',
@@ -179,14 +210,15 @@ export function RetirementSnapshot() {
                   color: activeTab === t.key ? '#f59e0b' : 'rgba(255,255,255,0.4)',
                   whiteSpace: 'nowrap',
                 }}
-                onClick={() => setActiveTab(t.key)}>
+                onClick={() => setActiveTab(t.key)}
+                onKeyDown={(e) => handleTabKeyDown(e, index)}>
                 {t.label}
               </button>
             ))}
           </div>
 
           {activeTab === 'resumen' && (
-            <div className="d-flex flex-column gap-4">
+            <div id="panel-resumen" role="tabpanel" aria-labelledby="tab-resumen" className="d-flex flex-column gap-4">
               <RateBadge />
               <div className="p-4 rounded-4" style={cardStyle}>
                 <h6 className="fw-bold mb-3">Estado del contrato</h6>
@@ -211,10 +243,10 @@ export function RetirementSnapshot() {
             </div>
           )}
 
-          {activeTab === 'historial' && <ContributionHistory walletAddress={address} lockedBalance={lockedBalance} depositCount={depositCount} />}
+          {activeTab === 'historial' && <div id="panel-historial" role="tabpanel" aria-labelledby="tab-historial"><ContributionHistory walletAddress={address} lockedBalance={lockedBalance} depositCount={depositCount} /></div>}
 
           {activeTab === 'ciclos' && (
-            <div className="p-4 rounded-4" style={cardStyle}>
+            <div id="panel-ciclos" role="tabpanel" aria-labelledby="tab-ciclos" className="p-4 rounded-4" style={cardStyle}>
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h6 className="fw-bold mb-0">Ciclos cada 5 años · $25 USDC/mes</h6>
                 <span className="badge rounded-pill" style={{ backgroundColor: 'rgba(251,191,36,0.1)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.2)' }}>
@@ -253,12 +285,12 @@ export function RetirementSnapshot() {
           )}
 
           {/* AutoloanCard recibe el saldo REAL del contrato y la dirección */}
-          {activeTab === 'prestamo' && <AutoloanCard lockedBalance={lockedBalance} walletAddress={address} />}
-          {activeTab === 'referidos' && <ReferralModule userName={address?.slice(0, 8) ?? 'usuario'} walletAddress={address} />}
-          {activeTab === 'carlos' && <CarlosSimulator />}
+          {activeTab === 'prestamo' && <div id="panel-prestamo" role="tabpanel" aria-labelledby="tab-prestamo"><AutoloanCard lockedBalance={lockedBalance} walletAddress={address} /></div>}
+          {activeTab === 'referidos' && <div id="panel-referidos" role="tabpanel" aria-labelledby="tab-referidos"><ReferralModule userName={address?.slice(0, 8) ?? 'usuario'} walletAddress={address} /></div>}
+          {activeTab === 'carlos' && <div id="panel-carlos" role="tabpanel" aria-labelledby="tab-carlos"><CarlosSimulator /></div>}
 
           {activeTab === 'ingresos' && (
-            <div className="p-4 rounded-4" style={cardStyle}>
+            <div id="panel-ingresos" role="tabpanel" aria-labelledby="tab-ingresos" className="p-4 rounded-4" style={cardStyle}>
               <h6 className="fw-bold mb-3">Distribución del rendimiento</h6>
               <div className="mb-4">
                 <div className="progress rounded-pill mb-2" style={{ height: 24, backgroundColor: 'rgba(255,255,255,0.05)' }}>
