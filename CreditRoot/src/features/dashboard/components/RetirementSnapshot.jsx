@@ -115,8 +115,25 @@ export function RetirementSnapshot() {
     { key: 'ingresos', label: '💰 Distribución' },
   ]
 
+  const skeletonCardStyle = {
+    backgroundColor: '#0c0c0c',
+    border: '1px solid rgba(255,255,255,0.06)',
+  }
+
   return (
     <div style={{ backgroundColor: '#050505', color: '#fff', fontFamily: "'Inter', sans-serif" }}>
+      <style>{`
+        @keyframes skeleton-pulse {
+          0%, 100% { opacity: 0.4; }
+          50% { opacity: 0.15; }
+        }
+        .skeleton-pulse {
+          background: rgba(255,255,255,0.12);
+          border-radius: 6px;
+          animation: skeleton-pulse 1.6s ease-in-out infinite;
+        }
+      `}</style>
+
       <div className="mb-4">
         <div className="d-flex align-items-center gap-2 mb-2 flex-wrap">
           <div className="badge rounded-pill px-3 py-2"
@@ -130,9 +147,21 @@ export function RetirementSnapshot() {
       </div>
 
       {loading && (
-        <div className="text-center py-5">
-          <div className="spinner-border text-primary mb-3" role="status" />
-          <p className="text-white-50 small">Cargando datos desde Stellar testnet...</p>
+        <div className="row g-3 mb-4" aria-busy="true" aria-label="Cargando datos del dashboard">
+          {[
+            'USDC en wallet',
+            'USDC bloqueado',
+            'Proyección a 20 años',
+            'Fecha de retiro',
+          ].map((label) => (
+            <div className="col-sm-6 col-xl-3" key={label}>
+              <div className="p-4 rounded-4 h-100" style={skeletonCardStyle}>
+                <div className="small mb-2" style={{ color: 'transparent', userSelect: 'none' }}>{label}</div>
+                <div className="skeleton-pulse mb-2" style={{ height: 24, width: '70%' }} />
+                <div className="skeleton-pulse" style={{ height: 14, width: '90%' }} />
+              </div>
+            </div>
+          ))}
         </div>
       )}
       {error && (
