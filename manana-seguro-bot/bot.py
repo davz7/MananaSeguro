@@ -15,7 +15,7 @@ from telegram import (
 )
 from telegram.ext import (
     Application, CommandHandler, MessageHandler, CallbackQueryHandler,
-    ConversationHandler, filters, ContextTypes
+    ConversationHandler, filters, ContextTypes, PicklePersistence
 )
 
 load_dotenv()
@@ -682,7 +682,8 @@ def main():
     if not ANTHROPIC_API_KEY:
         raise ValueError("Falta ANTHROPIC_API_KEY en .env")
 
-    app = Application.builder().token(TELEGRAM_TOKEN).build()
+    persistence = PicklePersistence(filepath='bot_data.pickle')
+    app = Application.builder().token(TELEGRAM_TOKEN).persistence(persistence).build()
 
     conv = ConversationHandler(
         entry_points=[
@@ -717,6 +718,8 @@ def main():
             CommandHandler("alertas", suscribir_alertas),
         ],
         allow_reentry=True,
+        persistent=True,
+        name="manana_seguro_conversation"
     )
 
     app.add_handler(conv)
