@@ -28,4 +28,5 @@ function cetesRatePlugin() {
 
 export default defineConfig({
   plugins: [react(), cetesRatePlugin()],
+  test: { environment: 'jsdom' },
 })
