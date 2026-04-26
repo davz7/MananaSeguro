@@ -682,7 +682,7 @@ def main():
     if not ANTHROPIC_API_KEY:
         raise ValueError("Falta ANTHROPIC_API_KEY en .env")
 
-    persistence = PicklePersistence(filepath='bot_data.pickle')
+    persistence = PicklePersistence(filepath='bot_data.pkl')
     app = Application.builder().token(TELEGRAM_TOKEN).persistence(persistence).build()
 
     conv = ConversationHandler(
