@@ -32,3 +32,15 @@ async def get_ai_response(historial: list) -> str:
         messages=historial,
     )
     return response.content[0].text
+
+
+def ask_claude(user_text: str, history: list[dict] | None = None) -> str:
+    """Sync wrapper used by the WhatsApp webhook."""
+    messages = (history or []) + [{"role": "user", "content": user_text}]
+    response = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=400,
+        system=SYSTEM_PROMPT,
+        messages=messages,
+    )
+    return response.content[0].text
