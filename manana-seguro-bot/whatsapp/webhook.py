@@ -17,9 +17,9 @@ from core.proyecciones import calcular_proyeccion, usd, mxn
 
 load_dotenv()
 
-WHATSAPP_TOKEN = os.environ["WHATSAPP_TOKEN"]
-PHONE_NUMBER_ID = os.environ["WHATSAPP_PHONE_NUMBER_ID"]
-VERIFY_TOKEN = os.environ["WHATSAPP_VERIFY_TOKEN"]
+WHATSAPP_TOKEN = os.environ.get("WHATSAPP_TOKEN", "")
+PHONE_NUMBER_ID = os.environ.get("WHATSAPP_PHONE_NUMBER_ID", "")
+VERIFY_TOKEN = os.environ.get("WHATSAPP_VERIFY_TOKEN", "")
 
 API_URL = f"https://graph.facebook.com/v19.0/{PHONE_NUMBER_ID}/messages"
 
