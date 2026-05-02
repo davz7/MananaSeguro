@@ -9,10 +9,10 @@ import { PlannerScreen } from '../screens/PlannerScreen'
 import { DashboardScreen } from '../screens/DashboardScreen'
 import { WithdrawalScreen } from '../screens/WithdrawalScreen'
 
-function AppLayout({ usuario }) {
+function AppLayout({ usuario, onLogout }) {
   return (
-    <div className="bg-surface min-h-screen">
-      <AppHeader usuario={usuario} />
+    <div className="bg-surface dark:bg-[#0f0e0d] min-h-screen">
+      <AppHeader usuario={usuario} onLogout={onLogout} />
       <main>
         <Routes>
           <Route path="/home" element={<HomeScreen usuario={usuario} />} />
@@ -36,12 +36,17 @@ export function AppShell() {
     navigate('/home')
   }
 
+  function handleLogout() {
+    setUsuario(null)
+    navigate('/')
+  }
+
   return (
     <Routes>
       <Route path="/" element={<LandingScreen onLogin={() => navigate('/login')} onRegister={() => navigate('/register')} />} />
-      <Route path="/login" element={<AuthScreen modo="login" onAuth={handleAuth} onVolver={() => navigate('/')} />} />
-      <Route path="/register" element={<AuthScreen modo="register" onAuth={handleAuth} onVolver={() => navigate('/')} />} />
-      <Route path="/*" element={usuario ? <AppLayout usuario={usuario} /> : <Navigate to="/" replace />} />
+      <Route path="/login" element={<AuthScreen onAuth={handleAuth} onVolver={() => navigate('/')} />} />
+      <Route path="/register" element={<AuthScreen onAuth={handleAuth} onVolver={() => navigate('/')} />} />
+      <Route path="/*" element={usuario ? <AppLayout usuario={usuario} onLogout={handleLogout} /> : <Navigate to="/" replace />} />
     </Routes>
   )
 }

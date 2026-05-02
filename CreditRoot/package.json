@@ -16,8 +16,11 @@
     "@stellar/stellar-sdk": "^14.6.1",
     "accesly": "^0.2.5",
     "bootstrap": "^5.3.8",
+    "i18next": "^26.0.8",
+    "lucide-react": "^1.14.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-i18next": "^17.0.6",
     "react-router-dom": "^7.14.2"
   },
   "devDependencies": {

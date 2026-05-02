@@ -1,35 +1,21 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { INCENTIVE_SCENARIOS } from '../../../data/retirementContent'
 
-/**
- * ReferralModule — Sistema de referidos de Mañana Seguro
- *
- * Reglas del modelo de negocio: 
- * - Referido válido: 6 meses activo + al menos 1 depósito
- * - 1 referido activo → incentivo sube de 5% a 6%
- * - 2 referidos activos → incentivo sube a 7% (o 9% con constancia)
- * - Fraude: referido solo válido con actividad real
- */
 export function ReferralModule({ userName = 'Usuario', walletAddress = null }) {
+  const { t } = useTranslation()
   const [referrals, setReferrals] = useState(() => loadReferrals())
   const [copied, setCopied] = useState(false)
   const [newEmail, setNewEmail] = useState('')
   const [addError, setAddError] = useState(null)
 
-  // Código único derivado de la wallet o mock
   const referralCode = generateCode(walletAddress ?? userName)
   const referralLink = `https://manana-seguro.app/r/${referralCode}`
-
-  // Referidos que califican (6+ meses activos, al menos 1 depósito)
   const activeReferrals = referrals.filter(r => r.monthsActive >= 6 && r.deposits >= 1)
   const pendingReferrals = referrals.filter(r => r.monthsActive < 6)
-
-  // Incentivo actual según referidos activos
   const incentiveTier = getIncentiveTier(activeReferrals.length)
 
-  useEffect(() => {
-    saveReferrals(referrals)
-  }, [referrals])
+  useEffect(() => { saveReferrals(referrals) }, [referrals])
 
   function handleCopy() {
     navigator.clipboard.writeText(referralLink).then(() => {
@@ -41,78 +27,81 @@ export function ReferralModule({ userName = 'Usuario', walletAddress = null }) {
   function handleAddReferral() {
     setAddError(null)
     if (!newEmail.trim() || !newEmail.includes('@')) {
-      setAddError('Ingresa un correo válido')
+      setAddError(t('referrals.errorCorreo'))
       return
     }
     if (referrals.find(r => r.email === newEmail.trim())) {
-      setAddError('Este correo ya está registrado')
+      setAddError(t('referrals.errorDuplicado'))
       return
     }
-    const mock = {
+    setReferrals(prev => [...prev, {
       id: Date.now(),
       email: newEmail.trim(),
       name: newEmail.split('@')[0],
       joinedAt: new Date().toISOString(),
-      monthsActive: 0,   // mock: empieza en 0
+      monthsActive: 0,
       deposits: 0,
       status: 'pendiente',
-    }
-    setReferrals(prev => [...prev, mock])
+    }])
     setNewEmail('')
   }
 
-  // Simula progreso (solo para demo/hackathon)
   function handleSimulateProgress(id) {
     setReferrals(prev => prev.map(r => r.id === id
-      ? { ...r, monthsActive: Math.min(r.monthsActive + 1, 12), deposits: Math.max(r.deposits, 1), status: r.monthsActive >= 5 ? 'activo' : 'en progreso' }
+      ? {
+        ...r,
+        monthsActive: Math.min(r.monthsActive + 1, 12),
+        deposits: Math.max(r.deposits, 1),
+        status: r.monthsActive >= 5 ? 'activo' : 'en progreso',
+      }
       : r
     ))
   }
 
-  const cardStyle = { backgroundColor: '#0c0c0c', border: '1px solid rgba(255,255,255,0.06)' }
-
   return (
-    <div className="d-flex flex-column gap-4">
+    <div className="flex flex-col gap-4">
 
-      {/* Header con tier actual */}
-      <div className="p-4 rounded-4" style={cardStyle}>
-        <div className="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+      {/* ── Tier actual ── */}
+      <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
+        <div className="flex items-start justify-between flex-wrap gap-3 mb-5">
           <div>
-            <h5 className="fw-bold mb-1">Sistema de referidos</h5>
-            <p className="text-white-50 small mb-0">
-              Invita amigos y sube tu incentivo cada 5 años hasta el 9%.
+            <h5 className="font-display font-black text-ink dark:text-white text-lg mb-1">
+              {t('referrals.titulo')}
+            </h5>
+            <p className="text-sm text-ink/50 dark:text-white/50 max-w-sm">
+              {t('referrals.desc')}
             </p>
           </div>
-          <div className="text-center">
-            <div className="fw-bold" style={{ fontSize: 28, color: incentiveTier.color }}>
+          <div className="text-center shrink-0">
+            <div className="font-display font-black text-3xl mb-0.5" style={{ color: incentiveTier.color }}>
               {incentiveTier.pct}%
             </div>
-            <div className="small text-white-50">tu incentivo actual</div>
+            <div className="text-xs text-ink/40 dark:text-white/40">{t('referrals.incentivoActual')}</div>
           </div>
         </div>
 
-        {/* Tabla de tiers */}
-        <div className="d-flex flex-column gap-2 mb-4">
-          {INCENTIVE_SCENARIOS.map((s) => {
+        {/* Tiers */}
+        <div className="flex flex-col gap-2 mb-5">
+          {INCENTIVE_SCENARIOS.map(s => {
             const isActive = s.pct === incentiveTier.pct
+            const label = t(`incentiveScenarios.${s.key}.label`)
+            const description = t(`incentiveScenarios.${s.key}.description`)
             return (
-              <div key={s.key} className="d-flex justify-content-between align-items-center p-3 rounded-3"
-                style={{
-                  backgroundColor: isActive ? 'rgba(59,130,246,0.08)' : 'rgba(255,255,255,0.02)',
-                  border: isActive ? '1px solid rgba(59,130,246,0.3)' : '1px solid rgba(255,255,255,0.04)',
-                }}>
+              <div key={s.key}
+                className={`flex justify-between items-center p-3 rounded-xl border transition-all ${isActive
+                  ? 'bg-brand/8 border-brand/25'
+                  : 'bg-ink/2 dark:bg-white/2 border-ink/5 dark:border-white/5'
+                  }`}>
                 <div>
-                  <div className="small fw-bold" style={{ color: isActive ? '#f59e0b' : '#fff' }}>
-                    {isActive ? '→ ' : ''}{s.label}
-                  </div>
-                  <div className="small text-white-50">{s.description}</div>
+                  <p className={`text-sm font-semibold mb-0.5 ${isActive ? 'text-brand' : 'text-ink dark:text-white'}`}>
+                    {isActive ? '→ ' : ''}{label}
+                  </p>
+                  <p className="text-xs text-ink/40 dark:text-white/40">{description}</p>
                 </div>
-                <span className="badge rounded-pill"
-                  style={{
-                    backgroundColor: isActive ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.05)',
-                    color: isActive ? '#f59e0b' : 'rgba(255,255,255,0.4)',
-                    border: isActive ? '1px solid rgba(59,130,246,0.3)' : '1px solid transparent',
-                  }}>
+                <span className={`text-xs font-bold px-3 py-1 rounded-full border ${isActive
+                  ? 'bg-brand/10 text-brand border-brand/25'
+                  : 'bg-ink/4 dark:bg-white/4 text-ink/40 dark:text-white/40 border-transparent'
+                  }`}>
                   {s.pct}%
                 </span>
               </div>
@@ -120,119 +109,110 @@ export function ReferralModule({ userName = 'Usuario', walletAddress = null }) {
           })}
         </div>
 
-        {/* Stats rápidos */}
-        <div className="row g-2">
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-2">
           {[
-            { label: 'Referidos totales', val: referrals.length, color: '#fff' },
-            { label: 'Activos (6+ meses)', val: activeReferrals.length, color: '#22c55e' },
-            { label: 'En progreso', val: pendingReferrals.length, color: '#fbbf24' },
+            { label: t('referrals.statsTotales'), val: referrals.length, color: 'text-ink dark:text-white' },
+            { label: t('referrals.statsActivos'), val: activeReferrals.length, color: 'text-green-600' },
+            { label: t('referrals.statsProgreso'), val: pendingReferrals.length, color: 'text-yellow-500' },
           ].map(item => (
-            <div className="col-4" key={item.label}>
-              <div className="p-3 rounded-3 text-center"
-                style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div className="fw-bold fs-5" style={{ color: item.color }}>{item.val}</div>
-                <div className="small text-white-50">{item.label}</div>
-              </div>
+            <div key={item.label} className="bg-ink/3 dark:bg-white/3 border border-ink/6 dark:border-white/6 rounded-xl p-3 text-center">
+              <div className={`font-display font-black text-xl mb-0.5 ${item.color}`}>{item.val}</div>
+              <div className="text-xs text-ink/40 dark:text-white/40">{item.label}</div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Link de referido */}
-      <div className="p-4 rounded-4" style={cardStyle}>
-        <h6 className="fw-bold mb-3">Tu link de referido</h6>
-        <div className="d-flex gap-2 mb-2">
+      {/* ── Link de referido ── */}
+      <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
+        <h6 className="font-semibold text-ink dark:text-white mb-3">{t('referrals.tuLink')}</h6>
+        <div className="flex gap-2 mb-2">
           <input
             readOnly
             value={referralLink}
-            className="form-control bg-transparent text-white border-secondary rounded-3 font-monospace small"
-            style={{ fontSize: 12 }}
+            className="w-full border border-ink/10 dark:border-white/10 rounded-xl px-4 py-2.5 text-xs font-mono bg-ink/3 dark:bg-white/3 text-ink dark:text-white outline-none"
           />
           <button
-            className="btn btn-sm px-3 rounded-3 fw-bold flex-shrink-0"
-            style={{
-              background: copied ? 'rgba(34,197,94,0.15)' : 'linear-gradient(45deg, #d97706, #f59e0b)',
-              border: copied ? '1px solid rgba(34,197,94,0.3)' : 'none',
-              color: copied ? '#22c55e' : '#fff',
-              minWidth: 80,
-            }}
-            onClick={handleCopy}
-          >
-            {copied ? '✓ Copiado' : 'Copiar'}
+            className={`shrink-0 text-xs font-bold px-4 py-2.5 rounded-xl border transition-all cursor-pointer ${copied
+              ? 'bg-green-500/10 text-green-600 border-green-500/20'
+              : 'bg-brand hover:bg-brand-dark text-white border-transparent hover:-translate-y-px'
+              }`}
+            onClick={handleCopy}>
+            {copied ? t('referrals.copiado') : t('referrals.copiar')}
           </button>
         </div>
-        <div className="small text-white-50">
-          Código: <span className="font-monospace fw-bold" style={{ color: '#f59e0b' }}>{referralCode}</span>
-          {' '}· Un referido califica después de 6 meses activo y al menos 1 depósito.
-        </div>
+        <p className="text-xs text-ink/40 dark:text-white/40">
+          {t('referrals.codigo')}{' '}
+          <span className="font-mono font-bold text-brand">{referralCode}</span>
+          {' '}· {t('referrals.codigoDesc')}
+        </p>
       </div>
 
-      {/* Invitar por correo */}
-      <div className="p-4 rounded-4" style={cardStyle}>
-        <h6 className="fw-bold mb-3">Invitar por correo</h6>
-        <div className="d-flex gap-2 mb-1">
+      {/* ── Invitar por correo ── */}
+      <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
+        <h6 className="font-semibold text-ink dark:text-white mb-3">{t('referrals.invitarCorreo')}</h6>
+        <div className="flex gap-2 mb-1">
           <input
             type="email"
-            className="form-control bg-transparent text-white border-secondary rounded-3"
-            placeholder="correo@ejemplo.com"
+            className="w-full border border-ink/10 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-white/5 text-ink dark:text-white outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all"
+            placeholder={t('referrals.placeholder')}
             value={newEmail}
             onChange={e => setNewEmail(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleAddReferral()}
           />
           <button
-            className="btn btn-sm px-3 rounded-3 fw-bold flex-shrink-0"
-            style={{ background: 'linear-gradient(45deg, #d97706, #f59e0b)', border: 'none', minWidth: 80 }}
-            onClick={handleAddReferral}
-          >
-            Invitar
+            className="shrink-0 bg-brand hover:bg-brand-dark text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all hover:-translate-y-px cursor-pointer"
+            onClick={handleAddReferral}>
+            {t('referrals.invitar')}
           </button>
         </div>
-        {addError && <div className="small mt-1" style={{ color: '#f87171' }}>⚠ {addError}</div>}
+        {addError && (
+          <p className="text-xs text-red-500 mt-1">⚠ {addError}</p>
+        )}
       </div>
 
-      {/* Lista de referidos */}
+      {/* ── Lista de referidos ── */}
       {referrals.length > 0 && (
-        <div className="p-4 rounded-4" style={cardStyle}>
-          <h6 className="fw-bold mb-3">Mis referidos</h6>
-          <div className="d-flex flex-column gap-2">
+        <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
+          <h6 className="font-semibold text-ink dark:text-white mb-4">{t('referrals.misReferidos')}</h6>
+          <div className="flex flex-col gap-3">
             {referrals.map(r => {
               const isActive = r.monthsActive >= 6 && r.deposits >= 1
               const progress = Math.min((r.monthsActive / 6) * 100, 100)
               return (
-                <div key={r.id} className="p-3 rounded-3"
-                  style={{
-                    backgroundColor: isActive ? 'rgba(34,197,94,0.05)' : 'rgba(255,255,255,0.02)',
-                    border: `1px solid ${isActive ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.05)'}`,
-                  }}>
-                  <div className="d-flex justify-content-between align-items-start mb-2">
+                <div key={r.id}
+                  className={`p-4 rounded-xl border transition-all ${isActive
+                    ? 'bg-green-500/5 border-green-500/15'
+                    : 'bg-ink/2 dark:bg-white/2 border-ink/5 dark:border-white/5'
+                    }`}>
+                  <div className="flex justify-between items-start mb-2">
                     <div>
-                      <div className="small fw-bold">{r.name}</div>
-                      <div className="small text-white-50">{r.email}</div>
+                      <p className="text-sm font-semibold text-ink dark:text-white mb-0.5">{r.name}</p>
+                      <p className="text-xs text-ink/40 dark:text-white/40">{r.email}</p>
                     </div>
-                    <span className="badge rounded-pill"
-                      style={{
-                        backgroundColor: isActive ? 'rgba(34,197,94,0.1)' : 'rgba(251,191,36,0.1)',
-                        color: isActive ? '#22c55e' : '#fbbf24',
-                        border: `1px solid ${isActive ? 'rgba(34,197,94,0.2)' : 'rgba(251,191,36,0.2)'}`,
-                        fontSize: 10,
-                      }}>
-                      {isActive ? '✓ Activo' : `${r.monthsActive}/6 meses`}
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${isActive
+                      ? 'bg-green-500/10 text-green-600 border-green-500/20'
+                      : 'bg-yellow-400/10 text-yellow-600 border-yellow-400/20'
+                      }`}>
+                      {isActive ? t('referrals.activo') : `${r.monthsActive}/6 meses`}
                     </span>
                   </div>
 
                   {!isActive && (
                     <>
-                      <div className="progress rounded-pill mb-1" style={{ height: 4, backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                        <div className="progress-bar rounded-pill"
-                          style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #d97706, #fbbf24)' }} />
+                      <div className="h-1.5 bg-ink/5 dark:bg-white/5 rounded-full overflow-hidden mb-1.5">
+                        <div className="h-full bg-gradient-to-r from-brand-dark to-brand rounded-full transition-all duration-500"
+                          style={{ width: `${progress}%` }} />
                       </div>
-                      <div className="d-flex justify-content-between">
-                        <span className="small text-white-50">{r.monthsActive} de 6 meses para calificar</span>
-                        {/* Solo para demo */}
-                        <button className="btn btn-sm p-0 small text-white-50"
-                          style={{ fontSize: 10, textDecoration: 'underline', background: 'none', border: 'none' }}
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-ink/40 dark:text-white/40">
+                          {t('referrals.mesesProgreso', { meses: r.monthsActive })}
+                        </span>
+                        <button
+                          className="text-xs text-ink/30 dark:text-white/30 hover:text-brand transition-colors underline cursor-pointer bg-transparent border-none"
                           onClick={() => handleSimulateProgress(r.id)}>
-                          +1 mes (demo)
+                          {t('referrals.masMes')}
                         </button>
                       </div>
                     </>
@@ -249,9 +229,7 @@ export function ReferralModule({ userName = 'Usuario', walletAddress = null }) {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
 function generateCode(seed) {
-  // Código corto determinístico basado en wallet o nombre
   let hash = 0
   for (let i = 0; i < seed.length; i++) {
     hash = ((hash << 5) - hash) + seed.charCodeAt(i)
@@ -262,8 +240,8 @@ function generateCode(seed) {
 
 function getIncentiveTier(activeCount) {
   if (activeCount >= 2) return { pct: 7, color: '#22c55e', label: '2 referidos activos' }
-  if (activeCount >= 1) return { pct: 6, color: '#f59e0b', label: '1 referido activo' }
-  return { pct: 5, color: 'rgba(255,255,255,0.6)', label: 'Solo fidelidad' }
+  if (activeCount >= 1) return { pct: 6, color: '#e3730d', label: '1 referido activo' }
+  return { pct: 5, color: '#a69f97', label: 'Solo fidelidad' }
 }
 
 function loadReferrals() {
@@ -281,7 +259,6 @@ function saveReferrals(referrals) {
 }
 
 function getMockReferrals() {
-  // Datos demo para el hackathon
   return [
     { id: 1, email: 'maria@ejemplo.com', name: 'maria', joinedAt: '2025-09-01', monthsActive: 6, deposits: 4, status: 'activo' },
     { id: 2, email: 'pedro@ejemplo.com', name: 'pedro', joinedAt: '2025-12-01', monthsActive: 3, deposits: 2, status: 'en progreso' },

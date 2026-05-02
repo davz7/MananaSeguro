@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { MANANA_SEGURO_RATES, INCENTIVE_SCENARIOS } from '../../../data/retirementContent'
 import { formatCurrencyUsd, formatCurrencyMxn } from '../../../utils/formatters'
 import { calculateCycles, calculateLoan } from '../../../utils/projections'
@@ -16,19 +17,17 @@ const DEFAULTS = {
 
 export function CarlosSimulator() {
   const { userRate } = useEtherfuseRate()
+  const { t } = useTranslation()
   const [params, setParams] = useState(DEFAULTS)
   const [step, setStep] = useState(0)
 
   const incentivePct = INCENTIVE_SCENARIOS.find(s => s.key === params.escenario)?.pct ?? 7
   const cycles = calculateCycles(params.mensual, params.anios, userRate, incentivePct)
-
   const mesAEmergencia = 36
   const saldoMes36 = estimateSaldoMes(params.mensual, mesAEmergencia, userRate)
   const loan = calculateLoan(saldoMes36, saldoMes36 * 0.30)
-
   const penalizacion = params.simularImpago ? params.mesesImpago * MANANA_SEGURO_RATES.loanPenaltyPerMonth : 0
   const tasaEscenario = Math.max(MANANA_SEGURO_RATES.loanMinUserRate, userRate - penalizacion)
-
   const cyclesFinal = calculateCycles(params.mensual, params.anios, tasaEscenario, incentivePct)
   const saldoFinal = cyclesFinal[cyclesFinal.length - 1]?.endBalance ?? 0
   const totalIncentivos = cyclesFinal.reduce((s, c) => s + c.incentiveAmount, 0)
@@ -36,255 +35,293 @@ export function CarlosSimulator() {
   const enPesos = saldoFinal * 17
   const ingresosPlat = calcPlatformRevenue(params.mensual, params.anios)
 
-  const cardStyle = { backgroundColor: '#0c0c0c', border: '1px solid rgba(255,255,255,0.06)' }
-  const steps = ['Perfil', 'Ciclos', 'Emergencia', 'Resultado']
+  const steps = [
+    t('carlos.perfil'),
+    t('carlos.ciclos'),
+    t('carlos.emergencia'),
+    t('carlos.resultado'),
+  ]
+
+  const inputClass = "w-full border border-ink/10 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-white/5 text-ink dark:text-white outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all"
 
   return (
-    <div className="d-flex flex-column gap-4">
+    <div className="flex flex-col gap-4">
 
-      {/* Header stepper */}
-      <div className="p-4 rounded-4"
-        style={{ ...cardStyle, background: 'linear-gradient(135deg, #0c0c0c 0%, rgba(37,99,235,0.08) 100%)' }}>
-        <div className="d-flex align-items-center gap-3 mb-3">
-          <div style={{ fontSize: 36 }}>🛵</div>
+      {/* ── Header stepper ── */}
+      <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
+        <div className="flex items-center gap-4 mb-5">
+          <span className="text-4xl">🛵</span>
           <div>
-            <h5 className="fw-bold mb-1">Simulación: {params.nombre}</h5>
-            <p className="text-white-50 small mb-0">
-              {params.edad} años · ${params.mensual} USDC/mes · {params.anios} años · {userRate}% APY
+            <h5 className="font-display font-black text-ink dark:text-white text-lg mb-0.5">
+              {t('carlos.titulo')} {params.nombre}
+            </h5>
+            <p className="text-xs text-ink/40 dark:text-white/40">
+              {t('carlos.subtitulo', { edad: params.edad, mensual: params.mensual, anios: params.anios, apy: userRate })}
             </p>
           </div>
         </div>
-        <div className="d-flex gap-0">
+
+        {/* Stepper */}
+        <div className="flex items-center">
           {steps.map((s, i) => (
-            <div key={s} className="d-flex align-items-center" style={{ flex: i < steps.length - 1 ? 1 : 'none' }}>
-              <button className="btn btn-sm rounded-circle fw-bold d-flex align-items-center justify-content-center flex-shrink-0"
-                style={{ width: 32, height: 32, backgroundColor: i <= step ? '#d97706' : 'rgba(255,255,255,0.05)', border: i <= step ? 'none' : '1px solid rgba(255,255,255,0.1)', color: i <= step ? '#fff' : 'rgba(255,255,255,0.3)', fontSize: 12 }}
+            <div key={s} className="flex items-center" style={{ flex: i < steps.length - 1 ? 1 : 'none' }}>
+              <button
+                className={`w-8 h-8 rounded-full text-xs font-bold flex items-center justify-content shrink-0 cursor-pointer transition-all ${i <= step
+                    ? 'bg-brand text-white'
+                    : 'bg-ink/5 dark:bg-white/5 border border-ink/10 dark:border-white/10 text-ink/30 dark:text-white/30'
+                  }`}
                 onClick={() => setStep(i)}>
                 {i < step ? '✓' : i + 1}
               </button>
               {i < steps.length - 1 && (
-                <div style={{ flex: 1, height: 2, backgroundColor: i < step ? '#d97706' : 'rgba(255,255,255,0.08)', margin: '0 4px' }} />
+                <div className={`flex-1 h-0.5 mx-1 transition-all ${i < step ? 'bg-brand' : 'bg-ink/8 dark:bg-white/8'}`} />
               )}
             </div>
           ))}
         </div>
       </div>
 
-      {/* Parámetros */}
-      <div className="p-4 rounded-4" style={cardStyle}>
-        <h6 className="fw-bold mb-3">Personaliza la simulación</h6>
-        <div className="row g-3">
+      {/* ── Parámetros ── */}
+      <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
+        <h6 className="font-semibold text-ink dark:text-white mb-4">{t('carlos.personaliza')}</h6>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
           {[
-            { label: 'Nombre', field: 'nombre', type: 'text' },
-            { label: 'Edad inicial', field: 'edad', type: 'number', min: 18 },
-            { label: 'Aportación mensual (USDC)', field: 'mensual', type: 'number', min: 2 },
-            { label: 'Años al retiro', field: 'anios', type: 'number', min: 5 },
+            { label: t('carlos.nombre'), field: 'nombre', type: 'text' },
+            { label: t('carlos.edad'), field: 'edad', type: 'number', min: 18 },
+            { label: t('carlos.mensual'), field: 'mensual', type: 'number', min: 2 },
+            { label: t('carlos.anios'), field: 'anios', type: 'number', min: 5 },
           ].map(f => (
-            <div className="col-sm-6 col-md-3" key={f.field}>
-              <label className="small text-white-50 mb-1 d-block">{f.label}</label>
-              <input type={f.type} className="form-control bg-transparent text-white border-secondary rounded-3"
-                value={params[f.field]} min={f.min}
-                onChange={e => setParams(p => ({ ...p, [f.field]: f.type === 'number' ? Number(e.target.value) : e.target.value }))}
+            <div key={f.field}>
+              <label className="block text-xs text-ink/40 dark:text-white/40 mb-1.5">{f.label}</label>
+              <input
+                type={f.type}
+                className={inputClass}
+                value={params[f.field]}
+                min={f.min}
+                onChange={e => setParams(p => ({
+                  ...p,
+                  [f.field]: f.type === 'number' ? Number(e.target.value) : e.target.value,
+                }))}
               />
             </div>
           ))}
-          <div className="col-sm-6 col-md-6">
-            <label className="small text-white-50 mb-1 d-block">Incentivo cada 5 años</label>
-            <select className="form-select bg-transparent text-white border-secondary rounded-3" style={{ backgroundColor: '#111' }}
-              value={params.escenario}
-              onChange={e => setParams(p => ({ ...p, escenario: e.target.value }))}>
-              {INCENTIVE_SCENARIOS.map(s => (
-                <option key={s.key} value={s.key} style={{ backgroundColor: '#111' }}>
-                  {s.label} — {s.pct}%
-                </option>
-              ))}
-            </select>
-          </div>
+        </div>
+        <div>
+          <label className="block text-xs text-ink/40 dark:text-white/40 mb-1.5">{t('carlos.incentivo')}</label>
+          <select
+            className={inputClass + ' cursor-pointer'}
+            value={params.escenario}
+            onChange={e => setParams(p => ({ ...p, escenario: e.target.value }))}>
+            {INCENTIVE_SCENARIOS.map(s => (
+              <option key={s.key} value={s.key}>{s.label} — {s.pct}%</option>
+            ))}
+          </select>
         </div>
       </div>
 
-      {/* Step 0: Perfil */}
+      {/* ── Step 0: Perfil ── */}
       {step === 0 && (
-        <div className="p-4 rounded-4" style={cardStyle}>
-          <h6 className="fw-bold mb-3">Perfil de ahorro</h6>
-          <div className="row g-3 mb-4">
+        <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
+          <h6 className="font-semibold text-ink dark:text-white mb-4">{t('carlos.perfilTitulo')}</h6>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
             {[
-              { label: 'Aportación mensual', val: formatCurrencyUsd(params.mensual), sub: `≈ ${formatCurrencyMxn(params.mensual * 17)}` },
-              { label: 'Total a aportar', val: formatCurrencyUsd(totalAportado), sub: `en ${params.anios} años` },
-              { label: 'Tasa que recibirá', val: `${userRate}% APY`, sub: 'vía Etherfuse CETES' },
-              { label: 'Incentivo por ciclo', val: `${incentivePct}%`, sub: 'del rendimiento cada 5 años' },
+              { label: t('carlos.aporteLabel'), val: formatCurrencyUsd(params.mensual), sub: `≈ ${formatCurrencyMxn(params.mensual * 17)}` },
+              { label: t('carlos.totalAportar'), val: formatCurrencyUsd(totalAportado), sub: t('carlos.enAnios', { anios: params.anios }) },
+              { label: t('carlos.tasaLabel'), val: `${userRate}% APY`, sub: t('carlos.tasaSub') },
+              { label: t('carlos.incentivoLabel'), val: `${incentivePct}%`, sub: t('carlos.incentivoPorCiclo') },
             ].map(item => (
-              <div className="col-sm-6 col-md-3" key={item.label}>
-                <div className="p-3 rounded-4 h-100" style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div className="small text-white-50 mb-1">{item.label}</div>
-                  <div className="fw-bold">{item.val}</div>
-                  <div className="small text-white-50">{item.sub}</div>
-                </div>
+              <div key={item.label} className="bg-ink/3 dark:bg-white/3 border border-ink/6 dark:border-white/6 rounded-xl p-3">
+                <p className="text-xs text-ink/40 dark:text-white/40 mb-1">{item.label}</p>
+                <p className="text-sm font-bold text-ink dark:text-white mb-0.5">{item.val}</p>
+                <p className="text-xs text-ink/35 dark:text-white/35">{item.sub}</p>
               </div>
             ))}
           </div>
-          <button className="btn btn-primary rounded-3 fw-bold px-4"
-            style={{ background: 'linear-gradient(45deg, #d97706, #f59e0b)', border: 'none' }}
-            onClick={() => setStep(1)}>Ver ciclos de 5 años →</button>
+          <button
+            className="bg-brand hover:bg-brand-dark text-white font-semibold px-5 py-2.5 rounded-xl transition-all hover:-translate-y-px cursor-pointer"
+            onClick={() => setStep(1)}>
+            {t('carlos.verCiclos')}
+          </button>
         </div>
       )}
 
-      {/* Step 1: Ciclos */}
+      {/* ── Step 1: Ciclos ── */}
       {step === 1 && (
-        <div className="p-4 rounded-4" style={cardStyle}>
-          <h6 className="fw-bold mb-1">Ciclos de incentivo ({incentivePct}% cada 5 años)</h6>
-          <p className="small text-white-50 mb-3">{INCENTIVE_SCENARIOS.find(s => s.key === params.escenario)?.label}</p>
-          <div className="table-responsive mb-4">
-            <table className="table table-dark table-borderless mb-0" style={{ fontSize: 13 }}>
+        <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
+          <h6 className="font-semibold text-ink dark:text-white mb-1">
+            {t('carlos.ciclosTitulo', { pct: incentivePct })}
+          </h6>
+          <p className="text-xs text-ink/40 dark:text-white/40 mb-4">
+            {INCENTIVE_SCENARIOS.find(s => s.key === params.escenario)?.label}
+          </p>
+          <div className="overflow-x-auto mb-5">
+            <table className="w-full text-sm">
               <thead>
-                <tr className="text-white-50">
-                  <th>Ciclo</th><th>Años</th><th>Saldo fin</th><th>Rendimiento</th>
-                  <th style={{ color: '#fbbf24' }}>Incentivo {incentivePct}%</th>
+                <tr className="text-ink/40 dark:text-white/40 text-xs border-b border-ink/6 dark:border-white/6">
+                  <th className="text-left pb-2 font-medium">{t('carlos.ciclo')}</th>
+                  <th className="text-left pb-2 font-medium">{t('carlos.aniosCol')}</th>
+                  <th className="text-left pb-2 font-medium">{t('carlos.saldoFin')}</th>
+                  <th className="text-left pb-2 font-medium">{t('carlos.rendimiento')}</th>
+                  <th className="text-left pb-2 font-medium text-yellow-600">{t('carlos.incentivoCol', { pct: incentivePct })}</th>
                 </tr>
               </thead>
               <tbody>
                 {cycles.map(c => (
-                  <tr key={c.cycle} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                    <td className="fw-bold">{c.cycle}</td>
-                    <td className="text-white-50">{c.yearStart}–{c.yearEnd}</td>
-                    <td style={{ color: '#f59e0b' }}>{formatCurrencyUsd(c.endBalance)}</td>
-                    <td style={{ color: '#22c55e' }}>{formatCurrencyUsd(c.totalYield)}</td>
-                    <td style={{ color: '#fbbf24' }}>+{formatCurrencyUsd(c.incentiveAmount)}</td>
+                  <tr key={c.cycle} className="border-b border-ink/4 dark:border-white/4">
+                    <td className="py-2.5 font-semibold text-ink dark:text-white">{c.cycle}</td>
+                    <td className="py-2.5 text-ink/40 dark:text-white/40">{c.yearStart}–{c.yearEnd}</td>
+                    <td className="py-2.5 text-brand font-semibold">{formatCurrencyUsd(c.endBalance)}</td>
+                    <td className="py-2.5 text-green-600 font-semibold">{formatCurrencyUsd(c.totalYield)}</td>
+                    <td className="py-2.5 text-yellow-600 font-semibold">+{formatCurrencyUsd(c.incentiveAmount)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <div className="d-flex gap-2">
-            <button className="btn btn-sm rounded-3 text-white-50" style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'none' }} onClick={() => setStep(0)}>← Volver</button>
-            <button className="btn btn-primary rounded-3 fw-bold px-4" style={{ background: 'linear-gradient(45deg, #d97706, #f59e0b)', border: 'none' }} onClick={() => setStep(2)}>Ver emergencia mes 36 →</button>
+          <div className="flex gap-2">
+            <button className="border border-ink/10 dark:border-white/10 text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white text-sm font-medium px-4 py-2 rounded-xl transition-all cursor-pointer" onClick={() => setStep(0)}>
+              {t('carlos.volver')}
+            </button>
+            <button className="bg-brand hover:bg-brand-dark text-white font-semibold px-5 py-2.5 rounded-xl transition-all hover:-translate-y-px cursor-pointer" onClick={() => setStep(2)}>
+              {t('carlos.verEmergencia')}
+            </button>
           </div>
         </div>
       )}
 
-      {/* Step 2: Emergencia */}
+      {/* ── Step 2: Emergencia ── */}
       {step === 2 && (
-        <div className="p-4 rounded-4" style={cardStyle}>
-          <h6 className="fw-bold mb-1">🚨 Emergencia médica — Mes {mesAEmergencia}</h6>
-          <p className="small text-white-50 mb-4">
-            {params.nombre} necesita dinero urgente. Saldo acumulado: <strong style={{ color: '#fff' }}>{formatCurrencyUsd(saldoMes36)}</strong>
+        <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
+          <h6 className="font-semibold text-ink dark:text-white mb-1">
+            {t('carlos.emergenciaTitulo', { mes: mesAEmergencia })}
+          </h6>
+          <p className="text-sm text-ink/50 dark:text-white/50 mb-5">
+            {t('carlos.emergenciaDesc', { nombre: params.nombre })}{' '}
+            <strong className="text-ink dark:text-white">{formatCurrencyUsd(saldoMes36)}</strong>
           </p>
-          <div className="row g-3 mb-4">
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
             {[
-              { label: 'Saldo mes 36', val: formatCurrencyUsd(saldoMes36) },
-              { label: 'Autopréstamo máx. (30%)', val: formatCurrencyUsd(loan.maxLoan), color: '#fbbf24' },
-              { label: 'Solicita', val: formatCurrencyUsd(250), color: '#fbbf24' },
-              { label: 'Pago mensual', val: formatCurrencyUsd(loan.monthlyPayment), color: '#f87171' },
+              { label: t('carlos.saldoMes'), val: formatCurrencyUsd(saldoMes36), color: 'text-ink dark:text-white' },
+              { label: t('carlos.prestamoMax'), val: formatCurrencyUsd(loan.maxLoan), color: 'text-yellow-500' },
+              { label: t('carlos.solicita'), val: formatCurrencyUsd(250), color: 'text-yellow-500' },
+              { label: t('carlos.pagoMensual'), val: formatCurrencyUsd(loan.monthlyPayment), color: 'text-red-400' },
             ].map(item => (
-              <div className="col-sm-6 col-md-3" key={item.label}>
-                <div className="p-3 rounded-4" style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div className="small text-white-50 mb-1">{item.label}</div>
-                  <div className="fw-bold" style={{ color: item.color ?? '#fff' }}>{item.val}</div>
-                </div>
+              <div key={item.label} className="bg-ink/3 dark:bg-white/3 border border-ink/6 dark:border-white/6 rounded-xl p-3">
+                <p className="text-xs text-ink/40 dark:text-white/40 mb-1">{item.label}</p>
+                <p className={`text-sm font-bold ${item.color}`}>{item.val}</p>
               </div>
             ))}
           </div>
 
           {/* Toggle impago */}
-          <div className="d-flex align-items-center gap-3 mb-4 p-3 rounded-4"
-            style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
-            <div className="flex-grow-1">
-              <div className="small fw-bold">Simular meses de impago</div>
-              <div className="small text-white-50">Ver cómo afecta el rendimiento</div>
+          <div className="flex items-center justify-between gap-3 p-4 rounded-xl bg-ink/2 dark:bg-white/2 border border-ink/6 dark:border-white/6 mb-4">
+            <div>
+              <p className="text-sm font-semibold text-ink dark:text-white mb-0.5">{t('carlos.simularImpago')}</p>
+              <p className="text-xs text-ink/40 dark:text-white/40">{t('carlos.simularImpagoDesc')}</p>
             </div>
-            <button className="btn btn-sm rounded-3 fw-bold"
-              style={{
-                backgroundColor: params.simularImpago ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.05)',
-                border: params.simularImpago ? '1px solid rgba(239,68,68,0.3)' : '1px solid rgba(255,255,255,0.1)',
-                color: params.simularImpago ? '#f87171' : 'rgba(255,255,255,0.4)',
-              }}
+            <button
+              className={`text-xs font-bold px-4 py-2 rounded-xl border transition-all cursor-pointer ${params.simularImpago
+                  ? 'bg-red-500/10 text-red-500 border-red-500/25'
+                  : 'bg-ink/4 dark:bg-white/4 text-ink/40 dark:text-white/40 border-ink/10 dark:border-white/10'
+                }`}
               onClick={() => setParams(p => ({ ...p, simularImpago: !p.simularImpago }))}>
               {params.simularImpago ? 'ON' : 'OFF'}
             </button>
           </div>
 
           {params.simularImpago && (
-            <div className="p-3 rounded-4 mb-4"
-              style={{ backgroundColor: 'rgba(239,68,68,0.06)', border: '1px dashed rgba(239,68,68,0.3)' }}>
-              <div className="d-flex justify-content-between align-items-center mb-2">
-                <span className="small text-white-50">Meses de impago</span>
-                <span className="fw-bold" style={{ color: '#f87171' }}>{params.mesesImpago}</span>
+            <div className="bg-red-500/5 border border-dashed border-red-500/25 rounded-xl p-4 mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs text-ink/50 dark:text-white/50">{t('carlos.mesesImpago')}</span>
+                <span className="text-sm font-bold text-red-500">{params.mesesImpago}</span>
               </div>
-              <input type="range" className="form-range" min={1} max={12} step={1}
+              <input
+                type="range" className="w-full mb-2" min={1} max={12} step={1}
                 value={params.mesesImpago}
                 onChange={e => setParams(p => ({ ...p, mesesImpago: Number(e.target.value) }))}
-                style={{ accentColor: '#f87171' }} />
-              <div className="small mt-2" style={{ color: '#f87171' }}>
-                Penalización: −{penalizacion.toFixed(2)}% → rendimiento baja a {tasaEscenario.toFixed(2)}%
-              </div>
+                style={{ accentColor: '#ef4444' }}
+              />
+              <p className="text-xs text-red-500">
+                {t('carlos.penalizacion', { pct: penalizacion.toFixed(2), nueva: tasaEscenario.toFixed(2) })}
+              </p>
             </div>
           )}
 
-          <div className="d-flex gap-2">
-            <button className="btn btn-sm rounded-3 text-white-50" style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'none' }} onClick={() => setStep(1)}>← Volver</button>
-            <button className="btn btn-primary rounded-3 fw-bold px-4" style={{ background: 'linear-gradient(45deg, #d97706, #f59e0b)', border: 'none' }} onClick={() => setStep(3)}>Ver resultado final →</button>
+          <div className="flex gap-2">
+            <button className="border border-ink/10 dark:border-white/10 text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white text-sm font-medium px-4 py-2 rounded-xl transition-all cursor-pointer" onClick={() => setStep(1)}>
+              {t('carlos.volver')}
+            </button>
+            <button className="bg-brand hover:bg-brand-dark text-white font-semibold px-5 py-2.5 rounded-xl transition-all hover:-translate-y-px cursor-pointer" onClick={() => setStep(3)}>
+              {t('carlos.verResultado')}
+            </button>
           </div>
         </div>
       )}
 
-      {/* Step 3: Resultado */}
+      {/* ── Step 3: Resultado ── */}
       {step === 3 && (
-        <div className="p-4 rounded-4"
-          style={{ ...cardStyle, background: 'linear-gradient(135deg, #0c0c0c 0%, rgba(34,197,94,0.06) 100%)' }}>
-          <div className="text-center mb-4">
-            <div style={{ fontSize: 48 }}>🎯</div>
-            <h5 className="fw-bold mt-2 mb-1">{params.nombre} a los {params.edad + params.anios} años</h5>
-            <p className="text-white-50 small">{params.anios} años · ${params.mensual} USDC/mes · {tasaEscenario.toFixed(2)}% APY</p>
+        <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
+          <div className="text-center mb-6">
+            <div className="text-5xl mb-3">🎯</div>
+            <h5 className="font-display font-black text-ink dark:text-white text-xl mb-1">
+              {t('carlos.resultadoTitulo', { nombre: params.nombre, edad: params.edad + params.anios })}
+            </h5>
+            <p className="text-xs text-ink/40 dark:text-white/40">
+              {t('carlos.resultadoSub', { anios: params.anios, mensual: params.mensual, apy: tasaEscenario.toFixed(2) })}
+            </p>
           </div>
 
-          <div className="row g-3 mb-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
             {[
-              { label: 'Total aportado', val: formatCurrencyUsd(totalAportado), color: '#f59e0b' },
-              { label: 'Rendimiento Etherfuse', val: formatCurrencyUsd(saldoFinal - totalAportado - totalIncentivos), color: '#22c55e' },
-              { label: 'Incentivos cobrados', val: formatCurrencyUsd(totalIncentivos), color: '#fbbf24' },
-              { label: 'Saldo total', val: formatCurrencyUsd(saldoFinal), color: '#fff', bold: true },
+              { label: t('carlos.totalAportado'), val: formatCurrencyUsd(totalAportado), color: 'text-brand' },
+              { label: t('carlos.rendimientoLabel'), val: formatCurrencyUsd(saldoFinal - totalAportado - totalIncentivos), color: 'text-green-600' },
+              { label: t('carlos.incentivosLabel'), val: formatCurrencyUsd(totalIncentivos), color: 'text-yellow-500' },
+              { label: t('carlos.saldoTotal'), val: formatCurrencyUsd(saldoFinal), color: 'text-ink dark:text-white', bold: true },
             ].map(item => (
-              <div className="col-sm-6 col-md-3" key={item.label}>
-                <div className="p-3 rounded-4 text-center" style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <div className="small text-white-50 mb-1">{item.label}</div>
-                  <div className={item.bold ? 'fw-bold fs-5' : 'fw-bold'} style={{ color: item.color }}>{item.val}</div>
-                </div>
+              <div key={item.label} className="bg-ink/3 dark:bg-white/3 border border-ink/6 dark:border-white/6 rounded-xl p-3 text-center">
+                <p className="text-xs text-ink/40 dark:text-white/40 mb-1">{item.label}</p>
+                <p className={`font-bold ${item.bold ? 'text-base' : 'text-sm'} ${item.color}`}>{item.val}</p>
               </div>
             ))}
           </div>
 
-          <div className="p-4 rounded-4 text-center mb-4"
-            style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.1), rgba(59,130,246,0.1))', border: '1px solid rgba(34,197,94,0.2)' }}>
-            <div className="text-white-50 small mb-1">En pesos mexicanos (tipo de cambio $17)</div>
-            <div className="fw-bold" style={{ fontSize: 36, color: '#22c55e', letterSpacing: '-2px' }}>
+          {/* En pesos */}
+          <div className="bg-green-500/8 border border-green-500/15 rounded-xl p-5 text-center mb-5">
+            <p className="text-xs text-ink/40 dark:text-white/40 mb-1">{t('carlos.enPesosSub')}</p>
+            <p className="font-display font-black text-green-600" style={{ fontSize: 'clamp(1.8rem,4vw,2.4rem)', letterSpacing: '-2px' }}>
               {formatCurrencyMxn(enPesos)}
-            </div>
-            <div className="text-white-50 small mt-1">
-              Aportando {formatCurrencyMxn(params.mensual * 17)}/mes durante {params.anios} años
-            </div>
+            </p>
+            <p className="text-xs text-ink/35 dark:text-white/35 mt-1">
+              {t('carlos.aportandoSub', { mxn: formatCurrencyMxn(params.mensual * 17), anios: params.anios })}
+            </p>
           </div>
 
-          <div className="p-3 rounded-4 mb-4"
-            style={{ backgroundColor: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.15)' }}>
-            <div className="small fw-bold mb-2" style={{ color: '#fbbf24' }}>Lo que gana Mañana Seguro con {params.nombre}</div>
-            <div className="row g-2">
+          {/* Ingresos plataforma */}
+          <div className="bg-yellow-400/5 border border-yellow-400/15 rounded-xl p-4 mb-5">
+            <p className="text-xs font-bold text-yellow-600 mb-3">
+              {t('carlos.platTitulo', { nombre: params.nombre })}
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
-                { label: 'Comisión 1% anual', val: formatCurrencyUsd(ingresosPlat.comision) },
-                { label: 'Adm. autopréstamo', val: formatCurrencyUsd(ingresosPlat.autoprestamo) },
-                { label: 'Incentivos pagados', val: `−${formatCurrencyUsd(totalIncentivos)}` },
-                { label: 'Ingreso neto', val: formatCurrencyUsd(ingresosPlat.neto - totalIncentivos), bold: true },
+                { label: t('carlos.platComision'), val: formatCurrencyUsd(ingresosPlat.comision), bold: false },
+                { label: t('carlos.platAuto'), val: formatCurrencyUsd(ingresosPlat.autoprestamo), bold: false },
+                { label: t('carlos.platIncentivos'), val: `−${formatCurrencyUsd(totalIncentivos)}`, bold: false },
+                { label: t('carlos.platNeto'), val: formatCurrencyUsd(ingresosPlat.neto - totalIncentivos), bold: true },
               ].map(item => (
-                <div className="col-sm-6 col-md-3" key={item.label}>
-                  <div className="small text-white-50">{item.label}</div>
-                  <div className="small fw-bold" style={{ color: item.bold ? '#fbbf24' : '#fff' }}>{item.val}</div>
+                <div key={item.label}>
+                  <p className="text-xs text-ink/40 dark:text-white/40 mb-0.5">{item.label}</p>
+                  <p className={`text-sm font-bold ${item.bold ? 'text-yellow-600' : 'text-ink dark:text-white'}`}>{item.val}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <button className="btn btn-sm rounded-3 text-white-50"
-            style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'none' }}
-            onClick={() => setStep(0)}>↺ Reiniciar simulación</button>
+          <button
+            className="border border-ink/10 dark:border-white/10 text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white text-sm font-medium px-4 py-2 rounded-xl transition-all cursor-pointer"
+            onClick={() => setStep(0)}>
+            {t('carlos.reiniciar')}
+          </button>
         </div>
       )}
 
@@ -292,6 +329,7 @@ export function CarlosSimulator() {
   )
 }
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 function estimateSaldoMes(mensual, meses, annualRate) {
   const monthlyRate = annualRate / 100 / 12
   let balance = 0
@@ -309,5 +347,9 @@ function calcPlatformRevenue(mensual, anios) {
     comision += balance * monthlyRate
   }
   const autoprestamo = 250 * 0.005 * 24
-  return { comision: parseFloat(comision.toFixed(2)), autoprestamo: parseFloat(autoprestamo.toFixed(2)), neto: parseFloat((comision + autoprestamo).toFixed(2)) }
+  return {
+    comision: parseFloat(comision.toFixed(2)),
+    autoprestamo: parseFloat(autoprestamo.toFixed(2)),
+    neto: parseFloat((comision + autoprestamo).toFixed(2)),
+  }
 }

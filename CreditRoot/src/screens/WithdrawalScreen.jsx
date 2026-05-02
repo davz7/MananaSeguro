@@ -1,43 +1,36 @@
 import { WithdrawalFlow } from '../features/withdrawal/components/WithdrawalFlow'
+import { useTranslation } from 'react-i18next'
 
 export function WithdrawalScreen() {
-  const pasos = [
-    { icon: '💵', step: 'Depositas USDC', desc: 'Desde $2 USDC, cuando quieras' },
-    { icon: '🔒', step: 'Contrato bloquea', desc: 'Soroban en Stellar testnet' },
-    { icon: '📈', step: 'Etherfuse rinde', desc: '4.7% APY en USDC vía CETES' },
-    { icon: '🎁', step: 'Incentivos c/5 años', desc: 'Hasta 9% extra por fidelidad' },
-    { icon: '🏆', step: 'Retiras al llegar', desc: 'Todo a tu wallet, sin banco' },
-  ]
+  const { t } = useTranslation()
+  const pasos = t('withdrawal.pasos', { returnObjects: true })
 
   return (
-    <section className="bg-surface py-16 lg:py-24">
+    <section className="bg-surface dark:bg-[#0f0e0d] py-16 lg:py-24">
       <div className="container mx-auto px-4">
 
         <div className="mb-8 anim-fade-up-1">
-          <span className="inline-block bg-green-500/10 text-green-700 border border-green-500/20 rounded-lg px-4 py-1.5 text-xs font-semibold tracking-wide mb-4">
-            Retiro · Mañana Seguro
+          <span className="inline-block bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20 rounded-lg px-4 py-1.5 text-xs font-semibold tracking-wide mb-4">
+            {t('withdrawal.badge')}
           </span>
-          <h2 className="font-display font-black text-ink tracking-tight mb-2"
+          <h2 className="font-display font-black text-ink dark:text-white tracking-tight mb-2"
             style={{ fontSize: 'clamp(2rem,4vw,2.8rem)', lineHeight: 1.05 }}>
-            Flujo de retiro
+            {t('withdrawal.titulo')}
           </h2>
-          <p className="text-ink/50 text-lg max-w-xl">
-            Al alcanzar tu meta, el contrato libera todos tus fondos directamente a tu wallet.
-            Sin intermediarios, sin esperas, sin banco.
+          <p className="text-ink/50 dark:text-white/50 text-lg max-w-xl">
+            {t('withdrawal.descripcion')}
           </p>
         </div>
 
         <div className="grid lg:grid-cols-12 gap-6 anim-fade-up-2">
 
-          {/* WithdrawalFlow */}
           <div className="lg:col-span-8">
             <WithdrawalFlow meta={10000} />
           </div>
 
-          {/* Pasos */}
           <div className="lg:col-span-4">
-            <div className="bg-white border border-ink/8 rounded-2xl p-6 h-full">
-              <h6 className="font-semibold text-ink mb-5">El flujo completo</h6>
+            <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6 h-full">
+              <h6 className="font-semibold text-ink dark:text-white mb-5">{t('withdrawal.flujoCompleto')}</h6>
               <div className="flex flex-col gap-0">
                 {pasos.map((item, i) => (
                   <div key={item.step} className="flex gap-3 items-start">
@@ -46,12 +39,12 @@ export function WithdrawalScreen() {
                         {i + 1}
                       </div>
                       {i < pasos.length - 1 && (
-                        <div className="w-px h-5 bg-ink/8 my-1" />
+                        <div className="w-px h-5 bg-ink/8 dark:bg-white/8 my-1" />
                       )}
                     </div>
                     <div className="pb-4">
-                      <p className="text-sm font-semibold text-ink mb-0.5">{item.icon} {item.step}</p>
-                      <p className="text-xs text-ink/45">{item.desc}</p>
+                      <p className="text-sm font-semibold text-ink dark:text-white mb-0.5">{item.icon} {item.step}</p>
+                      <p className="text-xs text-ink/45 dark:text-white/45">{item.desc}</p>
                     </div>
                   </div>
                 ))}

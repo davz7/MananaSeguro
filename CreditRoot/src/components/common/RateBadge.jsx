@@ -1,110 +1,90 @@
+import { useTranslation } from 'react-i18next'
 import { useEtherfuseRate } from '../../hooks/useEtherfuseRate'
-/**
- * RateBadge — muestra la tasa actual de Etherfuse con estado en vivo/fallback.
- * Úsalo en ContributionPlanner y RetirementSnapshot.
- *
- * Props:
- *   onRateLoaded(userRate) — callback opcional cuando la tasa está lista
- *   compact               — versión pequeña para inline
- */
+
 export function RateBadge({ onRateLoaded, compact = false }) {
   const { cetesRate, userRate, platformRate, isLive, lastUpdated, loading, error } = useEtherfuseRate()
+  const { t } = useTranslation()
 
-  // Notifica al padre cuando la tasa está lista
   if (onRateLoaded && !loading) {
     onRateLoaded(userRate)
   }
 
   if (loading) {
     return (
-      <span className="d-inline-flex align-items-center gap-2"
-        style={{ fontSize: compact ? 11 : 12, color: 'rgba(255,255,255,0.3)' }}>
-        <span className="spinner-border" style={{ width: 10, height: 10, borderWidth: 1.5 }} />
-        Consultando tasa Etherfuse...
+      <span className="inline-flex items-center gap-2 text-xs text-ink/30 dark:text-white/30">
+        <svg className="animate-spin shrink-0" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+        </svg>
+        {t('rateBadge.cargando')}
       </span>
     )
   }
 
   if (compact) {
     return (
-      <span className="d-inline-flex align-items-center gap-1"
-        style={{
-          backgroundColor: isLive ? 'rgba(34,197,94,0.1)' : 'rgba(251,191,36,0.1)',
-          border: `1px solid ${isLive ? 'rgba(34,197,94,0.3)' : 'rgba(251,191,36,0.3)'}`,
-          borderRadius: 99,
-          padding: '2px 10px',
-          fontSize: 11,
-          fontWeight: 700,
-          color: isLive ? '#22c55e' : '#fbbf24',
-        }}>
-        <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: 'currentColor', display: 'inline-block' }} />
+      <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full border ${isLive
+        ? 'bg-green-500/10 text-green-600 border-green-500/20'
+        : 'bg-yellow-400/10 text-yellow-600 border-yellow-400/20'
+        }`}>
+        <span className="w-1.5 h-1.5 rounded-full bg-current pulse-dot" />
         {userRate.toFixed(2)}% APY
-        {isLive ? ' · en vivo' : ' · referencial'}
+        {isLive ? t('rateBadge.enVivo') : t('rateBadge.ref')}
       </span>
     )
   }
 
   return (
-    <div className="p-3 rounded-4"
-      style={{
-        backgroundColor: isLive ? 'rgba(34,197,94,0.05)' : 'rgba(251,191,36,0.05)',
-        border: `1px solid ${isLive ? 'rgba(34,197,94,0.15)' : 'rgba(251,191,36,0.2)'}`,
-      }}>
-      <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
-        <div className="d-flex align-items-center gap-2">
-          <span style={{
-            width: 8, height: 8, borderRadius: '50%',
-            backgroundColor: isLive ? '#22c55e' : '#fbbf24',
-            display: 'inline-block',
-            boxShadow: `0 0 6px ${isLive ? '#22c55e' : '#fbbf24'}`,
-            animation: isLive ? 'pulse 2s infinite' : 'none',
-          }} />
-          <span className="small fw-bold" style={{ color: isLive ? '#22c55e' : '#fbbf24' }}>
-            {isLive ? 'Tasa en vivo · Etherfuse' : 'Tasa referencial · Modelo de negocio'}
+    <div className={`rounded-xl p-4 border ${isLive
+      ? 'bg-green-500/5 dark:bg-green-500/5 border-green-500/15'
+      : 'bg-yellow-400/5 dark:bg-yellow-400/5 border-yellow-400/20'
+      }`}>
+
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+        <div className="flex items-center gap-2">
+          <span className={`w-2 h-2 rounded-full pulse-dot ${isLive ? 'bg-green-500' : 'bg-yellow-400'}`}
+            style={{ boxShadow: `0 0 6px ${isLive ? '#22c55e' : '#fbbf24'}` }} />
+          <span className={`text-xs font-bold ${isLive ? 'text-green-600' : 'text-yellow-600'}`}>
+            {isLive ? t('rateBadge.vivo') : t('rateBadge.referencial')}
           </span>
         </div>
         {lastUpdated && (
-          <span className="small text-white-50">
-            Actualizado: {lastUpdated.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
+          <span className="text-xs text-ink/40 dark:text-white/30">
+            {t('rateBadge.actualizado')} {lastUpdated.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
           </span>
         )}
       </div>
 
-      <div className="row g-2">
+      {/* Tasas */}
+      <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Tasa bruta CETES', val: `${cetesRate.toFixed(2)}%`, color: '#fff' },
-          { label: 'Comisión Mañana Seguro', val: `−${platformRate.toFixed(2)}%`, color: '#f87171' },
-          { label: 'Rendimiento para ti', val: `${userRate.toFixed(2)}%`, color: '#22c55e', bold: true },
-        ].map((item) => (
-          <div className="col-4" key={item.label}>
-            <div className="small text-white-50">{item.label}</div>
-            <div className={`small ${item.bold ? 'fs-6' : ''}`}
-              style={{ color: item.color, fontWeight: item.bold ? 700 : 500 }}>
+          { label: t('rateBadge.tasaBruta'), val: `${cetesRate.toFixed(2)}%`, color: 'text-ink dark:text-white', bold: false },
+          { label: t('rateBadge.comision'), val: `−${platformRate.toFixed(2)}%`, color: 'text-red-400', bold: false },
+          { label: t('rateBadge.rendimiento'), val: `${userRate.toFixed(2)}%`, color: 'text-green-600', bold: true },
+        ].map(item => (
+          <div key={item.label}>
+            <p className="text-xs text-ink/40 dark:text-white/40 mb-0.5">{item.label}</p>
+            <p className={`text-sm ${item.bold ? 'font-bold text-base' : 'font-medium'} ${item.color}`}>
               {item.val}
-            </div>
+            </p>
           </div>
         ))}
       </div>
 
+      {/* Error SDK */}
       {!isLive && error && (
-        <div className="small mt-2" style={{ color: 'rgba(255,255,255,0.3)' }}>
-          ⚠ SDK no disponible: {error.includes('no instalado') ? 'ejecuta npm install @etherfuse/stablebond-sdk' : error}
-        </div>
+        <p className="text-xs text-ink/30 dark:text-white/30 mt-2">
+          ⚠ SDK no disponible: {error.includes('no instalado') ? t('rateBadge.sdkError') : error}
+        </p>
       )}
 
+      {/* Tasa baja */}
       {platformRate < 1 && (
-        <div className="small mt-2 p-2 rounded-3"
-          style={{ backgroundColor: 'rgba(251,191,36,0.08)', color: '#fbbf24' }}>
-          ⚡ Tasa CETES bajo 4% — comisión reducida automáticamente a 0.5%
+        <div className="mt-2 px-3 py-2 rounded-xl bg-yellow-400/8 text-yellow-600 text-xs font-medium">
+          {t('rateBadge.tasaBaja')}
         </div>
       )}
 
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.4; }
-        }
-      `}</style>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 export const navigationItems = [
-  { href: '/home',       label: 'Inicio' },
-  { href: '/planner',    label: 'Simulador' },
-  { href: '/dashboard',  label: 'Dashboard' },
-  { href: '/withdrawal', label: 'Retiro' },
+  { href: '/home',       label: 'Inicio',     key: 'inicio' },
+  { href: '/planner',    label: 'Simulador',  key: 'simulador' },
+  { href: '/dashboard',  label: 'Dashboard',  key: 'dashboard' },
+  { href: '/withdrawal', label: 'Retiro',     key: 'retiro' },
 ]

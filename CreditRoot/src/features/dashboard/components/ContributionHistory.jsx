@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { MANANA_SEGURO_RATES } from '../../../data/retirementContent'
 import { formatCurrencyUsd } from '../../../utils/formatters'
 import { loadHistory, saveHistory } from './contributionHistoryUtils'
+
 /**
  * ContributionHistory — Historial de aportaciones
  *
@@ -12,152 +14,140 @@ import { loadHistory, saveHistory } from './contributionHistoryUtils'
  * - Cuando el usuario deposita desde ContributionPlanner, la historia local
  *   se actualiza automáticamente.
  */
+
 export function ContributionHistory({ walletAddress = null, lockedBalance = 0, depositCount = 0 }) {
+  const { t } = useTranslation()
   const [history, setHistory] = useState(() => loadHistory(walletAddress))
 
-  // Sincronizar historia local cuando cambia la wallet 
   useEffect(() => {
     setHistory(loadHistory(walletAddress))
   }, [walletAddress])
 
-  // Persistir cambios
   useEffect(() => {
     saveHistory(walletAddress, history)
   }, [history, walletAddress])
 
-  // Usar los datos reales del contrato para el resumen
-  // Si el contrato dice más depósitos de los que tenemos localmente, mostrar aviso
   const localDepositCount = history.filter(e => e.type === 'deposito').length
   const hasNewOnChain = depositCount > localDepositCount
 
-  const cardStyle = { backgroundColor: '#0c0c0c', border: '1px solid rgba(255,255,255,0.06)' }
-
   return (
-    <div className="d-flex flex-column gap-4">
+    <div className="flex flex-col gap-4">
 
       {/* ── Resumen real del contrato ── */}
-      <div className="p-4 rounded-4" style={cardStyle}>
-        <div className="d-flex align-items-center gap-2 mb-4">
-          <h5 className="fw-bold mb-0">Historial de aportaciones</h5>
-          <span className="badge rounded-pill px-2 py-1"
-            style={{ backgroundColor: 'rgba(34,197,94,0.1)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.2)', fontSize: 10 }}>
-            🔗 On-chain
+      <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
+        <div className="flex items-center gap-2 mb-5">
+          <h5 className="font-display font-black text-ink dark:text-white text-lg mb-0">
+            {t('history.titulo')}
+          </h5>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-green-500/10 text-green-500 border border-green-500/20">
+            {t('history.onchain')}
           </span>
         </div>
-
-        <div className="row g-3 mb-0">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
             {
-              label: 'USDC bloqueado en contrato',
+              label: t('history.usdcBloqueado'),
               val: formatCurrencyUsd(lockedBalance),
-              color: '#22c55e',
-              sub: 'Dato real Soroban testnet',
+              color: 'text-green-500',
+              sub: t('history.usdcSub'),
             },
             {
-              label: 'Total de depósitos',
-              val: `${depositCount} depósito${depositCount !== 1 ? 's' : ''}`,
-              color: '#f59e0b',
-              sub: 'Contador on-chain',
+              label: t('history.totalDepositos'),
+              val: depositCount !== 1
+                ? t('history.totalDepositosValPlural', { n: depositCount })
+                : t('history.totalDepositosVal', { n: depositCount }),
+              color: 'text-yellow-500',
+              sub: t('history.totalDepositosSub'),
             },
             {
-              label: 'Rendimiento proyectado (1 año)',
+              label: t('history.rendimientoProyectado'),
               val: formatCurrencyUsd(lockedBalance * (MANANA_SEGURO_RATES.userRate / 100)),
-              color: '#fbbf24',
-              sub: `A ${MANANA_SEGURO_RATES.userRate}% APY`,
+              color: 'text-yellow-400',
+              sub: t('history.rendimientoSub', { apy: MANANA_SEGURO_RATES.userRate }),
             },
           ].map(item => (
-            <div className="col-sm-4" key={item.label}>
-              <div className="p-3 rounded-4"
-                style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div className="small text-white-50 mb-1">{item.label}</div>
-                <div className="fw-bold" style={{ color: item.color }}>{item.val}</div>
-                <div className="small text-white-50 mt-1" style={{ fontSize: 11 }}>{item.sub}</div>
-              </div>
+            <div key={item.label} className="bg-ink/3 dark:bg-white/3 border border-ink/6 dark:border-white/6 rounded-xl p-3">
+              <p className="text-xs text-ink/40 dark:text-white/40 mb-1">{item.label}</p>
+              <p className={`text-sm font-bold ${item.color}`}>{item.val}</p>
+              <p className="text-xs text-ink/30 dark:text-white/30 mt-1">{item.sub}</p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Aviso si hay depósitos nuevos en cadena no reflejados localmente */}
+      {/* ── Aviso on-chain ── */}
       {hasNewOnChain && (
-        <div className="p-3 rounded-4"
-          style={{ backgroundColor: 'rgba(59,130,246,0.08)', border: '1px dashed rgba(59,130,246,0.3)' }}>
-          <div className="small" style={{ color: '#93c5fd' }}>
-            ℹ️ El contrato registra <strong>{depositCount}</strong> depósito{depositCount !== 1 ? 's' : ''} on-chain
-            pero tu historial local tiene {localDepositCount}.
-            Los nuevos depósitos aparecerán aquí automáticamente la próxima vez que deposites desde esta app.
-          </div>
+        <div className="bg-blue-500/5 border border-dashed border-blue-500/25 rounded-xl p-4">
+          <p className="text-xs text-blue-300">
+            {depositCount !== 1
+              ? t('history.avisoOnchainPlural', { onchain: depositCount, local: localDepositCount })
+              : t('history.avisoOnchain', { onchain: depositCount, local: localDepositCount })}
+          </p>
         </div>
       )}
 
       {/* ── Lista local de movimientos ── */}
-      <div className="p-4 rounded-4" style={cardStyle}>
-        <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-          <div>
-            <h5 className="fw-bold mb-1">Movimientos registrados</h5>
-            <p className="text-white-50 small mb-0">
-              Historial local · Para depositar usa la sección{' '}
-              <strong style={{ color: '#f59e0b' }}>Inicio → Depósito</strong>
-            </p>
-          </div>
+      <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
+        <div className="mb-5">
+          <h5 className="font-display font-black text-ink dark:text-white text-lg mb-1">
+            {t('history.movimientos')}
+          </h5>
+          <p className="text-xs text-ink/40 dark:text-white/40">
+            {t('history.movimientosSub')}{' '}
+            <strong className="text-yellow-500">{t('history.movimientosSeccion')}</strong>
+          </p>
         </div>
 
         {history.length === 0 ? (
-          <div className="text-center py-5"
-            style={{ borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)' }}>
-            <div style={{ fontSize: 32 }} className="mb-2">📭</div>
-            <p className="text-white-50 small mb-0">
-              Aún no hay depósitos registrados.<br />
-              Realiza tu primer depósito desde la sección de inicio.
-            </p>
+          <div className="text-center py-10 bg-ink/2 dark:bg-white/2 border border-dashed border-ink/8 dark:border-white/8 rounded-xl">
+            <div className="text-4xl mb-3">📭</div>
+            <p className="text-sm text-ink/40 dark:text-white/40">{t('history.vacio')}</p>
+            <p className="text-xs text-ink/30 dark:text-white/30 mt-1">{t('history.vacioSub')}</p>
           </div>
         ) : (
-          <div className="table-responsive">
-            <table className="table table-dark table-borderless mb-0" style={{ fontSize: 13 }}>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
               <thead>
-                <tr className="text-white-50">
-                  <th>Fecha</th>
-                  <th>Tipo</th>
-                  <th>Monto</th>
-                  <th>Rendimiento</th>
-                  <th>Saldo acum.</th>
-                  <th>Estado</th>
+                <tr className="text-xs text-ink/40 dark:text-white/40 border-b border-ink/6 dark:border-white/6">
+                  <th className="text-left pb-2 font-medium">{t('history.colFecha')}</th>
+                  <th className="text-left pb-2 font-medium">{t('history.colTipo')}</th>
+                  <th className="text-left pb-2 font-medium">{t('history.colMonto')}</th>
+                  <th className="text-left pb-2 font-medium">{t('history.colRendimiento')}</th>
+                  <th className="text-left pb-2 font-medium">{t('history.colSaldo')}</th>
+                  <th className="text-left pb-2 font-medium">{t('history.colEstado')}</th>
                 </tr>
               </thead>
               <tbody>
                 {history.map((entry) => (
-                  <tr key={entry.id}
-                    style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                    <td className="text-white-50">{entry.date}</td>
-                    <td>
-                      <span className="badge rounded-pill"
-                        style={{
-                          backgroundColor: entry.type === 'deposito'
-                            ? 'rgba(59,130,246,0.1)' : 'rgba(34,197,94,0.1)',
-                          color: entry.type === 'deposito' ? '#f59e0b' : '#22c55e',
-                          border: `1px solid ${entry.type === 'deposito' ? 'rgba(59,130,246,0.2)' : 'rgba(34,197,94,0.2)'}`,
-                          fontSize: 10,
-                        }}>
-                        {entry.type === 'deposito' ? '↓ Depósito' : '↑ Rendimiento'}
+                  <tr key={entry.id} className="border-b border-ink/4 dark:border-white/4 last:border-0">
+                    <td className="py-2.5 text-xs text-ink/40 dark:text-white/40">{entry.date}</td>
+                    <td className="py-2.5">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold border ${entry.type === 'deposito'
+                          ? 'bg-yellow-400/10 text-yellow-500 border-yellow-400/20'
+                          : 'bg-green-500/10 text-green-500 border-green-500/20'
+                        }`}>
+                        {entry.type === 'deposito' ? t('history.tipoDeposito') : t('history.tipoRendimiento')}
                       </span>
                     </td>
-                    <td className="fw-bold" style={{ color: '#f59e0b' }}>
+                    <td className="py-2.5 font-bold text-yellow-500">
                       +{formatCurrencyUsd(entry.amount)}
                     </td>
-                    <td style={{ color: '#22c55e' }}>
+                    <td className="py-2.5 text-green-500 font-medium">
                       +{formatCurrencyUsd(entry.yieldAccrued)}
                     </td>
-                    <td className="fw-bold">{formatCurrencyUsd(entry.balanceAfter)}</td>
-                    <td>
+                    <td className="py-2.5 font-bold text-ink dark:text-white">
+                      {formatCurrencyUsd(entry.balanceAfter)}
+                    </td>
+                    <td className="py-2.5">
                       {entry.txHash ? (
                         <a href={`https://stellar.expert/explorer/testnet/tx/${entry.txHash}`}
                           target="_blank" rel="noopener noreferrer"
-                          style={{ color: '#f59e0b', fontSize: 11 }}>
-                          ✓ Ver tx →
+                          className="text-xs text-yellow-500 hover:underline">
+                          {t('history.verTx')}
                         </a>
                       ) : (
-                        <span style={{ fontSize: 10, color: entry.confirmed ? '#22c55e' : '#fbbf24' }}>
-                          {entry.confirmed ? '✓ Confirmado' : '⏳ Pendiente'}
+                        <span className={`text-xs font-medium ${entry.confirmed ? 'text-green-500' : 'text-yellow-500'}`}>
+                          {entry.confirmed ? t('history.confirmado') : t('history.pendiente')}
                         </span>
                       )}
                     </td>
@@ -172,4 +162,3 @@ export function ContributionHistory({ walletAddress = null, lockedBalance = 0, d
     </div>
   )
 }
-
