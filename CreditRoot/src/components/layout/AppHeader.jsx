@@ -15,7 +15,9 @@ export function AppHeader({ usuario, onLogout }) {
   const [menuOpen, setMenuOpen] = useState(false)
 
   function toggleLang() {
-    i18n.changeLanguage(i18n.language === 'es' ? 'en' : 'es')
+    const next = i18n.language === 'es' ? 'en' : 'es'
+    i18n.changeLanguage(next)
+    localStorage.setItem('ms-lang', next)
   }
 
   function handleNavigate(href) {
