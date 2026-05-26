@@ -17,6 +17,14 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { randomUUID } from 'crypto'
+import { validateAmount, validateKyc, validateBankAccount, validateUserId } from './_lib/depositValidation.js'
+import { createLogger, resetRequestId } from './_lib/logger.js'
+
+const { MONTO_MINIMO_MXN, MONTO_MAXIMO_MXN } = await import('./_lib/depositValidation.js')
+
+// ─── Logger ──────────────────────────────────────────────────────────────────
+
+const log = createLogger('etherfuse-deposit')
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
@@ -32,13 +40,9 @@ const ETHERFUSE_BASE =
     ? 'https://api.etherfuse.com'
     : 'https://api.sand.etherfuse.com'
 
-// Monto mínimo en MXN — ISO 25010 Seguridad funcional
-const MONTO_MINIMO_MXN = 40
-const MONTO_MAXIMO_MXN = 100_000
 const FETCH_TIMEOUT_MS = 10_000
 
 // Identificador del activo CETES en Stellar
-// Formato: CODE:ISSUER — verificar en docs de Etherfuse para producción
 const CETES_ASSET_STELLAR = 'CETES:GC3CW7EDYRTWQ635VDIGY6S4ZUF5L6TQ7AA4MWS7LEQDBLUSZXV7UPS4'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -79,6 +83,7 @@ async function llamarEtherfuse(path, method, body) {
 // ─── Handler principal ────────────────────────────────────────────────────────
 
 export async function handler(event) {
+  resetRequestId()
 
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers: CORS_HEADERS, body: '' }
@@ -94,7 +99,7 @@ export async function handler(event) {
 
   // ── Validar env ───────────────────────────────────────────────────────────
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY || !process.env.ETHERFUSE_API_KEY) {
-    console.error('[etherfuse-deposit] Variables de entorno faltantes')
+    log.error('Variables de entorno faltantes')
     return {
       statusCode: 500,
       headers: CORS_HEADERS,
@@ -109,10 +114,11 @@ export async function handler(event) {
     usuarioId = body.usuarioId
     montoMxn = Number(body.montoMxn)
 
-    if (!usuarioId) throw new Error('usuarioId requerido')
-    if (!montoMxn || isNaN(montoMxn)) throw new Error('montoMxn requerido y debe ser numérico')
-    if (montoMxn < MONTO_MINIMO_MXN) throw new Error(`Monto mínimo: $${MONTO_MINIMO_MXN} MXN`)
-    if (montoMxn > MONTO_MAXIMO_MXN) throw new Error(`Monto máximo: $${MONTO_MAXIMO_MXN.toLocaleString('es-MX')} MXN`)
+    const userIdResult = validateUserId(usuarioId)
+    if (!userIdResult.valid) throw new Error(userIdResult.error)
+
+    const amountResult = validateAmount(montoMxn)
+    if (!amountResult.valid) throw new Error(amountResult.error)
   } catch (err) {
     return {
       statusCode: 400,
@@ -131,7 +137,7 @@ export async function handler(event) {
     // ── Verificar usuario y estado de KYC ────────────────────────────────
     const { data: usuario, error: errorUsuario } = await supabase
       .from('usuarios')
-      .select('id, email, customer_id, bank_account_id, stellar_public_key, kyc_status, bank_account_status')
+      .select('id, customer_id, bank_account_id, stellar_public_key, kyc_status, bank_account_status')
       .eq('id', usuarioId)
       .single()
 
@@ -144,32 +150,19 @@ export async function handler(event) {
     }
 
     // ── Seguridad: bloquear depósito si KYC no está aprobado ─────────────
-    if (usuario.kyc_status !== 'approved') {
-      return {
-        statusCode: 403,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({
-          error: 'KYC pendiente',
-          mensaje: 'Debes completar la verificación de identidad antes de depositar.',
-          kycStatus: usuario.kyc_status,
-        }),
-      }
+    const kycResult = validateKyc(usuario.kyc_status)
+    if (!kycResult.valid) {
+      log.warn('KYC no aprobado', { userId: usuarioId, kycStatus: usuario.kyc_status })
+      return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify(kycResult) }
     }
 
-    if (usuario.bank_account_status !== 'active') {
-      return {
-        statusCode: 403,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({
-          error: 'Cuenta bancaria pendiente',
-          mensaje: 'Tu cuenta bancaria aún está en verificación. Intenta en unos minutos.',
-          bankAccountStatus: usuario.bank_account_status,
-        }),
-      }
+    const bankResult = validateBankAccount(usuario.bank_account_status)
+    if (!bankResult.valid) {
+      log.warn('Cuenta bancaria no activa', { userId: usuarioId, bankStatus: usuario.bank_account_status })
+      return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify(bankResult) }
     }
 
     // ── Paso 1: crear quote en Etherfuse ──────────────────────────────────
-    // POST /ramp/quote — MXN → CETES en Stellar
     const quoteId = randomUUID()
     const quote = await llamarEtherfuse('/ramp/quote', 'POST', {
       quoteId,
@@ -184,21 +177,17 @@ export async function handler(event) {
       walletAddress: usuario.stellar_public_key,
     })
 
-    console.info('[etherfuse-deposit] Quote creado:', quoteId, '| Monto:', montoMxn, 'MXN')
+    log.info('Quote creado', { quoteId, montoMxn })
 
     // ── Paso 2: crear orden en Etherfuse ──────────────────────────────────
-    // POST /ramp/order — devuelve depositClabe (CLABE única por orden)
     const orderId = randomUUID()
     const orden = await llamarEtherfuse('/ramp/order', 'POST', {
       orderId,
       bankAccountId: usuario.bank_account_id,
-      // Usamos publicKey directamente en lugar de cryptoWalletId
-      // según docs: one or the other is required
       publicKey: usuario.stellar_public_key,
       quoteId: quote.quoteId || quoteId,
     })
 
-    // La respuesta viene anidada bajo "onramp"
     const ordenData = orden.onramp || orden
     const depositClabe = ordenData.depositClabe
 
@@ -206,11 +195,9 @@ export async function handler(event) {
       throw new Error('Etherfuse no devolvió depositClabe')
     }
 
-    console.info('[etherfuse-deposit] Orden creada:', orderId, '| CLABE:', depositClabe)
+    log.info('Orden creada', { orderId })
 
     // ── Paso 3: guardar orden en Supabase ─────────────────────────────────
-    // Guardamos ANTES de responder al cliente — si el cliente cae, la orden
-    // persiste y podemos recuperarla por webhook
     const { error: errorOrden } = await supabase
       .from('ordenes')
       .insert({
@@ -223,9 +210,7 @@ export async function handler(event) {
       })
 
     if (errorOrden) {
-      console.error('[etherfuse-deposit] Error al guardar orden:', errorOrden.message)
-      // No es fatal — la orden existe en Etherfuse aunque falle Supabase
-      // El webhook la recuperará cuando llegue el SPEI
+      log.error('Error al guardar orden', { orderId, error: errorOrden.message })
     }
 
     // ── Respuesta al frontend ─────────────────────────────────────────────
@@ -234,25 +219,19 @@ export async function handler(event) {
       headers: CORS_HEADERS,
       body: JSON.stringify({
         orderId,
-        // La CLABE a la que el usuario hace el SPEI — única por orden
         depositClabe,
         depositBankName: ordenData.depositBankName || 'STP',
         depositAccountHolder: ordenData.depositAccountHolder || 'Etherfuse MX',
-        // El usuario debe transferir EXACTAMENTE este monto
         montoExactoMxn: montoMxn,
-        // Cuánto CETES recibirá (estimado del quote)
         targetAmount: quote.targetAmount,
-        // Fee de Etherfuse
         feeAmount: quote.feeAmount,
-        // Estado inicial
         status: 'created',
-        // Instrucción clara para el usuario
         instruccion: `Transfiere exactamente $${montoMxn.toLocaleString('es-MX')} MXN desde tu banco a la CLABE indicada. El monto debe ser exacto.`,
       }),
     }
 
   } catch (err) {
-    console.error('[etherfuse-deposit] Error:', err.message)
+    log.error('Error inesperado', { error: err.message })
     return {
       statusCode: 500,
       headers: CORS_HEADERS,
