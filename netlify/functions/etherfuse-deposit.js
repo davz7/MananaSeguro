@@ -33,8 +33,9 @@ const ETHERFUSE_BASE =
     : 'https://api.sand.etherfuse.com'
 
 // Monto mínimo en MXN — ISO 25010 Seguridad funcional
-const MONTO_MINIMO_MXN = 40
-const MONTO_MAXIMO_MXN = 100_000
+import { validateAmount, validateKyc, validateBankAccount, validateUserId } from './_lib/depositValidation.js'
+
+const { MONTO_MINIMO_MXN, MONTO_MAXIMO_MXN } = await import('./_lib/depositValidation.js')
 const FETCH_TIMEOUT_MS = 10_000
 
 // Identificador del activo CETES en Stellar
@@ -103,16 +104,17 @@ export async function handler(event) {
   }
 
   // ── Parsear y validar body ────────────────────────────────────────────────
-  let usuarioId, montoMxn
+  let body, usuarioId, montoMxn
   try {
-    const body = JSON.parse(event.body || '{}')
+    body = JSON.parse(event.body || '{}')
     usuarioId = body.usuarioId
-    montoMxn = Number(body.montoMxn)
+    montoMxn = body.montoMxn
 
-    if (!usuarioId) throw new Error('usuarioId requerido')
-    if (!montoMxn || isNaN(montoMxn)) throw new Error('montoMxn requerido y debe ser numérico')
-    if (montoMxn < MONTO_MINIMO_MXN) throw new Error(`Monto mínimo: $${MONTO_MINIMO_MXN} MXN`)
-    if (montoMxn > MONTO_MAXIMO_MXN) throw new Error(`Monto máximo: $${MONTO_MAXIMO_MXN.toLocaleString('es-MX')} MXN`)
+    const userIdResult = validateUserId(usuarioId)
+    if (!userIdResult.valid) throw new Error(userIdResult.error)
+
+    const amountResult = validateAmount(montoMxn)
+    if (!amountResult.valid) throw new Error(amountResult.error)
   } catch (err) {
     return {
       statusCode: 400,
@@ -144,28 +146,14 @@ export async function handler(event) {
     }
 
     // ── Seguridad: bloquear depósito si KYC no está aprobado ─────────────
-    if (usuario.kyc_status !== 'approved') {
-      return {
-        statusCode: 403,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({
-          error: 'KYC pendiente',
-          mensaje: 'Debes completar la verificación de identidad antes de depositar.',
-          kycStatus: usuario.kyc_status,
-        }),
-      }
+    const kycResult = validateKyc(usuario.kyc_status)
+    if (!kycResult.valid) {
+      return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify(kycResult) }
     }
 
-    if (usuario.bank_account_status !== 'active') {
-      return {
-        statusCode: 403,
-        headers: CORS_HEADERS,
-        body: JSON.stringify({
-          error: 'Cuenta bancaria pendiente',
-          mensaje: 'Tu cuenta bancaria aún está en verificación. Intenta en unos minutos.',
-          bankAccountStatus: usuario.bank_account_status,
-        }),
-      }
+    const bankResult = validateBankAccount(usuario.bank_account_status)
+    if (!bankResult.valid) {
+      return { statusCode: 403, headers: CORS_HEADERS, body: JSON.stringify(bankResult) }
     }
 
     // ── Paso 1: crear quote en Etherfuse ──────────────────────────────────

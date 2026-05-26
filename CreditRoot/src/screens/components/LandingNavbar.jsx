@@ -15,7 +15,9 @@ function LandingNavbar({ onLogin, onRegister, onVolver, soloVolver }) {
     }, [])
 
     function toggleLang() {
-        i18n.changeLanguage(i18n.language === 'es' ? 'en' : 'es')
+        const newLang = i18n.language === 'es' ? 'en' : 'es'
+        i18n.changeLanguage(newLang)
+        localStorage.setItem('ms-lang', newLang)
     }
 
     return (
