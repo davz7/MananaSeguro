@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { AppHeader } from '../components/layout/AppHeader'
 import { AppFooter } from '../components/layout/AppFooter'
+import { ErrorBoundary } from '../components/ErrorBoundary'
 import { LandingScreen } from '../screens/LandingScreen'
 import { AuthScreen } from '../screens/AuthScreen'
 import { HomeScreen } from '../screens/HomeScreen'
@@ -14,7 +15,8 @@ function AppLayout({ usuario, onLogout }) {
     <div className="bg-surface dark:bg-[#0f0e0d] min-h-screen">
       <AppHeader usuario={usuario} onLogout={onLogout} />
       <main>
-        <Routes>
+        <ErrorBoundary>
+          <Routes>
           <Route path="/home"       element={<HomeScreen usuario={usuario} />} />
           <Route path="/dashboard"  element={<DashboardScreen />} />
           <Route path="/withdrawal" element={<WithdrawalScreen />} />
@@ -22,6 +24,7 @@ function AppLayout({ usuario, onLogout }) {
           <Route path="/planner"    element={<Navigate to="/dashboard" replace />} />
           <Route path="*"           element={<Navigate to="/home" replace />} />
         </Routes>
+        </ErrorBoundary>
       </main>
       <AppFooter />
     </div>
@@ -65,7 +68,8 @@ export function AppShell() {
   const estaAutenticado = !!usuario
 
   return (
-    <Routes>
+    <ErrorBoundary>
+      <Routes>
       <Route path="/" element={
         <LandingScreen
           onLogin={() => navigate('/login')}
@@ -88,5 +92,6 @@ export function AppShell() {
           : <Navigate to="/login" replace />
       } />
     </Routes>
+    </ErrorBoundary>
   )
 }

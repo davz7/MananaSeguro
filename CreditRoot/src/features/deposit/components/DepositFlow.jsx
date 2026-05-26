@@ -11,6 +11,7 @@
 
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Skeleton, DepositFlowSkeleton } from '../../components/Skeleton'
 
 const MIN_MXN = 40
 const MAX_MXN = 10000
@@ -25,6 +26,11 @@ const STEPS = {
 export function DepositFlow({ usuarioId, kycStatus, onComplete, onClose }) {
   const { t } = useTranslation()
 
+  // Debug: throw behind ?crash=1 to test ErrorBoundary
+  if (typeof window !== 'undefined' && window.location.search.includes('crash=1')) {
+    throw new Error('[DEV] DepositFlow crash test — ErrorBoundary should catch this')
+  }
+
   const [step, setStep] = useState(
     kycStatus !== 'approved' ? STEPS.KYC : STEPS.AMOUNT
   )
@@ -33,6 +39,7 @@ export function DepositFlow({ usuarioId, kycStatus, onComplete, onClose }) {
   const [orderStatus, setOrderStatus] = useState('created')
   const [onboardingUrl, setOnboardingUrl] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [loadingOrder, setLoadingOrder] = useState(false)
   const [error, setError] = useState(null)
 
   // ── Polling del estado de la orden ────────────────────────────────────────
@@ -60,6 +67,7 @@ export function DepositFlow({ usuarioId, kycStatus, onComplete, onClose }) {
   // ── KYC: abrir Etherfuse ──────────────────────────────────────────────────
   async function handleStartKyc() {
     setLoading(true)
+    setLoadingOrder(true)
     setError(null)
     try {
       const res = await fetch('/api/etherfuse/onboarding', {
@@ -76,12 +84,14 @@ export function DepositFlow({ usuarioId, kycStatus, onComplete, onClose }) {
       setError(err.message)
     } finally {
       setLoading(false)
+      setLoadingOrder(false)
     }
   }
 
   // ── Depósito: crear orden ─────────────────────────────────────────────────
   async function handleDepositar() {
     setLoading(true)
+    setLoadingOrder(true)
     setError(null)
     try {
       const res = await fetch('/api/etherfuse/deposit', {
@@ -101,10 +111,9 @@ export function DepositFlow({ usuarioId, kycStatus, onComplete, onClose }) {
       setError(err.message)
     } finally {
       setLoading(false)
+      setLoadingOrder(false)
     }
-  }
-
-  const btnPrimary = 'w-full bg-brand hover:bg-brand-dark text-white font-semibold py-3.5 px-4 rounded-xl transition-all hover:-translate-y-px hover:shadow-lg hover:shadow-brand/30 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
+  } = 'w-full bg-brand hover:bg-brand-dark text-white font-semibold py-3.5 px-4 rounded-xl transition-all hover:-translate-y-px hover:shadow-lg hover:shadow-brand/30 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
   const btnSecondary = 'w-full bg-transparent border border-ink/15 dark:border-white/15 text-ink dark:text-white font-semibold py-3 px-4 rounded-xl transition-all hover:border-ink/30 dark:hover:border-white/30 cursor-pointer'
 
   return (
@@ -139,7 +148,9 @@ export function DepositFlow({ usuarioId, kycStatus, onComplete, onClose }) {
       )}
 
       {/* ── Monto ── */}
-      {step === STEPS.AMOUNT && (
+      {step === STEPS.AMOUNT && loading && <DepositFlowSkeleton />}
+
+      {step === STEPS.AMOUNT && !loading && (
         <>
           <div>
             <h3 className="font-display font-black text-ink dark:text-white text-xl mb-1">
@@ -228,7 +239,7 @@ export function DepositFlow({ usuarioId, kycStatus, onComplete, onClose }) {
           <p className="text-xs text-ink/30 dark:text-white/30">
             {t('deposit.advertenciaMontoExacto')}
           </p>
-        </>
+      </>
       )}
 
       {/* ── Done ── */}
