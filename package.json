@@ -1,8 +1,14 @@
 {
   "name": "manana-seguro-functions",
   "type": "module",
+  "scripts": {
+    "test:functions": "vitest run"
+  },
   "dependencies": {
     "@stellar/stellar-sdk": "^12.3.0",
     "@supabase/supabase-js": "^2.105.4"
+  },
+  "devDependencies": {
+    "vitest": "^3.1.1"
   }
 }
