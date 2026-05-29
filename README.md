@@ -2,7 +2,7 @@
 
 **USDC retirement savings on Stellar — built for Mexico's informal workers.**
 
-Mañana Seguro is a DeFi platform that lets delivery drivers, street vendors, and freelancers save for retirement starting from $2 USDC, earning real yield through tokenized CETES via Etherfuse — no bank, no AFORE, no middlemen.
+Mañana Seguro is a DeFi platform that lets delivery drivers, street vendors, and freelancers save for retirement starting from  USDC, earning real yield through tokenized CETES via Etherfuse — no bank, no AFORE, no middlemen.
 
 > Built during the **Stellar Genesis Hackathon**.
 
@@ -21,6 +21,79 @@ Mañana Seguro is a DeFi platform that lets delivery drivers, street vendors, an
 
 ## Architecture
 
+### Deposit Flow — SPEI → Stellar
+
+El usuario inicia un depósito desde el frontend, que solicita una CLABE a Etherfuse. El usuario transfiere pesos vía SPEI a esa CLABE. Etherfuse confirma el pago, notifica a nuestro webhook, que registra la orden en Supabase y acredita USDC en la wallet Stellar del usuario.
+
+> The user starts a deposit from the frontend, which requests a CLABE from Etherfuse. The user sends MXN via SPEI to that CLABE. Etherfuse confirms payment, notifies our webhook, which records the order in Supabase and credits USDC to the user's Stellar wallet.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Usuario
+    participant FE as DepositFlow (Frontend)
+    participant API as /api/etherfuse/deposit
+    participant EF as Etherfuse API
+    participant Banco as Banco del Usuario
+    participant WB as Webhook (Netlify fn)
+    participant DB as Supabase
+    participant SC as Stellar Network
+
+    Usuario->>FE: Ingresa monto y confirma depósito
+    FE->>FE: KYC check (kyc_status == 'approved')
+    FE->>API: POST /api/etherfuse/deposit {usuarioId, montoMxn}
+    API->>DB: Verify user + KYC approved
+    API->>EF: Crear orden de depósito (POST /ramp/quote + /ramp/order)
+    EF-->>API: depositClabe (unique CLABE per order) + orderId
+    API-->>FE: CLABE + orderId + montoExactoMxn
+    FE-->>Usuario: Muestra CLABE para transferencia SPEI
+
+    Usuario->>Banco: Transfiere MXN vía SPEI a la CLABE
+    Banco->>EF: Liquidación SPEI
+    EF->>WB: POST /webhook {orderId, status: "payment_received"}
+    WB->>WB: Verify HMAC-SHA256 signature
+    WB->>DB: Actualiza orden → completed
+    DB-->>SC: Acredita USDC/CETES en wallet del usuario
+    SC-->>Usuario: Balance actualizado ✅
+```
+
+### Order State Machine
+
+Cada depósito pasa por los siguientes estados. Si el pago no llega o es rechazado, la orden puede terminar en `failed` o `cancelled`.
+
+> Each deposit transitions through the following states. If payment is not received or is rejected, the order may end in `failed` or `cancelled`.
+
+```mermaid
+flowchart LR
+    created((Created)) -->|Quote + Order created| pending_payment((Pending Payment))
+    pending_payment -->|SPEI received| payment_received((Payment Received))
+    payment_received -->|CETES minted on Stellar| completed((Completed))
+
+    pending_payment -.->|Timeout / no payment| cancelled((Cancelled))
+    payment_received -.->|Etherfuse processing error| failed((Failed))
+    created -.->|API error / KYC rejected| failed
+
+    style created fill:#e1f5fe
+    style pending_payment fill:#fff3e0
+    style payment_received fill:#f3e5f5
+    style completed fill:#e8f5e9
+    style cancelled fill:#fce4ec
+    style failed fill:#fce4ec
+```
+
+**Explicación paso a paso:**
+
+1. **Usuario ingresa monto** — El usuario elige cuánto quiere depositar (mín. $40 MXN).
+2. **Verificación KYC** — El frontend confirma que el usuario tiene KYC aprobado antes de permitir el depósito.
+3. **Crear orden** — La function llama a Etherfuse para obtener un quote y una CLABE única por orden.
+4. **Transferencia SPEI** — El usuario transfiere el monto exacto desde su banco mexicano vía SPEI.
+5. **Webhook de confirmación** — Etherfuse notifica vía webhook cuando recibe los fondos.
+6. **Acreditación CETES** — Finalmente, los tokens CETES se acreditan en la wallet Stellar del usuario.
+
+---
+
+### System Architecture
+
 ```
 MananaSeguro/
 ├── CreditRoot/              # Frontend — React 19 + Vite + Bootstrap 5
@@ -34,61 +107,15 @@ MananaSeguro/
 │   └── stellar_connection.py # Stellar testnet integration
 │
 └── netlify/functions/
-    └── cetes-rate.js        # CORS proxy for the Etherfuse API
-```
-
-### Flujo de depósito SPEI → Stellar / SPEI → Stellar deposit flow
-
-El usuario inicia un depósito desde el frontend, que solicita una CLABE a Etherfuse. El usuario transfiere pesos vía SPEI a esa CLABE. Etherfuse confirma el pago, notifica a nuestro webhook, que registra la orden en Supabase y acredita USDC en la wallet Stellar del usuario.
-
-> The user starts a deposit from the frontend, which requests a CLABE from Etherfuse. The user sends MXN via SPEI to that CLABE. Etherfuse confirms payment, notifies our webhook, which records the order in Supabase and credits USDC to the user's Stellar wallet.
-
-```mermaid
-sequenceDiagram
-    actor Usuario
-    participant Frontend as DepositFlow (Frontend)
-    participant API as /api/etherfuse/deposit
-    participant Etherfuse as Etherfuse API
-    participant Banco as Banco del Usuario
-    participant Webhook as Webhook (Netlify fn)
-    participant Supabase
-    participant Stellar
-
-    Usuario->>Frontend: Ingresa monto y confirma depósito
-    Frontend->>API: POST /api/etherfuse/deposit { amount, userId }
-    API->>Etherfuse: Crear orden de depósito
-    Etherfuse-->>API: CLABE + orderId
-    API-->>Frontend: CLABE + orderId
-    Frontend-->>Usuario: Muestra CLABE para transferencia SPEI
-
-    Usuario->>Banco: Transfiere MXN vía SPEI a la CLABE
-    Banco->>Etherfuse: Liquidación SPEI
-    Etherfuse->>Webhook: POST /webhook { orderId, status: "payment_received" }
-    Webhook->>Supabase: Actualiza orden → completed
-    Webhook->>Stellar: Acredita USDC en wallet del usuario
-    Stellar-->>Usuario: Balance USDC actualizado ✅
-```
-
-### Máquina de estados de la orden / Order state machine
-
-Cada depósito pasa por los siguientes estados. Si el pago no llega o es rechazado, la orden puede terminar en `failed` o `cancelled`.
-
-> Each deposit transitions through the following states. If payment is not received or is rejected, the order may end in `failed` or `cancelled`.
-
-```mermaid
-flowchart LR
-    A([created]) --> B([pending_payment])
-    B --> C([payment_received])
-    C --> D([completed])
-    B --> E([cancelled])
-    C --> F([failed])
-
-    style A fill:#6c757d,color:#fff
-    style B fill:#ffc107,color:#000
-    style C fill:#0d6efd,color:#fff
-    style D fill:#198754,color:#fff
-    style E fill:#dc3545,color:#fff
-    style F fill:#dc3545,color:#fff
+    ├── auth-google.js       # Google OAuth + Stellar wallet creation
+    ├── cetes-rate.js        # CETES rate from Banxico API
+    ├── etherfuse-deposit.js # Create deposit order + CLABE
+    ├── etherfuse-onboarding.js # KYC onboarding URL
+    ├── etherfuse-ramp.js    # Generic Etherfuse Ramp API proxy
+    ├── etherfuse-webhook.js # Handle Etherfuse webhook events
+    ├── exchange-rate.js     # USD/MXN rate from Banxico
+    ├── metas.js             # CRUD for savings goals
+    └── order-status.js      # Query deposit order status
 ```
 
 ---
