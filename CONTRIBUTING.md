@@ -6,50 +6,49 @@ Thanks for your interest in contributing! This guide covers how to participate, 
 
 ---
 
-## 🌊 Wave 5 (current cycle)
+## 🌊 Wave 6 (current cycle)
 
-> **Scope:** web app only (frontend + Netlify functions). The Telegram/WhatsApp bots are out of scope this Wave — see [`ISSUES.md`](./ISSUES.md) for the full list of Wave 5 issues.
+> **Scope:** Soroban smart contracts (Rust), frontend (React), bot logic (Python), and documentation-
 
-All Wave 5 issues are designed to be completed **without access to maintainer credentials**.
+All Wave 6 issues are designed to be completed **without access to maintainer credentials** (Supabase, Etherfuse, Google OAuth, deployed contract keys). Every issue is validated locally via unit tests, UI checks, or documentation.
 
 ### What runs locally without credentials
 
-| Works  | Requires credentials  |
+| Works ✅ | Requires credentials ❌ |
 |---|---|
-| Landing, navigation, dark mode | Login with Google |
-| Language switcher (ES / EN) | Deposit / Withdrawal end-to-end |
-| Carlos Simulator, Contribution Planner | Goal persistence to Supabase |
-| Vitest tests (frontend + backend) | Live Etherfuse / Stellar calls |
+| Frontend UI, dark mode, language switch | Login with Google |
+| Vitest tests (frontend utils, hooks) | Deposit / Withdrawal end-to-end |
+| `cargo test` on the Soroban contracts | Goal persistence to Supabase |
+| `pytest` on the bot projection logic | Live Etherfuse / Stellar calls |
 
-No Wave 5 issue requires the live flows in the right column.
+No Wave 6 issue requires the live flows in the right column.
 
-### Running backend tests (issues #1, #2)
+### Running tests per area
 
+**Soroban contracts (issues #1, #2, #9):**
 ```bash
-cd netlify/functions
-npm init -y && npm install --save-dev vitest   # first time only
-npx vitest
+cd CreditContract/contracts/score
+cargo test                # runs against a mocked ledger, no network
+cargo doc --open          # build API docs (issue #2)
 ```
-**Frontend (UI only — issues #3, #4, #5, #6):**
+
+**Frontend (issues #3, #4, #8, #10):**
 ```bash
 cd CreditRoot
 npm install
-npm run dev          # http://localhost:5173
+npm run test              # Vitest (already configured)
 ```
 
-**Frontend + Netlify functions (issues #1, #2, #7, #8):**
+**Bot (issue #7):**
 ```bash
-npm install -g netlify-cli   # first time only
-cd CreditRoot
-npm install
-netlify dev          # http://localhost:8888 — proxies /api/* to the functions
+cd manana-seguro-bot
+pip install -r requirements.txt
+pytest test_proyeccion.py
 ```
 
-Tests mock `console.log` and external APIs — no real credentials hit.
+### Branch naming for Wave 6
 
-### Branch naming for Wave 5
-
-Use `wave5/<issue-number>-<short-description>`, e.g. `wave5/4-auto-detect-language`.
+Use `wave6/<issue-number>-<short-description>`, e.g. `wave6/3-formatters-tests`.
 
 ---
 
