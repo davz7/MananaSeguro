@@ -204,3 +204,106 @@ fn test_no_retirar_con_prestamo_activo() {
     // Intentar retirar con préstamo activo — debe fallar
     cliente.retirar(&usuario);
 }
+
+#[test]
+fn test_actualizar_meta_exito() {
+    let (_env, cliente, _admin, usuario, _usdc) = setup();
+    cliente.actualizar_meta(&usuario, &150_000_000);
+    assert_eq!(cliente.ver_meta(&usuario), 150_000_000);
+}
+
+#[test]
+#[should_panic(expected = "La meta debe ser mayor a 0")]
+fn test_actualizar_meta_cero_panica() {
+    let (_env, cliente, _admin, usuario, _usdc) = setup();
+    cliente.actualizar_meta(&usuario, &0);
+}
+
+#[test]
+fn test_autoprestamo_ciclo_completo() {
+    let (env, cliente, _admin, usuario, _usdc) = setup();
+
+    cliente.depositar(&usuario, &100_000_000, &20);
+    // Solicitar préstamo del 30% (30 USDC)
+    cliente.solicitar_prestamo(&usuario, &30_000_000);
+
+    // Pagar las 24 cuotas
+    for i in 0..24 {
+        let (saldo_prestamo, meses) = cliente.ver_prestamo(&usuario);
+        assert!(saldo_prestamo > 0);
+        assert_eq!(meses, i);
+        cliente.pagar_prestamo(&usuario);
+    }
+
+    // Verificar que el préstamo ha sido liquidado y eliminado del storage
+    let (saldo_prestamo, meses) = cliente.ver_prestamo(&usuario);
+    assert_eq!(saldo_prestamo, 0);
+    assert_eq!(meses, 0);
+}
+
+#[test]
+fn test_retirar_math_comision() {
+    let (env, cliente, admin, usuario, usdc) = setup();
+    let token_client = token::Client::new(&env, &usdc);
+
+    // Depositar 100 USDC (100_000_000 stroops)
+    let saldo = 100_000_000i128;
+    cliente.depositar(&usuario, &saldo, &1);
+
+    // Avanzar tiempo para cumplir bloqueo (1 año + 1 segundo)
+    env.ledger().with_mut(|l| {
+        l.timestamp += 365 * 24 * 3600 + 1;
+    });
+
+    let balance_usuario_antes = token_client.balance(&usuario);
+    let balance_admin_antes = token_client.balance(&admin);
+
+    cliente.retirar(&usuario);
+
+    let comision_esperada = saldo * 1 / 100; // 1%
+    let monto_usuario_esperado = saldo - comision_esperada;
+
+    let balance_usuario_despues = token_client.balance(&usuario);
+    let balance_admin_despues = token_client.balance(&admin);
+
+    assert_eq!(balance_usuario_despues, balance_usuario_antes + monto_usuario_esperado);
+    assert_eq!(balance_admin_despues, balance_admin_antes + comision_esperada);
+    assert_eq!(token_client.balance(&cliente.address), 0);
+}
+
+#[test]
+#[should_panic(expected = "Ya tienes un autopréstamo activo")]
+fn test_solicitar_segundo_prestamo_panica() {
+    let (env, cliente, _admin, usuario, _usdc) = setup();
+
+    cliente.depositar(&usuario, &100_000_000, &20);
+    cliente.solicitar_prestamo(&usuario, &10_000_000);
+    cliente.solicitar_prestamo(&usuario, &10_000_000);
+}
+
+#[test]
+#[should_panic(expected = "No tienes autopréstamo activo")]
+fn test_pagar_sin_prestamo_activo_panica() {
+    let (_env, cliente, _admin, usuario, _usdc) = setup();
+    cliente.pagar_prestamo(&usuario);
+}
+
+#[test]
+#[should_panic(expected = "Mínimo 1 USDC de préstamo")]
+fn test_solicitar_prestamo_bajo_minimo_panica() {
+    let (env, cliente, _admin, usuario, _usdc) = setup();
+
+    cliente.depositar(&usuario, &100_000_000, &20);
+    cliente.solicitar_prestamo(&usuario, &9_999_999);
+}
+
+#[test]
+fn test_meta_defecto_diez_veces_primer_deposito() {
+    let (env, cliente, _admin, usuario, _usdc) = setup();
+
+    let primer_deposito = 50_000_000i128;
+    cliente.depositar(&usuario, &primer_deposito, &1);
+
+    let meta = cliente.ver_meta(&usuario);
+    assert_eq!(meta, primer_deposito * 10);
+}
