@@ -1,0 +1,113 @@
+name: CI
+
+# Cuándo se dispara: en cada PR hacia main, y cada push directo a main.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Solo lectura del repo. El workflow no necesita permisos de escritura.
+permissions:
+  contents: read
+
+# Si alguien sube un commit nuevo a un PR, cancela la corrida anterior
+# en vez de correr las dos. Ahorra tiempo y minutos de Actions.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------
+  # 1. Frontend — React + Vite. Corre Vitest y luego ESLint.
+  # ---------------------------------------------------------------
+  frontend:
+    name: Frontend (vitest + lint)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: CreditRoot
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: CreditRoot/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Ojo: "vitest" a secas arranca en modo watch y se colgaría para siempre
+      # en CI. El "run" es obligatorio aquí.
+      - name: Run tests
+        run: npx vitest run
+
+      # Va después de los tests a propósito: si el lint corriera primero
+      # y fallara, nunca verías el resultado de los tests.
+      - name: Run ESLint
+        run: npm run lint
+
+  # ---------------------------------------------------------------
+  # 2. Netlify Functions — el backend serverless.
+  # ---------------------------------------------------------------
+  functions:
+    name: Netlify functions (vitest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: netlify/functions
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: netlify/functions/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+  # ---------------------------------------------------------------
+  # 3. Contratos Soroban — workspace de cargo con score y retiro_chain.
+  # ---------------------------------------------------------------
+  contracts:
+    name: Soroban contracts (cargo test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: CreditContract
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      # Cachea el registry y los artefactos de compilación. Sin esto cada
+      # corrida recompila soroban-sdk desde cero (~3-4 min). Con esto, ~40s.
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: CreditContract
+
+      # Corre los tests de los dos contratos del workspace.
+      - name: Run tests
+        run: cargo test --workspace
+
+      # Falla si alguien manda código sin formatear. Es barato y evita
+      # discusiones de estilo en los reviews.
+      - name: Check formatting
+        run: cargo fmt --all -- --check
