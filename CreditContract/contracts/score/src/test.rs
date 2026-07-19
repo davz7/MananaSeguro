@@ -12,7 +12,13 @@ fn crear_usdc(env: &Env, admin: &Address) -> Address {
     token_id.address()
 }
 
-fn setup() -> (Env, MananaSeguroContractClient<'static>, Address, Address, Address) {
+fn setup() -> (
+    Env,
+    MananaSeguroContractClient<'static>,
+    Address,
+    Address,
+    Address,
+) {
     let env = Env::default();
     env.mock_all_auths();
 
@@ -266,8 +272,14 @@ fn test_retirar_math_comision() {
     let balance_usuario_despues = token_client.balance(&usuario);
     let balance_admin_despues = token_client.balance(&admin);
 
-    assert_eq!(balance_usuario_despues, balance_usuario_antes + monto_usuario_esperado);
-    assert_eq!(balance_admin_despues, balance_admin_antes + comision_esperada);
+    assert_eq!(
+        balance_usuario_despues,
+        balance_usuario_antes + monto_usuario_esperado
+    );
+    assert_eq!(
+        balance_admin_despues,
+        balance_admin_antes + comision_esperada
+    );
     assert_eq!(token_client.balance(&cliente.address), 0);
 }
 
