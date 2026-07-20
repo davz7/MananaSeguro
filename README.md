@@ -1,5 +1,7 @@
 # Mañana Seguro 🛡️
 
+![CI](https://github.com/davz7/MananaSeguro/actions/workflows/ci.yml/badge.svg)
+
 **USDC retirement savings on Stellar — built for Mexico's informal workers.**
 
 Mañana Seguro is a DeFi platform that lets delivery drivers, street vendors, and freelancers save for retirement starting from $2 USDC, earning real yield through tokenized CETES via Etherfuse — no bank, no AFORE, no middlemen.
