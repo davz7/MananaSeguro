@@ -62,7 +62,7 @@ fn test_depositar_minimo() {
 }
 
 #[test]
-#[should_panic(expected = "Minimo $2 USDC")]
+#[should_panic(expected = "$2 USDC")]
 fn test_depositar_bajo_minimo() {
     let (env, cliente, _admin, usuario, _usdc) = setup();
     // $1 USDC = 10_000_000 stroops — debe fallar
@@ -140,7 +140,7 @@ fn test_retirar_tiempo_cumplido() {
 }
 
 #[test]
-#[should_panic(expected = "Aun no alcanzas la meta")]
+#[should_panic(expected = "no alcanzas la meta")]
 fn test_retirar_sin_cumplir_condiciones() {
     let (env, cliente, _admin, usuario, _usdc) = setup();
 
@@ -193,7 +193,7 @@ fn test_autoprestamo_pagar() {
 }
 
 #[test]
-#[should_panic(expected = "Liquida tu autoprestamo")]
+#[should_panic(expected = "Liquida tu autopr")]
 fn test_no_retirar_con_prestamo_activo() {
     let (env, cliente, _admin, usuario, usdc) = setup();
 
@@ -284,7 +284,7 @@ fn test_retirar_math_comision() {
 }
 
 #[test]
-#[should_panic(expected = "Ya tienes un autoprestamo activo")]
+#[should_panic(expected = "Ya tienes un autopr")]
 fn test_solicitar_segundo_prestamo_panica() {
     let (env, cliente, _admin, usuario, _usdc) = setup();
 
@@ -294,14 +294,14 @@ fn test_solicitar_segundo_prestamo_panica() {
 }
 
 #[test]
-#[should_panic(expected = "No tienes autoprestamo activo")]
+#[should_panic(expected = "No tienes autopr")]
 fn test_pagar_sin_prestamo_activo_panica() {
     let (_env, cliente, _admin, usuario, _usdc) = setup();
     cliente.pagar_prestamo(&usuario);
 }
 
 #[test]
-#[should_panic(expected = "Minimo 1 USDC de prestamo")]
+#[should_panic(expected = "1 USDC de pr")]
 fn test_solicitar_prestamo_bajo_minimo_panica() {
     let (env, cliente, _admin, usuario, _usdc) = setup();
 

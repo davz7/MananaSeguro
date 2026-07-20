@@ -244,7 +244,6 @@ describe("calculateLoan", () => {
 
     const loan = calculateLoan(lockedBalance, requestedAmount);
 
-    expect(loan.amount).toBe(5000);
     expect(loan.maxLoan).toBe(3000); // 30% of 10000
     // Since requested > maxLoan, amount should be capped
     expect(loan.amount).toBe(3000);
@@ -306,16 +305,18 @@ describe("calculateLoan", () => {
     expect(loan.totalRepaid).toBeCloseTo(loan.amount + loan.totalFees, 2);
   });
 
-  it("monthly payment is consistent across schedule", () => {
-    const loan = calculateLoan(20000, 4000);
+  it("payments decrease as the balance goes down", () => {
+      const loan = calculateLoan(20000, 4000);
 
-    const firstPayment = loan.schedule[0].payment;
-    expect(loan.monthlyPayment).toBeCloseTo(firstPayment, 5);
+      expect(loan.monthlyPayment).toBeCloseTo(loan.schedule[0].payment, 5);
 
-    // All payments should be roughly equal (small variations due to fees on remaining balance)
-    loan.schedule.forEach((p) => {
-      expect(p.payment).toBeCloseTo(firstPayment, 2);
-    });
+      // Capital fijo, interés sobre saldo decreciente → la cuota baja cada mes
+      loan.schedule.forEach((p, i) => {
+        expect(p.principal).toBeCloseTo(loan.schedule[0].principal, 5);
+        if (i > 0) {
+          expect(p.payment).toBeLessThan(loan.schedule[i - 1].payment);
+        }
+      });
   });
 
   it("ending balance correctly decreases to zero", () => {

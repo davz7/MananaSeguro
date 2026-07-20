@@ -28,9 +28,9 @@ describe('ErrorBoundary', () => {
         <ErrorBoundary><Boom shouldThrow={true} /></ErrorBoundary>
       </MemoryRouter>
     )
-    expect(screen.getByText('Algo salió mal')).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'Reintentar' })).toBeTruthy()
-    expect(screen.getByRole('link', { name: 'Volver al inicio' })).toBeTruthy()
+    expect(screen.getByText('Something went wrong')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Back to home' })).toBeTruthy()
     expect(console.error).toHaveBeenCalled()
   })
 
@@ -45,9 +45,9 @@ describe('ErrorBoundary', () => {
         <ErrorBoundary><Toggle /></ErrorBoundary>
       </MemoryRouter>
     )
-    expect(screen.getByText('Algo salió mal')).toBeTruthy()
+    expect(screen.getByText('Something went wrong')).toBeTruthy()
     throwIt = false
-    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
     expect(screen.getByText('recuperado')).toBeTruthy()
   })
 })
