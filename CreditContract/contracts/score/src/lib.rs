@@ -27,7 +27,7 @@ pub enum DataKey {
 // ─── Constantes del modelo de negocio ─────────────────────────────────────────
 
 /// Depósito mínimo: 2 USDC (en stroops, 7 decimales Stellar).
-const MIN_DEPOSIT: i128 = 2_000_000;
+const MIN_DEPOSIT: i128 = 20_000_000;
 /// Comisión de plataforma: 1% en basis points (10000 = 100%).
 const PLATAFORMA_FEE: i128 = 100;
 /// Porcentaje máximo del saldo para autopréstamo: 30%.
