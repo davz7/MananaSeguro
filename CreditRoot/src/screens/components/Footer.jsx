@@ -65,7 +65,7 @@ function Footer() {
 
                     {/* Redes sociales */}
                     <div className="flex items-center gap-3">
-                        {SOCIAL_LINKS.map(({ icon: Icon, href, label }) => (
+                        {SOCIAL_LINKS.map(({ href, label }) => (
                             <a
                                 key={label}
                                 href={href}
