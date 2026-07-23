@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Shield, TriangleAlert, Lock, Zap, Building2, ArrowRight, ArrowLeft } from 'lucide-react'
 import Footer from './components/Footer'
 import LandingNavbar from './components/LandingNavbar'
 import { conectarWallet } from '../lib/wallet'
@@ -125,7 +126,7 @@ export function AuthScreen({ onAuth, onVolver }) {
           {/* Copy izquierda */}
           <div className="hidden lg:flex flex-col justify-center anim-fade-up-1">
             <span className="inline-block bg-brand/10 text-brand-dark border border-brand/20 rounded-lg px-4 py-1.5 text-xs font-semibold tracking-wide mb-6">
-              🛡️ {t('auth.badge')}
+              <Shield size={14} aria-hidden="true" /> {t('auth.badge')}
             </span>
             <h1 className="font-display font-black text-ink dark:text-white tracking-tight mb-4"
               style={{ fontSize: 'clamp(2.4rem,5vw,3.6rem)', lineHeight: 1.05 }}>
@@ -173,7 +174,7 @@ export function AuthScreen({ onAuth, onVolver }) {
 
                   {error && (
                     <div className="bg-red-500/8 border border-dashed border-red-400/40 text-red-500 text-sm text-center px-4 py-3 rounded-xl">
-                      ⚠️ {error}
+                      <TriangleAlert size={16} className="inline shrink-0" aria-hidden="true" /> {error}
                     </div>
                   )}
 
@@ -200,15 +201,18 @@ export function AuthScreen({ onAuth, onVolver }) {
                   {/* Trust indicators */}
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { icon: '🔒', text: t('auth.trust1') },
-                      { icon: '⚡', text: t('auth.trust2') },
-                      { icon: '🏦', text: t('auth.trust3') },
-                    ].map(item => (
+                      { icon: Lock, text: t('auth.trust1') },
+                      { icon: Zap, text: t('auth.trust2') },
+                      { icon: Building2, text: t('auth.trust3') },
+                    ].map(item => {
+                      const Icon = item.icon
+                      return (
                       <div key={item.text} className="bg-ink/2 dark:bg-white/3 rounded-xl p-3 text-center">
-                        <div className="text-lg mb-1">{item.icon}</div>
+                        <div className="mb-1"><Icon size={18} aria-hidden="true" className="text-ink/40 dark:text-white/40" /></div>
                         <div className="text-xs text-ink/45 dark:text-white/45 font-medium">{item.text}</div>
                       </div>
-                    ))}
+                      )
+                    })}
                   </div>
 
                   {/* Divisor */}
@@ -257,10 +261,10 @@ export function AuthScreen({ onAuth, onVolver }) {
                   </div>
                   {error && (
                     <div className="w-full bg-red-500/8 border border-dashed border-red-400/40 text-red-500 text-sm text-center px-4 py-3 rounded-xl">
-                      ⚠️ {error}
+                      <TriangleAlert size={16} className="inline shrink-0" aria-hidden="true" /> {error}
                       {error.includes('freighter.app') && (
                         <a href="https://freighter.app" target="_blank" rel="noopener noreferrer" className="block mt-2 text-brand underline font-medium">
-                          {t('auth.instalar')} →
+                          {t('auth.instalar')} <ArrowRight size={14} className="inline" aria-hidden="true" />
                         </a>
                       )}
                     </div>
@@ -278,7 +282,7 @@ export function AuthScreen({ onAuth, onVolver }) {
                   </button>
                   <button className="text-sm text-ink/30 dark:text-white/30 hover:text-ink/60 transition-colors cursor-pointer"
                     onClick={() => { setPaso('inicio'); setError(null) }}>
-                    ← {t('nav.volverInicio')}
+                    <ArrowLeft size={14} className="inline" aria-hidden="true" /> {t('nav.volverInicio')}
                   </button>
                 </div>
               )}
@@ -311,7 +315,7 @@ export function AuthScreen({ onAuth, onVolver }) {
                     />
                   </div>
                   {error && (
-                    <div className="bg-red-500/8 border border-dashed border-red-400/40 text-red-500 text-sm text-center px-4 py-3 rounded-xl">⚠️ {error}</div>
+                    <div className="bg-red-500/8 border border-dashed border-red-400/40 text-red-500 text-sm text-center px-4 py-3 rounded-xl"><TriangleAlert size={16} className="inline shrink-0" aria-hidden="true" /> {error}</div>
                   )}
                   <button type="submit" className="w-full bg-brand hover:bg-brand-dark text-white font-semibold py-4 rounded-xl transition-all hover:-translate-y-px hover:shadow-lg hover:shadow-brand/30 cursor-pointer">
                     {t('auth.entrar')}

@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { TriangleAlert } from 'lucide-react'
 import { useEtherfuseRate } from '../../../hooks/useEtherfuseRate'
 import { MANANA_SEGURO_RATES } from '../../../data/retirementContent'
 import { calculateCycles } from '../../../utils/projections'
@@ -283,7 +284,7 @@ export function RetirementSnapshot() {
         <div className="bg-ink/5 dark:bg-white/5 border border-brand/20 rounded-2xl p-5">
           {error.includes('sesión') || error.includes('Sin sesión') ? (
             <div>
-              <p className="font-semibold text-ink dark:text-white mb-1">⚠️ No hay sesión activa</p>
+              <p className="font-semibold text-ink dark:text-white mb-1"><TriangleAlert size={16} className="inline shrink-0" aria-hidden="true" /> No hay sesión activa</p>
               <p className="text-sm text-ink/50 dark:text-white/50 mb-3">Inicia sesión para ver tu dashboard.</p>
               <button className="bg-brand text-white text-sm font-semibold px-4 py-2 rounded-xl cursor-pointer"
                 onClick={() => window.location.href = '/login'}>
@@ -292,7 +293,7 @@ export function RetirementSnapshot() {
             </div>
           ) : (
             <div>
-              <p className="font-semibold text-ink dark:text-white mb-1">⚠️ {error}</p>
+              <p className="font-semibold text-ink dark:text-white mb-1"><TriangleAlert size={16} className="inline shrink-0" aria-hidden="true" /> {error}</p>
               <p className="text-sm text-ink/50 dark:text-white/50">{t('snapshot.errorGenerico')}</p>
             </div>
           )}
