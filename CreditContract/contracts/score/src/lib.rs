@@ -1,6 +1,36 @@
 #![no_std]
 
-use soroban_sdk::{contract, contractimpl, contracttype, token, Address, Env, Symbol};
+use soroban_sdk::{contract, contracterror, contractimpl, contracttype, token, Address, Env, Symbol};
+
+// ─── Error Enum ───────────────────────────────────────────────────────────────
+
+#[contracterror]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[repr(u32)]
+pub enum Error {
+    /// Monto de depósito menor al mínimo permitido (2 USDC).
+    MontoBajoMinimo = 1,
+    /// Período de bloqueo de años inválido (debe estar entre 1 y 40 años).
+    AniosBloqueoInvalidos = 2,
+    /// El usuario no posee saldo bloqueado en el contrato.
+    SinSaldo = 3,
+    /// No se ha alcanzado la meta de ahorro ni el tiempo de bloqueo.
+    CondicionesRetiroNoCumplidas = 4,
+    /// Existe un autopréstamo pendiente que impide el retiro.
+    PrestamoPendiente = 5,
+    /// El usuario ya cuenta con un autopréstamo activo.
+    PrestamoActivo = 6,
+    /// El monto solicitado excede el 30% del saldo bloqueado.
+    ExcedeLimitePrestamo = 7,
+    /// Monto de préstamo menor al mínimo permitido (1 USDC).
+    MontoPrestamoBajoMinimo = 8,
+    /// El usuario no tiene un autopréstamo activo para pagar.
+    NoTienePrestamoActivo = 9,
+    /// El autopréstamo ya ha completado las 24 cuotas / se encuentra liquidado.
+    PrestamoYaLiquidado = 10,
+    /// La meta ingresada no es válida (debe ser mayor a 0).
+    MetaInvalida = 11,
+}
 
 // ─── Storage Keys ─────────────────────────────────────────────────────────────
 
@@ -63,17 +93,18 @@ impl MananaSeguroContract {
     /// * `monto` - Cantidad en stroops (mínimo 2 USDC).
     /// * `anios_bloqueo` - Años de bloqueo (1-40).
     ///
-    /// # Panics
-    /// Si el monto es menor a `MIN_DEPOSIT`, si `anios_bloqueo` está fuera del rango,
-    /// o si el usuario no autoriza la transferencia.
-    pub fn depositar(env: Env, usuario: Address, monto: i128, anios_bloqueo: u32) {
+    /// # Errors
+    /// Retorna `Error::MontoBajoMinimo` si el monto es menor a `MIN_DEPOSIT`, o
+    /// `Error::AniosBloqueoInvalidos` si `anios_bloqueo` está fuera del rango (1..=40).
+    pub fn depositar(env: Env, usuario: Address, monto: i128, anios_bloqueo: u32) -> Result<(), Error> {
         usuario.require_auth();
 
-        assert!(monto >= MIN_DEPOSIT, "Mínimo $2 USDC por depósito");
-        assert!(
-            anios_bloqueo >= 1 && anios_bloqueo <= 40,
-            "Bloqueo entre 1 y 40 años"
-        );
+        if monto < MIN_DEPOSIT {
+            return Err(Error::MontoBajoMinimo);
+        }
+        if !(1..=40).contains(&anios_bloqueo) {
+            return Err(Error::AniosBloqueoInvalidos);
+        }
 
         // Transferir USDC del usuario al contrato
         let usdc: Address = env.storage().instance().get(&DataKey::UsdcToken).unwrap();
@@ -118,6 +149,8 @@ impl MananaSeguroContract {
         // Emitir evento
         env.events()
             .publish((Symbol::new(&env, "deposito"), usuario.clone()), monto);
+
+        Ok(())
     }
 
     /// Retorna el saldo bloqueado del usuario en stroops.
@@ -158,10 +191,11 @@ impl MananaSeguroContract {
     /// 2. El saldo alcanzó o superó la meta.
     /// No debe haber un autopréstamo activo. Se cobra una comisión de plataforma (1%).
     ///
-    /// # Panics
-    /// Si el usuario no tiene saldo, si no cumple las condiciones de retiro,
-    /// o si tiene un préstamo activo sin liquidar.
-    pub fn retirar(env: Env, usuario: Address) {
+    /// # Errors
+    /// Retorna `Error::SinSaldo` si el usuario no tiene saldo,
+    /// `Error::CondicionesRetiroNoCumplidas` si no cumple las condiciones de retiro, o
+    /// `Error::PrestamoPendiente` si tiene un préstamo activo sin liquidar.
+    pub fn retirar(env: Env, usuario: Address) -> Result<(), Error> {
         usuario.require_auth();
 
         let saldo: i128 = env
@@ -170,7 +204,9 @@ impl MananaSeguroContract {
             .get(&DataKey::Balance(usuario.clone()))
             .unwrap_or(0);
 
-        assert!(saldo > 0, "No tienes saldo bloqueado");
+        if saldo <= 0 {
+            return Err(Error::SinSaldo);
+        }
 
         let fecha_retiro: u64 = env
             .storage()
@@ -188,10 +224,9 @@ impl MananaSeguroContract {
         let meta_alcanzada = saldo >= meta;
         let tiempo_cumplido = ahora >= fecha_retiro;
 
-        assert!(
-            meta_alcanzada || tiempo_cumplido,
-            "Aún no alcanzas la meta ni el tiempo de bloqueo"
-        );
+        if !meta_alcanzada && !tiempo_cumplido {
+            return Err(Error::CondicionesRetiroNoCumplidas);
+        }
 
         // Verificar que no hay préstamo pendiente
         let prestamo: i128 = env
@@ -199,7 +234,9 @@ impl MananaSeguroContract {
             .persistent()
             .get(&DataKey::Prestamo(usuario.clone()))
             .unwrap_or(0);
-        assert!(prestamo == 0, "Liquida tu autopréstamo antes de retirar");
+        if prestamo != 0 {
+            return Err(Error::PrestamoPendiente);
+        }
 
         // Calcular comisión de plataforma (1% del saldo)
         let comision = saldo * PLATAFORMA_FEE / 10_000;
@@ -233,6 +270,8 @@ impl MananaSeguroContract {
             (Symbol::new(&env, "retiro"), usuario.clone()),
             monto_usuario,
         );
+
+        Ok(())
     }
 
     /// Solicita un autopréstamo de emergencia sobre el saldo bloqueado.
@@ -241,10 +280,12 @@ impl MananaSeguroContract {
     /// # Arguments
     /// * `monto` - Cantidad a solicitar en stroops (mínimo 1 USDC).
     ///
-    /// # Panics
-    /// Si el usuario no tiene saldo, si ya tiene un préstamo activo,
-    /// si excede el 30% del saldo, o si el monto es menor a 1 USDC.
-    pub fn solicitar_prestamo(env: Env, usuario: Address, monto: i128) {
+    /// # Errors
+    /// Retorna `Error::SinSaldo` si el usuario no tiene saldo,
+    /// `Error::PrestamoActivo` si ya tiene un préstamo activo,
+    /// `Error::ExcedeLimitePrestamo` si excede el 30% del saldo, o
+    /// `Error::MontoPrestamoBajoMinimo` si el monto es menor a 1 USDC.
+    pub fn solicitar_prestamo(env: Env, usuario: Address, monto: i128) -> Result<(), Error> {
         usuario.require_auth();
 
         let saldo: i128 = env
@@ -253,7 +294,9 @@ impl MananaSeguroContract {
             .get(&DataKey::Balance(usuario.clone()))
             .unwrap_or(0);
 
-        assert!(saldo > 0, "No tienes saldo bloqueado");
+        if saldo <= 0 {
+            return Err(Error::SinSaldo);
+        }
 
         // Verificar que no hay préstamo activo
         let prestamo_activo: i128 = env
@@ -261,12 +304,18 @@ impl MananaSeguroContract {
             .persistent()
             .get(&DataKey::Prestamo(usuario.clone()))
             .unwrap_or(0);
-        assert!(prestamo_activo == 0, "Ya tienes un autopréstamo activo");
+        if prestamo_activo != 0 {
+            return Err(Error::PrestamoActivo);
+        }
 
         // Máximo 30% del saldo
         let max_prestamo = saldo * PRESTAMO_MAX_PCT / 100;
-        assert!(monto <= max_prestamo, "Excede el 30% de tu saldo bloqueado");
-        assert!(monto >= STROOP, "Mínimo 1 USDC de préstamo");
+        if monto > max_prestamo {
+            return Err(Error::ExcedeLimitePrestamo);
+        }
+        if monto < STROOP {
+            return Err(Error::MontoPrestamoBajoMinimo);
+        }
 
         // Guardar saldo del préstamo
         env.storage()
@@ -284,15 +333,18 @@ impl MananaSeguroContract {
         // Emitir evento
         env.events()
             .publish((Symbol::new(&env, "prestamo"), usuario.clone()), monto);
+
+        Ok(())
     }
 
     /// Paga la cuota mensual del autopréstamo activo.
     /// El pago incluye capital (saldo / meses restantes) + interés mensual.
     /// El interés se transfiere al administrador.
     ///
-    /// # Panics
-    /// Si el usuario no tiene un autopréstamo activo, o si ya está liquidado.
-    pub fn pagar_prestamo(env: Env, usuario: Address) {
+    /// # Errors
+    /// Retorna `Error::NoTienePrestamoActivo` si el usuario no tiene un autopréstamo activo, o
+    /// `Error::PrestamoYaLiquidado` si ya está liquidado.
+    pub fn pagar_prestamo(env: Env, usuario: Address) -> Result<(), Error> {
         usuario.require_auth();
 
         let saldo_prestamo: i128 = env
@@ -301,7 +353,9 @@ impl MananaSeguroContract {
             .get(&DataKey::Prestamo(usuario.clone()))
             .unwrap_or(0);
 
-        assert!(saldo_prestamo > 0, "No tienes autopréstamo activo");
+        if saldo_prestamo <= 0 {
+            return Err(Error::NoTienePrestamoActivo);
+        }
 
         let meses: u32 = env
             .storage()
@@ -309,7 +363,9 @@ impl MananaSeguroContract {
             .get(&DataKey::PrestamoMeses(usuario.clone()))
             .unwrap_or(0);
 
-        assert!(meses < PRESTAMO_MAX_MESES, "Préstamo ya liquidado");
+        if meses >= PRESTAMO_MAX_MESES {
+            return Err(Error::PrestamoYaLiquidado);
+        }
 
         // Calcular pago: capital / meses_restantes + interés mensual
         let meses_restantes = (PRESTAMO_MAX_MESES - meses) as i128;
@@ -351,6 +407,8 @@ impl MananaSeguroContract {
             (Symbol::new(&env, "pago_prestamo"), usuario.clone()),
             pago_total,
         );
+
+        Ok(())
     }
 
     /// Retorna el saldo pendiente del autopréstamo y los meses pagados.
@@ -373,14 +431,18 @@ impl MananaSeguroContract {
     /// # Arguments
     /// * `nueva_meta` - Nueva meta en stroops (debe ser mayor a 0).
     ///
-    /// # Panics
-    /// Si `nueva_meta` es 0 o negativo.
-    pub fn actualizar_meta(env: Env, usuario: Address, nueva_meta: i128) {
+    /// # Errors
+    /// Retorna `Error::MetaInvalida` si `nueva_meta` es 0 o negativo.
+    pub fn actualizar_meta(env: Env, usuario: Address, nueva_meta: i128) -> Result<(), Error> {
         usuario.require_auth();
-        assert!(nueva_meta > 0, "La meta debe ser mayor a 0");
+        if nueva_meta <= 0 {
+            return Err(Error::MetaInvalida);
+        }
         env.storage()
             .persistent()
             .set(&DataKey::Meta(usuario), &nueva_meta);
+
+        Ok(())
     }
 }
 

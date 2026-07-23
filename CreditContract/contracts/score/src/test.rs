@@ -40,7 +40,7 @@ fn setup() -> (
 
 #[test]
 fn test_depositar_basico() {
-    let (env, cliente, _admin, usuario, _usdc) = setup();
+    let (_env, cliente, _admin, usuario, _usdc) = setup();
 
     // Depositar $10 USDC (10 * 10_000_000 = 100_000_000 stroops)
     let monto = 100_000_000i128;
@@ -53,7 +53,7 @@ fn test_depositar_basico() {
 
 #[test]
 fn test_depositar_minimo() {
-    let (env, cliente, _admin, usuario, _usdc) = setup();
+    let (_env, cliente, _admin, usuario, _usdc) = setup();
 
     // Mínimo $2 USDC = 20_000_000 stroops
     let monto = 20_000_000i128;
@@ -62,16 +62,28 @@ fn test_depositar_minimo() {
 }
 
 #[test]
-#[should_panic(expected = "$2 USDC")]
 fn test_depositar_bajo_minimo() {
-    let (env, cliente, _admin, usuario, _usdc) = setup();
-    // $1 USDC = 10_000_000 stroops — debe fallar
-    cliente.depositar(&usuario, &10_000_000, &20);
+    let (_env, cliente, _admin, usuario, _usdc) = setup();
+    // $1 USDC = 10_000_000 stroops — debe fallar con MontoBajoMinimo
+    let res = cliente.try_depositar(&usuario, &10_000_000, &20);
+    assert_eq!(res, Err(Ok(Error::MontoBajoMinimo)));
+}
+
+#[test]
+fn test_depositar_anios_bloqueo_invalidos() {
+    let (_env, cliente, _admin, usuario, _usdc) = setup();
+    // Bloqueo 0 años — debe fallar con AniosBloqueoInvalidos
+    let res_cero = cliente.try_depositar(&usuario, &20_000_000, &0);
+    assert_eq!(res_cero, Err(Ok(Error::AniosBloqueoInvalidos)));
+
+    // Bloqueo 41 años — debe fallar con AniosBloqueoInvalidos
+    let res_excede = cliente.try_depositar(&usuario, &20_000_000, &41);
+    assert_eq!(res_excede, Err(Ok(Error::AniosBloqueoInvalidos)));
 }
 
 #[test]
 fn test_multiples_depositos() {
-    let (env, cliente, _admin, usuario, _usdc) = setup();
+    let (_env, cliente, _admin, usuario, _usdc) = setup();
 
     cliente.depositar(&usuario, &100_000_000, &20);
     cliente.depositar(&usuario, &50_000_000, &20);
@@ -98,13 +110,10 @@ fn test_retirar_meta_alcanzada() {
     let (env, cliente, _admin, usuario, usdc) = setup();
 
     // Depositar suficiente para alcanzar la meta (meta = 10x primer depósito)
-    // Meta = 100_000_000 * 10 = 1_000_000_000
-    // Necesitamos depositar suficiente para alcanzarla
     let primer_deposito = 100_000_000i128;
     cliente.depositar(&usuario, &primer_deposito, &1);
 
     // Meta = 1_000_000_000 — depositar más para alcanzarla
-    // Mintear más USDC para el usuario
     let usdc_admin = token::StellarAssetClient::new(&env, &usdc);
     usdc_admin.mint(&usuario, &2_000_000_000);
 
@@ -140,18 +149,26 @@ fn test_retirar_tiempo_cumplido() {
 }
 
 #[test]
-#[should_panic(expected = "no alcanzas la meta")]
+fn test_retirar_sin_saldo() {
+    let (_env, cliente, _admin, usuario, _usdc) = setup();
+    // Intentar retirar sin depositar antes
+    let res = cliente.try_retirar(&usuario);
+    assert_eq!(res, Err(Ok(Error::SinSaldo)));
+}
+
+#[test]
 fn test_retirar_sin_cumplir_condiciones() {
-    let (env, cliente, _admin, usuario, _usdc) = setup();
+    let (_env, cliente, _admin, usuario, _usdc) = setup();
 
     cliente.depositar(&usuario, &100_000_000, &20);
     // Intentar retirar sin alcanzar meta ni tiempo
-    cliente.retirar(&usuario);
+    let res = cliente.try_retirar(&usuario);
+    assert_eq!(res, Err(Ok(Error::CondicionesRetiroNoCumplidas)));
 }
 
 #[test]
 fn test_autoprestamo_solicitar() {
-    let (env, cliente, _admin, usuario, _usdc) = setup();
+    let (_env, cliente, _admin, usuario, _usdc) = setup();
 
     cliente.depositar(&usuario, &100_000_000, &20);
 
@@ -164,13 +181,13 @@ fn test_autoprestamo_solicitar() {
 }
 
 #[test]
-#[should_panic(expected = "Excede el 30%")]
 fn test_autoprestamo_excede_limite() {
-    let (env, cliente, _admin, usuario, _usdc) = setup();
+    let (_env, cliente, _admin, usuario, _usdc) = setup();
 
     cliente.depositar(&usuario, &100_000_000, &20);
-    // Solicitar 40% — debe fallar
-    cliente.solicitar_prestamo(&usuario, &40_000_000);
+    // Solicitar 40% — debe fallar con ExcedeLimitePrestamo
+    let res = cliente.try_solicitar_prestamo(&usuario, &40_000_000);
+    assert_eq!(res, Err(Ok(Error::ExcedeLimitePrestamo)));
 }
 
 #[test]
@@ -193,9 +210,8 @@ fn test_autoprestamo_pagar() {
 }
 
 #[test]
-#[should_panic(expected = "Liquida tu autopr")]
 fn test_no_retirar_con_prestamo_activo() {
-    let (env, cliente, _admin, usuario, usdc) = setup();
+    let (env, cliente, _admin, usuario, _usdc) = setup();
 
     cliente.depositar(&usuario, &100_000_000, &1);
 
@@ -207,8 +223,9 @@ fn test_no_retirar_con_prestamo_activo() {
         l.timestamp += 365 * 24 * 3600 + 1;
     });
 
-    // Intentar retirar con préstamo activo — debe fallar
-    cliente.retirar(&usuario);
+    // Intentar retirar con préstamo activo — debe fallar con PrestamoPendiente
+    let res = cliente.try_retirar(&usuario);
+    assert_eq!(res, Err(Ok(Error::PrestamoPendiente)));
 }
 
 #[test]
@@ -219,15 +236,15 @@ fn test_actualizar_meta_exito() {
 }
 
 #[test]
-#[should_panic(expected = "La meta debe ser mayor a 0")]
 fn test_actualizar_meta_cero_panica() {
     let (_env, cliente, _admin, usuario, _usdc) = setup();
-    cliente.actualizar_meta(&usuario, &0);
+    let res = cliente.try_actualizar_meta(&usuario, &0);
+    assert_eq!(res, Err(Ok(Error::MetaInvalida)));
 }
 
 #[test]
 fn test_autoprestamo_ciclo_completo() {
-    let (env, cliente, _admin, usuario, _usdc) = setup();
+    let (_env, cliente, _admin, usuario, _usdc) = setup();
 
     cliente.depositar(&usuario, &100_000_000, &20);
     // Solicitar préstamo del 30% (30 USDC)
@@ -284,34 +301,34 @@ fn test_retirar_math_comision() {
 }
 
 #[test]
-#[should_panic(expected = "Ya tienes un autopr")]
 fn test_solicitar_segundo_prestamo_panica() {
-    let (env, cliente, _admin, usuario, _usdc) = setup();
+    let (_env, cliente, _admin, usuario, _usdc) = setup();
 
     cliente.depositar(&usuario, &100_000_000, &20);
     cliente.solicitar_prestamo(&usuario, &10_000_000);
-    cliente.solicitar_prestamo(&usuario, &10_000_000);
+    let res = cliente.try_solicitar_prestamo(&usuario, &10_000_000);
+    assert_eq!(res, Err(Ok(Error::PrestamoActivo)));
 }
 
 #[test]
-#[should_panic(expected = "No tienes autopr")]
 fn test_pagar_sin_prestamo_activo_panica() {
     let (_env, cliente, _admin, usuario, _usdc) = setup();
-    cliente.pagar_prestamo(&usuario);
+    let res = cliente.try_pagar_prestamo(&usuario);
+    assert_eq!(res, Err(Ok(Error::NoTienePrestamoActivo)));
 }
 
 #[test]
-#[should_panic(expected = "1 USDC de pr")]
 fn test_solicitar_prestamo_bajo_minimo_panica() {
-    let (env, cliente, _admin, usuario, _usdc) = setup();
+    let (_env, cliente, _admin, usuario, _usdc) = setup();
 
     cliente.depositar(&usuario, &100_000_000, &20);
-    cliente.solicitar_prestamo(&usuario, &9_999_999);
+    let res = cliente.try_solicitar_prestamo(&usuario, &9_999_999);
+    assert_eq!(res, Err(Ok(Error::MontoPrestamoBajoMinimo)));
 }
 
 #[test]
 fn test_meta_defecto_diez_veces_primer_deposito() {
-    let (env, cliente, _admin, usuario, _usdc) = setup();
+    let (_env, cliente, _admin, usuario, _usdc) = setup();
 
     let primer_deposito = 50_000_000i128;
     cliente.depositar(&usuario, &primer_deposito, &1);

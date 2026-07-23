@@ -18,27 +18,45 @@ The score contract implements a locked retirement savings model in USDC on Sorob
 
 Business constants in code:
 
-- Minimum deposit: `2_000_000` stroops (`$2` USDC).
+- Minimum deposit: `20_000_000` stroops (`$2` USDC).
 - Platform fee on withdrawal: `100` bps (`1%`).
 - Max emergency loan: `30%` of locked balance.
 - Loan monthly interest: `50` bps (`0.5%` per month).
 - Max loan term: `24` months.
 
+## Error Handling
+
+The contract defines typed contract errors using `#[contracterror]` (`Error` enum):
+
+| Code | Variant | Description | Triggered by |
+|---|---|---|---|
+| `1` | `MontoBajoMinimo` | Monto de depósito menor al mínimo de $2 USDC (`20_000_000` stroops). | `depositar` |
+| `2` | `AniosBloqueoInvalidos` | Años de bloqueo fuera del rango permitido (1 a 40 años). | `depositar` |
+| `3` | `SinSaldo` | El usuario no posee saldo bloqueado en el contrato. | `retirar`, `solicitar_prestamo` |
+| `4` | `CondicionesRetiroNoCumplidas` | Aún no se cumple el tiempo de bloqueo ni se alcanzó la meta. | `retirar` |
+| `5` | `PrestamoPendiente` | Existe un autopréstamo pendiente de liquidación. | `retirar` |
+| `6` | `PrestamoActivo` | El usuario ya tiene un autopréstamo activo en curso. | `solicitar_prestamo` |
+| `7` | `ExcedeLimitePrestamo` | El monto solicitado excede el 30% del saldo bloqueado. | `solicitar_prestamo` |
+| `8` | `MontoPrestamoBajoMinimo` | Monto de préstamo menor al mínimo de $1 USDC (`10_000_000` stroops). | `solicitar_prestamo` |
+| `9` | `NoTienePrestamoActivo` | Intento de pago cuando no existe un autopréstamo activo. | `pagar_prestamo` |
+| `10` | `PrestamoYaLiquidado` | El préstamo ya ha cumplido las 24 cuotas / se encuentra liquidado. | `pagar_prestamo` |
+| `11` | `MetaInvalida` | La meta ingresada no es válida (debe ser mayor a 0). | `actualizar_meta` |
+
 ## Entrypoints
 
-| Entrypoint | Parameters | What it does | Panics / asserts |
-|---|---|---|---|
-| `inicializar` | `env: Env`, `admin: Address`, `usdc_token: Address` | Sets admin and USDC token addresses in instance storage. | Requires `admin.require_auth()`. |
-| `depositar` | `env: Env`, `usuario: Address`, `monto: i128`, `anios_bloqueo: u32` | Authenticates user, transfers USDC from user to contract, updates locked balance + deposit counter, sets first lock date and default goal (`10x` first deposit), emits `deposito`. | Panics if `monto < $2` equivalent, or lock years not in `1..=40`. Also panics if USDC token is not initialized (`unwrap`) or token transfer fails. |
-| `ver_balance` | `env: Env`, `usuario: Address` | Returns locked balance in stroops. | No explicit panic (returns `0` if missing). |
-| `ver_retiro` | `env: Env`, `usuario: Address` | Returns withdrawal timestamp (`unix u64`). | No explicit panic (returns `0` if missing). |
-| `ver_meta` | `env: Env`, `usuario: Address` | Returns goal amount in stroops. | No explicit panic (returns `0` if missing). |
-| `ver_depositos` | `env: Env`, `usuario: Address` | Returns number of deposits. | No explicit panic (returns `0` if missing). |
-| `retirar` | `env: Env`, `usuario: Address` | Allows withdrawal when time lock or goal condition is satisfied, charges 1% fee to admin, transfers net to user, clears user savings state, emits `retiro`. | Panics if no locked balance, if neither time nor goal condition is met, or if active loan exists. Also panics if admin/token config is missing (`unwrap`) or token transfer fails. |
-| `solicitar_prestamo` | `env: Env`, `usuario: Address`, `monto: i128` | Creates emergency auto-loan, stores principal + month counter, transfers loan amount to user, emits `prestamo`. | Panics if no locked balance, if active loan already exists, if requested amount exceeds 30% of balance, or if amount `< 1 USDC`. Also panics if token config is missing (`unwrap`) or token transfer fails. |
-| `pagar_prestamo` | `env: Env`, `usuario: Address` | Charges one monthly payment (`capital + monthly interest`), sends interest to admin, updates/clears loan state, emits `pago_prestamo`. | Panics if no active loan or months already reached max term. Also panics if admin/token config is missing (`unwrap`) or token transfer fails. |
-| `ver_prestamo` | `env: Env`, `usuario: Address` | Returns `(loan_balance_stroops, months_paid)`. | No explicit panic (returns `(0, 0)` if missing). |
-| `actualizar_meta` | `env: Env`, `usuario: Address`, `nueva_meta: i128` | Lets user set a custom retirement goal in stroops. | Panics if `nueva_meta <= 0`. |
+| Entrypoint | Parameters | Return | What it does | Errors / Authorization |
+|---|---|---|---|---|
+| `inicializar` | `env: Env`, `admin: Address`, `usdc_token: Address` | `()` | Sets admin and USDC token addresses in instance storage. | Requires `admin.require_auth()`. |
+| `depositar` | `env: Env`, `usuario: Address`, `monto: i128`, `anios_bloqueo: u32` | `Result<(), Error>` | Authenticates user, transfers USDC from user to contract, updates locked balance + deposit counter, sets first lock date and default goal (`10x` first deposit), emits `deposito`. | Requires `usuario.require_auth()`. Returns `MontoBajoMinimo` or `AniosBloqueoInvalidos`. |
+| `ver_balance` | `env: Env`, `usuario: Address` | `i128` | Returns locked balance in stroops. | Returns `0` if missing. |
+| `ver_retiro` | `env: Env`, `usuario: Address` | `u64` | Returns withdrawal timestamp (`unix u64`). | Returns `0` if missing. |
+| `ver_meta` | `env: Env`, `usuario: Address` | `i128` | Returns goal amount in stroops. | Returns `0` if missing. |
+| `ver_depositos` | `env: Env`, `usuario: Address` | `u32` | Returns number of deposits. | Returns `0` if missing. |
+| `retirar` | `env: Env`, `usuario: Address` | `Result<(), Error>` | Allows withdrawal when time lock or goal condition is satisfied, charges 1% fee to admin, transfers net to user, clears user savings state, emits `retiro`. | Requires `usuario.require_auth()`. Returns `SinSaldo`, `CondicionesRetiroNoCumplidas`, or `PrestamoPendiente`. |
+| `solicitar_prestamo` | `env: Env`, `usuario: Address`, `monto: i128` | `Result<(), Error>` | Creates emergency auto-loan, stores principal + month counter, transfers loan amount to user, emits `prestamo`. | Requires `usuario.require_auth()`. Returns `SinSaldo`, `PrestamoActivo`, `ExcedeLimitePrestamo`, or `MontoPrestamoBajoMinimo`. |
+| `pagar_prestamo` | `env: Env`, `usuario: Address` | `Result<(), Error>` | Charges one monthly payment (`capital + monthly interest`), sends interest to admin, updates/clears loan state, emits `pago_prestamo`. | Requires `usuario.require_auth()`. Returns `NoTienePrestamoActivo` or `PrestamoYaLiquidado`. |
+| `ver_prestamo` | `env: Env`, `usuario: Address` | `(i128, u32)` | Returns `(loan_balance_stroops, months_paid)`. | Returns `(0, 0)` if missing. |
+| `actualizar_meta` | `env: Env`, `usuario: Address`, `nueva_meta: i128` | `Result<(), Error>` | Lets user set a custom retirement goal in stroops. | Requires `usuario.require_auth()`. Returns `MetaInvalida`. |
 
 ## Storage Model
 
