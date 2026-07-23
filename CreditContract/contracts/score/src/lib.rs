@@ -1,8 +1,8 @@
 #![no_std]
 
 use soroban_sdk::{
-    contract, contractimpl, contracttype,
-    token, Address, Env, Symbol,
+    contract, contractevent, contractimpl, contracttype,
+    token, Address, Env,
 };
 
 // ─── Storage Keys ─────────────────────────────────────────────────────────────
@@ -21,12 +21,46 @@ pub enum DataKey {
 
 // ─── Constantes del modelo de negocio ─────────────────────────────────────────
 
-const MIN_DEPOSIT: i128 = 2_000_000;          // $2 USDC (7 decimales Stellar)
+const MIN_DEPOSIT: i128 = 20_000_000;          // $2 USDC (7 decimales Stellar)
 const PLATAFORMA_FEE: i128 = 100;             // 1% en basis points (10000 = 100%)
 const PRESTAMO_MAX_PCT: i128 = 30;            // 30% del saldo
 const PRESTAMO_FEE_MENSUAL: i128 = 50;        // 0.5% mensual en basis points
 const PRESTAMO_MAX_MESES: u32 = 24;
 const STROOP: i128 = 10_000_000;              // 1 USDC = 10_000_000 stroops
+
+// ─── Eventos ──────────────────────────────────────────────────────────────────
+
+#[contractevent(data_format = "single-value")]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Deposito {
+    #[topic]
+    pub usuario: Address,
+    pub monto: i128,
+}
+
+#[contractevent(data_format = "single-value")]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Retiro {
+    #[topic]
+    pub usuario: Address,
+    pub monto: i128,
+}
+
+#[contractevent(data_format = "single-value")]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Prestamo {
+    #[topic]
+    pub usuario: Address,
+    pub monto: i128,
+}
+
+#[contractevent(data_format = "single-value")]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct PagoPrestamo {
+    #[topic]
+    pub usuario: Address,
+    pub monto: i128,
+}
 
 // ─── Contrato ─────────────────────────────────────────────────────────────────
 
@@ -84,10 +118,10 @@ impl MananaSeguroContract {
         }
 
         // Emitir evento
-        env.events().publish(
-            (Symbol::new(&env, "deposito"), usuario.clone()),
+        Deposito {
+            usuario: usuario.clone(),
             monto,
-        );
+        }.publish(&env);
     }
 
     // ── Ver saldo bloqueado ───────────────────────────────────────────────────
@@ -174,10 +208,10 @@ impl MananaSeguroContract {
         env.storage().persistent().remove(&DataKey::DepositCount(usuario.clone()));
 
         // Emitir evento
-        env.events().publish(
-            (Symbol::new(&env, "retiro"), usuario.clone()),
-            monto_usuario,
-        );
+        Retiro {
+            usuario: usuario.clone(),
+            monto: monto_usuario,
+        }.publish(&env);
     }
 
     // ── Solicitar autopréstamo de emergencia ──────────────────────────────────
@@ -214,10 +248,10 @@ impl MananaSeguroContract {
         token_client.transfer(&env.current_contract_address(), &usuario, &monto);
 
         // Emitir evento
-        env.events().publish(
-            (Symbol::new(&env, "prestamo"), usuario.clone()),
+        Prestamo {
+            usuario: usuario.clone(),
             monto,
-        );
+        }.publish(&env);
     }
 
     // ── Pagar cuota mensual del autopréstamo ──────────────────────────────────
@@ -266,10 +300,10 @@ impl MananaSeguroContract {
                 .set(&DataKey::PrestamoMeses(usuario.clone()), &nuevos_meses);
         }
 
-        env.events().publish(
-            (Symbol::new(&env, "pago_prestamo"), usuario.clone()),
-            pago_total,
-        );
+        PagoPrestamo {
+            usuario: usuario.clone(),
+            monto: pago_total,
+        }.publish(&env);
     }
 
     // ── Ver estado del autopréstamo ───────────────────────────────────────────

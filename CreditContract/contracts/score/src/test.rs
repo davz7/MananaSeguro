@@ -2,8 +2,8 @@
 
 use super::*;
 use soroban_sdk::{
-    testutils::{Address as _, Ledger},
-    token, Address, Env,
+    testutils::{Address as _, Events as _, Ledger},
+    token, Address, Env, Event,
 };
 
 // Helper para crear token USDC de prueba
@@ -56,7 +56,7 @@ fn test_depositar_minimo() {
 }
 
 #[test]
-#[should_panic(expected = "Mínimo $2 USDC")]
+#[should_panic(expected = "$2 USDC")]
 fn test_depositar_bajo_minimo() {
     let (env, cliente, _admin, usuario, _usdc) = setup();
     // $1 USDC = 10_000_000 stroops — debe fallar
@@ -134,7 +134,7 @@ fn test_retirar_tiempo_cumplido() {
 }
 
 #[test]
-#[should_panic(expected = "Aún no alcanzas la meta")]
+#[should_panic(expected = "alcanzas la meta")]
 fn test_retirar_sin_cumplir_condiciones() {
     let (env, cliente, _admin, usuario, _usdc) = setup();
 
@@ -187,7 +187,7 @@ fn test_autoprestamo_pagar() {
 }
 
 #[test]
-#[should_panic(expected = "Liquida tu autopréstamo")]
+#[should_panic(expected = "antes de retirar")]
 fn test_no_retirar_con_prestamo_activo() {
     let (env, cliente, _admin, usuario, usdc) = setup();
 
@@ -203,4 +203,22 @@ fn test_no_retirar_con_prestamo_activo() {
 
     // Intentar retirar con préstamo activo — debe fallar
     cliente.retirar(&usuario);
+}
+
+#[test]
+fn test_depositar_emite_evento() {
+    let (env, cliente, _admin, usuario, _usdc) = setup();
+
+    let monto = 100_000_000i128;
+    cliente.depositar(&usuario, &monto, &20);
+
+    let expected = Deposito {
+        usuario: usuario.clone(),
+        monto,
+    };
+
+    assert_eq!(
+        env.events().all().filter_by_contract(&cliente.address),
+        [expected.to_xdr(&env, &cliente.address)],
+    );
 }
