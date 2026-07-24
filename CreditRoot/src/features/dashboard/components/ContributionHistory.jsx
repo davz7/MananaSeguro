@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { TriangleAlert, Inbox, Check, Hourglass, Clock } from 'lucide-react'
 import { formatCurrencyMxn } from '../../../utils/formatters'
 
 export function ContributionHistory() {
@@ -104,13 +105,13 @@ export function ContributionHistory() {
 
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-sm text-red-500">
-            ⚠️ {error}
+            <TriangleAlert size={16} className="inline shrink-0" aria-hidden="true" /> {error}
           </div>
         )}
 
         {!loading && !error && ordenes.length === 0 && (
           <div className="text-center py-10 bg-ink/2 dark:bg-white/2 border border-dashed border-ink/8 dark:border-white/8 rounded-xl">
-            <div className="text-4xl mb-3">📭</div>
+            <div className="mb-3"><Inbox size={36} aria-hidden="true" className="inline-block text-ink/30 dark:text-white/30" /></div>
             <p className="text-sm text-ink/40 dark:text-white/40">{t('history.vacio')}</p>
             <p className="text-xs text-ink/30 dark:text-white/30 mt-1">{t('history.vacioSub')}</p>
           </div>
@@ -151,9 +152,9 @@ export function ContributionHistory() {
                           ? 'bg-yellow-400/10 text-yellow-500 border-yellow-400/20'
                           : 'bg-ink/5 text-ink/40 border-ink/10'
                       }`}>
-                        {orden.status === 'completed' ? '✓ Completado'
-                          : orden.status === 'funded' ? '⏳ Procesando'
-                          : '🕐 Pendiente'}
+                        {orden.status === 'completed' ? <><Check size={12} aria-hidden="true" className="inline mr-0.5" />Completado</>
+                          : orden.status === 'funded' ? <><Hourglass size={12} aria-hidden="true" className="inline mr-0.5" />Procesando</>
+                          : <><Clock size={12} aria-hidden="true" className="inline mr-0.5" />Pendiente</>}
                       </span>
                     </td>
                   </tr>

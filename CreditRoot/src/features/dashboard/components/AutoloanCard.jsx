@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { TriangleAlert, Lock, XCircle, ArrowRight } from 'lucide-react'
 import { MANANA_SEGURO_RATES } from '../../../data/retirementContent'
 import { calculateLoan } from '../../../utils/projections'
 import { formatCurrencyUsd } from '../../../utils/formatters'
@@ -120,7 +121,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
         <div className="flex items-start justify-between flex-wrap gap-3">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xl">🚨</span>
+              <TriangleAlert size={20} aria-hidden="true" className="text-yellow-500 shrink-0" />
               <h5 className="font-display font-black text-ink dark:text-white text-lg mb-0">
                 {t('autoloan.titulo')}
               </h5>
@@ -138,7 +139,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
       {/* ── Sin saldo bloqueado ── */}
       {lockedBalance === 0 && fase === 'form' && (
         <div className="bg-white dark:bg-white/5 border border-dashed border-ink/10 dark:border-white/10 rounded-2xl p-6 text-center">
-          <div className="text-4xl mb-3">🔒</div>
+          <div className="mb-3"><Lock size={36} aria-hidden="true" className="inline-block text-ink/30 dark:text-white/30" /></div>
           <p className="text-sm text-ink/50 dark:text-white/50">
             {t('autoloan.sinSaldo')}{' '}
             <strong className="text-yellow-500">{t('autoloan.sinSaldoDeposito')}</strong>{' '}
@@ -206,7 +207,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
               ))}
               <div className="bg-red-500/5 border border-dashed border-red-500/25 rounded-lg p-3 mt-1">
                 <p className="text-xs text-red-400">
-                  ⚠ {t('autoloan.advertenciaPenalty')} <strong>−{MANANA_SEGURO_RATES.loanPenaltyPerMonth}%</strong> {t('autoloan.advertenciaPenaltySufijo')}
+                  <TriangleAlert size={14} className="inline shrink-0" aria-hidden="true" /> {t('autoloan.advertenciaPenalty')} <strong>−{MANANA_SEGURO_RATES.loanPenaltyPerMonth}%</strong> {t('autoloan.advertenciaPenaltySufijo')}
                 </p>
               </div>
             </div>
@@ -268,7 +269,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
       {/* ── FASE: Confirmando ── */}
       {fase === 'confirmando' && (
         <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6 text-center">
-          <div className="text-5xl mb-4">⚠️</div>
+          <div className="mb-4"><TriangleAlert size={48} aria-hidden="true" className="inline-block text-yellow-500" /></div>
           <h6 className="font-display font-black text-ink dark:text-white text-lg mb-2">
             {t('autoloan.confirmarTitulo')}
           </h6>
@@ -306,7 +307,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
       {/* ── FASE: Error ── */}
       {fase === 'error' && (
         <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6 text-center">
-          <div className="text-4xl mb-3">❌</div>
+          <div className="mb-3"><XCircle size={36} aria-hidden="true" className="inline-block text-red-500" /></div>
           <p className="text-sm text-red-400 mb-4">{errorMsg}</p>
           <button
             className="px-5 py-2.5 rounded-xl text-sm font-medium border border-ink/10 dark:border-white/10 text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white transition-all cursor-pointer"
@@ -329,7 +330,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
                 <a href={`https://stellar.expert/explorer/testnet/tx/${txHash}`}
                   target="_blank" rel="noopener noreferrer"
                   className="text-yellow-500 hover:underline">
-                  {txHash.slice(0, 16)}... →
+                  {txHash.slice(0, 16)}... <ArrowRight size={12} className="inline" aria-hidden="true" />
                 </a>
               </p>
             </div>

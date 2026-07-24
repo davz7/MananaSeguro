@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { Sun, Moon } from 'lucide-react'
 import { useDarkMode } from '../../hooks/useDarkMode'
 import { navigationItems } from '../../app/navigation'
 import { useEtherfuseRate } from '../../hooks/useEtherfuseRate'
@@ -65,7 +66,7 @@ export function AppHeader({ usuario, onLogout }) {
               className="text-xs font-bold px-3 py-1.5 rounded-lg border border-ink/10 dark:border-white/10 text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white hover:border-ink/20 transition-all cursor-pointer"
               onClick={toggle}
               aria-label="Toggle dark mode">
-              {dark ? '☀️' : '🌙'}
+              {dark ? <Sun size={16} aria-hidden="true" /> : <Moon size={16} aria-hidden="true" />}
             </button>
 
             <span className={`hidden lg:flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border ${isLive
@@ -144,7 +145,7 @@ export function AppHeader({ usuario, onLogout }) {
                 className="text-xs font-bold px-3 py-1.5 rounded-lg border border-ink/10 dark:border-white/10 text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white transition-all cursor-pointer"
                 onClick={toggle}
                 aria-label={dark ? 'Activar modo claro' : 'Activar modo oscuro'}>
-                {dark ? '☀️' : '🌙'}
+              {dark ? <Sun size={16} aria-hidden="true" /> : <Moon size={16} aria-hidden="true" />}
               </button>
 
               <span className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full border ${isLive
