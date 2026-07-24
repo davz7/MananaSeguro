@@ -21,7 +21,7 @@ export function AuthScreen({ onAuth, onVolver }) {
   // ── Callback de Google — cuando el usuario selecciona su cuenta ────────────
   const handleCredentialResponse = useCallback(async (response) => {
     if (!response.credential) {
-      setError('No se recibió credencial de Google. Intenta de nuevo.')
+      setError(t('auth.errorSinCredencial'))
       return
     }
     setLoading(true)
@@ -33,15 +33,15 @@ export function AuthScreen({ onAuth, onVolver }) {
         body: JSON.stringify({ idToken: response.credential }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Error al iniciar sesión')
+      if (!res.ok) throw new Error(data.error || t('auth.errorLogin'))
       localStorage.setItem('ms_usuario', JSON.stringify(data.usuario))
       onAuth(data.usuario)
     } catch (err) {
-      setError(err.message || 'Error al iniciar sesión. Intenta de nuevo.')
+      setError(err.message || t('auth.errorLoginReintentar'))
     } finally {
       setLoading(false)
     }
-  }, [onAuth])
+  }, [onAuth, t])
 
   // ── Inicializar SDK de Google ───────────────────────────────────────────────
   const inicializarGoogle = useCallback(() => {
@@ -69,7 +69,7 @@ export function AuthScreen({ onAuth, onVolver }) {
   // ── Cargar SDK de Google ───────────────────────────────────────────────────
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) {
-      setError('Error de configuración — contacta al equipo de Mañana Seguro')
+      setError(t('auth.errorConfig'))
       return
     }
     if (window.google?.accounts) {
@@ -81,9 +81,9 @@ export function AuthScreen({ onAuth, onVolver }) {
     script.async = true
     script.defer = true
     script.onload = inicializarGoogle
-    script.onerror = () => setError('No se pudo cargar Google. Verifica tu conexión.')
+    script.onerror = () => setError(t('auth.errorGoogleCarga'))
     document.head.appendChild(script)
-  }, [inicializarGoogle])
+  }, [inicializarGoogle, t])
 
   // ── Freighter: conectar wallet ─────────────────────────────────────────────
   async function handleConectarFreighter() {
@@ -95,11 +95,11 @@ export function AuthScreen({ onAuth, onVolver }) {
       setPaso('nombre')
     } catch (e) {
       if (e.message.includes('Freighter no está disponible')) {
-        setError('Freighter no está instalado. Instálalo desde freighter.app')
+        setError(t('auth.errorFreighterNoInstalado'))
       } else if (e.message.includes('Cancelaste')) {
-        setError('Cancelaste la conexión. Intenta de nuevo.')
+        setError(t('auth.errorConexionCancelada'))
       } else {
-        setError(e.message ?? 'No se pudo conectar la wallet. Intenta de nuevo.')
+        setError(e.message ?? t('auth.errorWalletConexion'))
       }
     } finally {
       setLoading(false)
@@ -109,7 +109,7 @@ export function AuthScreen({ onAuth, onVolver }) {
   function handleSubmit(e) {
     e.preventDefault()
     if (!nombre.trim()) {
-      setError(t('auth.nombreLabel') + ' requerido')
+      setError(t('auth.errorCampoRequerido', { campo: t('auth.nombreLabel') }))
       return
     }
     onAuth({ nombre: nombre.trim(), walletAddress: walletAddressFreighter })
@@ -129,8 +129,8 @@ export function AuthScreen({ onAuth, onVolver }) {
             </span>
             <h1 className="font-display font-black text-ink dark:text-white tracking-tight mb-4"
               style={{ fontSize: 'clamp(2.4rem,5vw,3.6rem)', lineHeight: 1.05 }}>
-              Empieza a ahorrar<br />
-              <em className="text-brand italic">en 30 segundos.</em>
+              {t('auth.heroTitulo')}<br />
+              <em className="text-brand italic">{t('auth.heroTituloAccent')}</em>
             </h1>
             <p className="text-ink/50 dark:text-white/50 text-lg leading-relaxed max-w-md mb-8">
               {t('auth.descWallet')}
@@ -152,7 +152,7 @@ export function AuthScreen({ onAuth, onVolver }) {
               ))}
             </div>
 
-            <img src={ardilla} alt="Mascota Mañana Seguro" className="h-40 object-contain float-squirrel" />
+            <img src={ardilla} alt={t('auth.mascotaAlt')} className="h-40 object-contain float-squirrel" />
           </div>
 
           {/* Card de auth */}
@@ -232,9 +232,9 @@ export function AuthScreen({ onAuth, onVolver }) {
 
                   {/* Powered by Pollar */}
                   <div className="flex items-center justify-center gap-1.5 pt-1">
-                    <span className="text-xs text-ink/25 dark:text-white/25">Powered by</span>
+                    <span className="text-xs text-ink/25 dark:text-white/25">{t('auth.poweredBy')}</span>
                     <a href="https://pollar.xyz" target="_blank" rel="noopener noreferrer" className="flex items-center">
-                      <img src={pollarLogo} alt="Pollar" className="h-8 w-auto opacity-60 hover:opacity-90 transition-opacity dark:invert" />
+                      <img src={pollarLogo} alt={t('auth.pollarAlt')} className="h-8 w-auto opacity-60 hover:opacity-90 transition-opacity dark:invert" />
                     </a>
                   </div>
                 </div>

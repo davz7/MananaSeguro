@@ -84,7 +84,7 @@ export function ContributionPlanner() {
             <div>
               <div className="flex justify-between mb-2">
                 <label className="text-xs text-ink/50 dark:text-white/50 font-medium">
-                  Ahorro mensual (MXN)
+                  {t('contributionPlanner.ahorroMensualMxnLabel')}
                 </label>
                 <span className="text-xs font-bold text-brand">{formatCurrencyMxn(mensualMxn)}</span>
               </div>
@@ -127,8 +127,8 @@ export function ContributionPlanner() {
                 onChange={e => updateScenario('yearsToRetirement', e.target.value)}
               />
               <div className="flex justify-between mt-1">
-                <span className="text-xs text-ink/35 dark:text-white/35">5 años</span>
-                <span className="text-xs text-ink/35 dark:text-white/35">40 años</span>
+                <span className="text-xs text-ink/35 dark:text-white/35">5 {t('contributionPlanner.aniosSufijo')}</span>
+                <span className="text-xs text-ink/35 dark:text-white/35">40 {t('contributionPlanner.aniosSufijo')}</span>
               </div>
             </div>
 
@@ -144,7 +144,7 @@ export function ContributionPlanner() {
                     : 'bg-yellow-400/10 text-yellow-600 border-yellow-400/20'
                 }`}>
                   <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                  {userRate}% APY
+                  {t('rateBadge.apySuffix', { value: userRate })}
                 </span>
               </div>
               <div className="grid grid-cols-3 gap-2">
@@ -172,12 +172,12 @@ export function ContributionPlanner() {
                 onChange={e => updateScenario('incentiveScenario', e.target.value)}>
                 {INCENTIVE_SCENARIOS.map(s => (
                   <option key={s.key} value={s.key}>
-                    {s.label} — {s.pct}% para ti
+                    {t(`incentiveScenarios.${s.key}.label`)} — {t('contributionPlanner.incentivoOpcionSufijo', { pct: s.pct })}
                   </option>
                 ))}
               </select>
               <p className="text-xs text-ink/40 dark:text-white/40 mt-1.5">
-                {INCENTIVE_SCENARIOS.find(s => s.key === scenario.incentiveScenario)?.description}
+                {t(`incentiveScenarios.${scenario.incentiveScenario}.description`)}
               </p>
             </div>
 
@@ -204,8 +204,8 @@ export function ContributionPlanner() {
           <div className="flex flex-col gap-0 mb-5">
             {[
               { label: t('contributionPlanner.detalleAportado'), val: formatCurrencyMxn(projection.investedAmount * MXN_PER_USD) },
-              { label: t('contributionPlanner.detalleTasa'), val: `${formatPercentage(userRate)} anual` },
-              { label: t('contributionPlanner.detalleComision'), val: `${formatPercentage(MANANA_SEGURO_RATES.platformRate)} anual` },
+              { label: t('contributionPlanner.detalleTasa'), val: t('contributionPlanner.anualSufijo', { pct: formatPercentage(userRate) }) },
+              { label: t('contributionPlanner.detalleComision'), val: t('contributionPlanner.anualSufijo', { pct: formatPercentage(MANANA_SEGURO_RATES.platformRate) }) },
             ].map(item => (
               <div key={item.label} className="flex justify-between py-2.5 border-b border-ink/5 dark:border-white/5 last:border-0">
                 <span className="text-xs text-ink/45 dark:text-white/45">{item.label}</span>
@@ -266,11 +266,10 @@ export function ContributionPlanner() {
         <div className="bg-brand/5 border border-brand/20 rounded-2xl p-5 flex items-start gap-3">
           <span className="text-2xl shrink-0">💡</span>
           <div>
-            <p className="font-semibold text-ink dark:text-white mb-1">¿Cómo funciona?</p>
+            <p className="font-semibold text-ink dark:text-white mb-1">{t('contributionPlanner.comoFunciona')}</p>
             <p className="text-sm text-ink/50 dark:text-white/50">
-              Esta simulación te muestra cuánto crecerá tu ahorro. Para depositar, usa el botón
-              <strong className="text-brand"> + Depositar</strong> arriba — solo necesitas hacer
-              un SPEI desde tu banco a la CLABE que te damos.
+              {t('contributionPlanner.comoFuncionaDesc')}
+              <strong className="text-brand"> {t('contributionPlanner.comoFuncionaBtn')}</strong> {t('contributionPlanner.comoFuncionaDesc2')}
             </p>
           </div>
         </div>

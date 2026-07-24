@@ -30,9 +30,9 @@ export function AppHeader({ usuario, onLogout }) {
 
           {/* Logo */}
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/home')}>
-            <img src={logoCompleto} alt="Logo Mañana Seguro" className="h-8 w-auto rounded-lg" />
+            <img src={logoCompleto} alt={t('nav.logoAlt')} className="h-8 w-auto rounded-lg" />
             <span className="font-display font-bold text-xl text-ink dark:text-white tracking-tight">
-              Mañana <span className="text-brand">Seguro</span>
+              {t('nav.marca')} <span className="text-brand">{t('nav.marcaAccent')}</span>
             </span>
           </div>
 
@@ -57,14 +57,14 @@ export function AppHeader({ usuario, onLogout }) {
             <button
               className="text-xs font-bold px-3 py-1.5 rounded-lg border border-ink/10 dark:border-white/10 text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white hover:border-ink/20 transition-all cursor-pointer"
               onClick={toggleLang}
-              aria-label="Cambiar idioma">
+              aria-label={t('nav.cambiarIdioma')}>
               {i18n.language === 'es' ? 'EN' : 'ES'}
             </button>
 
             <button
               className="text-xs font-bold px-3 py-1.5 rounded-lg border border-ink/10 dark:border-white/10 text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white hover:border-ink/20 transition-all cursor-pointer"
               onClick={toggle}
-              aria-label="Toggle dark mode">
+              aria-label={dark ? t('nav.activarModoClaro') : t('nav.activarModoOscuro')}>
               {dark ? '☀️' : '🌙'}
             </button>
 
@@ -73,7 +73,7 @@ export function AppHeader({ usuario, onLogout }) {
                 : 'bg-yellow-400/10 text-yellow-600 border-yellow-400/20'
               }`}>
               <span className="w-1.5 h-1.5 rounded-full bg-current pulse-dot" />
-              {userRate}% APY
+              {t('rateBadge.apySuffix', { value: userRate })}
             </span>
 
             {usuario && (
@@ -101,7 +101,7 @@ export function AppHeader({ usuario, onLogout }) {
           <button
             className="md:hidden flex flex-col justify-center items-center w-8 h-8 gap-1.5 cursor-pointer"
             onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Toggle menu">
+            aria-label={t('nav.toggleMenu')}>
             <span className={`w-5 h-0.5 bg-ink dark:bg-white transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
             <span className={`w-5 h-0.5 bg-ink dark:bg-white transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`} />
             <span className={`w-5 h-0.5 bg-ink dark:bg-white transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
@@ -136,14 +136,14 @@ export function AppHeader({ usuario, onLogout }) {
               <button
                 className="text-xs font-bold px-3 py-1.5 rounded-lg border border-ink/10 dark:border-white/10 text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white transition-all cursor-pointer"
                 onClick={toggleLang}
-                aria-label="Cambiar idioma">
+                aria-label={t('nav.cambiarIdioma')}>
                 {i18n.language === 'es' ? 'EN' : 'ES'}
               </button>
 
               <button
                 className="text-xs font-bold px-3 py-1.5 rounded-lg border border-ink/10 dark:border-white/10 text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white transition-all cursor-pointer"
                 onClick={toggle}
-                aria-label={dark ? 'Activar modo claro' : 'Activar modo oscuro'}>
+                aria-label={dark ? t('nav.activarModoClaro') : t('nav.activarModoOscuro')}>
                 {dark ? '☀️' : '🌙'}
               </button>
 
@@ -152,7 +152,7 @@ export function AppHeader({ usuario, onLogout }) {
                   : 'bg-yellow-400/10 text-yellow-600 border-yellow-400/20'
                 }`}>
                 <span className="w-1.5 h-1.5 rounded-full bg-current pulse-dot" />
-                {userRate}% APY
+                {t('rateBadge.apySuffix', { value: userRate })}
               </span>
             </div>
 

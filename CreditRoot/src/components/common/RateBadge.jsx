@@ -27,7 +27,7 @@ export function RateBadge({ onRateLoaded, compact = false }) {
         : 'bg-yellow-400/10 text-yellow-600 border-yellow-400/20'
         }`}>
         <span className="w-1.5 h-1.5 rounded-full bg-current pulse-dot" />
-        {userRate.toFixed(2)}% APY
+        {t('rateBadge.apySuffix', { value: userRate.toFixed(2) })}
         {isLive ? t('rateBadge.enVivo') : t('rateBadge.ref')}
       </span>
     )

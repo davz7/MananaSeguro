@@ -7,7 +7,14 @@
     "iniciarSesion": "Iniciar sesión",
     "comenzarGratis": "Comenzar gratis",
     "volverInicio": "← Volver al inicio",
-    "cerrarSesion": "Cerrar sesión"
+    "cerrarSesion": "Cerrar sesión",
+    "logoAlt": "Logo Mañana Seguro",
+    "marca": "Mañana",
+    "marcaAccent": "Seguro",
+    "cambiarIdioma": "Cambiar idioma",
+    "activarModoClaro": "Activar modo claro",
+    "activarModoOscuro": "Activar modo oscuro",
+    "toggleMenu": "Abrir menú"
   },
   "landing": {
     "badge": "Ahorro para retiro · CETES · México",
@@ -74,7 +81,8 @@
     "aniosSufijo": "años",
     "min": "1 año",
     "max": "40 años",
-    "apyMxn": "Pesos mexicanos · a {{apy}}% APY neto"
+    "apyMxn": "Pesos mexicanos · a {{apy}}% APY neto",
+    "mascotaAlt": "Mascota Mañana Seguro"
   },
   "auth": {
     "badge": "Tu retiro, en tus manos",
@@ -103,12 +111,36 @@
     "trust1": "Sin contraseña",
     "trust2": "30 segundos",
     "trust3": "Depósito SPEI",
-    "opcionesAvanzadas": "opciones avanzadas"
+    "opcionesAvanzadas": "opciones avanzadas",
+    "errorSinCredencial": "No se recibió credencial de Google. Intenta de nuevo.",
+    "errorLogin": "Error al iniciar sesión",
+    "errorLoginReintentar": "Error al iniciar sesión. Intenta de nuevo.",
+    "errorConfig": "Error de configuración — contacta al equipo de Mañana Seguro",
+    "errorGoogleCarga": "No se pudo cargar Google. Verifica tu conexión.",
+    "errorFreighterNoInstalado": "Freighter no está instalado. Instálalo desde freighter.app",
+    "errorConexionCancelada": "Cancelaste la conexión. Intenta de nuevo.",
+    "errorWalletConexion": "No se pudo conectar la wallet. Intenta de nuevo.",
+    "errorCampoRequerido": "{{campo}} requerido",
+    "heroTitulo": "Empieza a ahorrar",
+    "heroTituloAccent": "en 30 segundos.",
+    "mascotaAlt": "Mascota Mañana Seguro",
+    "poweredBy": "Powered by",
+    "pollarAlt": "Pollar"
   },
   "footer": {
     "stellar": "Construido sobre Stellar",
     "etherfuse": "Powered by Etherfuse",
-    "hackathon": "Genesis Hackathon 2026"
+    "hackathon": "Genesis Hackathon 2026",
+    "derechos": "© {{year}} Mañana Seguro. Todos los derechos reservados.",
+    "privacidad": "Aviso de privacidad",
+    "terminos": "Términos y condiciones",
+    "social": {
+      "x": "X / Twitter",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "correo": "Correo"
+    }
   },
   "home": {
     "badge": "🔒 Ahorro para retiro · Etherfuse CETES · Stellar",
@@ -122,7 +154,10 @@
       "rendimiento": "Rendimiento anual CETES",
       "empezar": "Para empezar",
       "comision": "Comisión plataforma"
-    }
+    },
+    "descripcionIntro": "Conecta tu cuenta de banco, empieza a ahorrar con SPEI desde $100 pesos.",
+    "cetesEnVivo": "CETES en vivo · {{rate}}% bruto vía Banxico",
+    "tipoCambio": "Tipo de cambio · ${{rate}} MXN/USD vía Banxico"
   },
   "dashboard": {
     "badge": "Dashboard · Mañana Seguro",
@@ -143,29 +178,29 @@
     "flujoCompleto": "El flujo completo",
     "pasos": [
       {
-        "icon": "💵",
+        "icon": "🏦",
         "step": "Depositas desde tu banco",
         "desc": "Desde $40 MXN vía SPEI, cuando quieras"
       },
       {
-        "icon": "🔒",
-        "step": "Contrato bloquea",
-        "desc": "Soroban en Stellar testnet"
+        "icon": "🔐",
+        "step": "Etherfuse guarda tu ahorro",
+        "desc": "Respaldado por CETES del gobierno mexicano"
       },
       {
         "icon": "📈",
         "step": "Etherfuse rinde",
-        "desc": "{{apy}}% APY en pesos vía CETES"
+        "desc": "{{apy}}% APY neto en pesos vía CETES"
       },
       {
         "icon": "🎁",
         "step": "Incentivos c/5 años",
-        "desc": "Hasta 7% extra por fidelidad"
+        "desc": "Hasta 9% extra por fidelidad"
       },
       {
-        "icon": "🏆",
+        "icon": "👤",
         "step": "Retiras al llegar",
-        "desc": "Todo a tu wallet, sin banco"
+        "desc": "Todo a tu cuenta bancaria, sin banco intermediario"
       }
     ],
     "verificandoTitulo": "Verificando tu meta de retiro",
@@ -210,7 +245,25 @@
     "exitosoTxTitulo": "✅ Transacción confirmada en Stellar",
     "exitosoTxLink": "Ver en Stellar Expert → ",
     "errorTitulo": "Algo salió mal",
-    "errorReintentar": "Reintentar"
+    "errorReintentar": "Reintentar",
+    "errorSinSesion": "Sin sesión activa",
+    "errorSaldo": "No se pudo cargar tu saldo",
+    "progresoAria": "Progreso de ahorro: {{pct}}%",
+    "ahorradosSufijo": "ahorrados",
+    "statAhorroActual": "Ahorro actual",
+    "statFaltaMeta": "Falta para meta",
+    "statDepositosSpei": "Depósitos vía SPEI",
+    "depositosCompletados": "{{count}} completados",
+    "statRendimientoApy": "Rendimiento APY",
+    "rendimientoNeto": "{{apy}}% neto",
+    "emergenciaDescMxn": "Puedes acceder hasta el {{pct}}% de tu ahorro ({{monto}}) como autopréstamo sin romper tu ahorro.",
+    "ahorroListoRetiro": "Tu ahorro está listo para retirarse",
+    "cardAhorroTotal": "Ahorro total",
+    "cardTasaCetesBruta": "Tasa CETES bruta",
+    "cardRendimientoNeto": "Rendimiento neto",
+    "cardComisionPlataforma": "Comisión plataforma",
+    "retiroProximamenteTitulo": "Retiro disponible próximamente",
+    "retiroProximamenteDesc": "Estamos habilitando la función de retiro vía SPEI. Te notificaremos cuando esté lista."
   },
   "rateBadge": {
     "cargando": "Consultando tasa Etherfuse...",
@@ -223,7 +276,8 @@
     "sdkError": "ejecuta npm install @etherfuse/stablebond-sdk",
     "tasaBaja": "⚡ Tasa CETES bajo 4% — comisión reducida automáticamente a 0.5%",
     "enVivo": "· en vivo",
-    "ref": "· referencial"
+    "ref": "· referencial",
+    "apySuffix": "{{value}}% APY"
   },
   "connectCard": {
     "badgeConectada": "✓ Cuenta activa",
@@ -244,7 +298,13 @@
     "pendiente": "Pendiente",
     "balanceXLM": "Red",
     "balanceUSDC": "Saldo",
-    "direccion": "Wallet"
+    "direccion": "Wallet",
+    "kyc": "KYC",
+    "kycVerificado": "✓ Verificado",
+    "kycPendiente": "⏳ Pendiente",
+    "email": "Email",
+    "miCuenta": "Mi cuenta",
+    "footerActiva": "Tu ahorro está protegido y generando rendimiento real de CETES."
   },
   "referrals": {
     "titulo": "Sistema de referidos",
@@ -266,7 +326,8 @@
     "errorDuplicado": "Este correo ya está registrado",
     "statsTotales": "Referidos totales",
     "statsActivos": "Activos (6+ meses)",
-    "statsProgreso": "En progreso"
+    "statsProgreso": "En progreso",
+    "mesesCompacto": "{{meses}}/6 meses"
   },
   "carlos": {
     "titulo": "Simulación:",
@@ -322,7 +383,9 @@
     "platAuto": "Adm. autopréstamo",
     "platIncentivos": "Incentivos pagados",
     "platNeto": "Ingreso neto",
-    "reiniciar": "↺ Reiniciar simulación"
+    "reiniciar": "↺ Reiniciar simulación",
+    "on": "ON",
+    "off": "OFF"
   },
   "autoloan": {
     "titulo": "Autopréstamo de emergencia",
@@ -380,7 +443,20 @@
     "impagoVarios": "⚠ {{n}} meses sin pagar — tu rendimiento bajó a",
     "prestamoCompletado": "🎉 Préstamo completado",
     "rendimientoCompleto": "Tu rendimiento volvió a {{rate}}% APY completo.",
-    "nuevaSolicitud": "Nueva solicitud"
+    "nuevaSolicitud": "Nueva solicitud",
+    "errorWalletNoConectada": "Wallet no conectada",
+    "errorSolicitar": "Error al solicitar el préstamo",
+    "errorPagar": "Error al pagar la cuota",
+    "montoMinimoMxn": "$170 MXN",
+    "ariaSolicitar": "Solicitar préstamo de {{monto}}",
+    "ariaSolicitarVacio": "Solicitar préstamo",
+    "ariaCancelarSolicitud": "Cancelar solicitud de préstamo",
+    "ariaConfirmarFirmar": "Confirmar y firmar préstamo",
+    "ariaIntentarDeNuevo": "Intentar de nuevo",
+    "ariaPagarMes": "Pagar mes {{mes}} del préstamo",
+    "ariaFallarMes": "Fallar mes de pago (demo)",
+    "ariaNuevaSolicitud": "Crear nueva solicitud de préstamo",
+    "maxSufijo": "{{val}} máx."
   },
   "history": {
     "titulo": "Historial de aportaciones",
@@ -410,7 +486,17 @@
     "tipoRendimiento": "↑ Rendimiento",
     "verTx": "✓ Ver tx →",
     "confirmado": "✓ Confirmado",
-    "pendiente": "⏳ Pendiente"
+    "pendiente": "⏳ Pendiente",
+    "badgeEtherfuse": "Etherfuse",
+    "saldoBloqueado": "Ahorro bloqueado",
+    "saldoBloqueadoSub": "Total de órdenes completadas",
+    "viaSpeiEtherfuse": "Vía SPEI · Etherfuse",
+    "movimientosDesc": "Depósitos vía SPEI registrados en Etherfuse",
+    "cargando": "Cargando historial...",
+    "colClabe": "CLABE",
+    "estadoCompletado": "✓ Completado",
+    "estadoProcesando": "⏳ Procesando",
+    "estadoPendienteReloj": "🕐 Pendiente"
   },
   "snapshot": {
     "badge": "Mañana Seguro",
@@ -474,7 +560,20 @@
     "ingresosProyeccion": "Proyección de ingresos plataforma",
     "ingresosColUsuarios": "Usuarios",
     "ingresosColActivos": "AUM",
-    "ingresosColIngreso": "Ingreso/año"
+    "ingresosColIngreso": "Ingreso/año",
+    "confirmarEliminarMeta": "¿Eliminar la meta \"{{nombre}}\"? Esta acción no se puede deshacer.",
+    "calculando": "Calculando...",
+    "fechaRetiroFormato": "{{anio}} (~{{anos}} años)",
+    "metasActivasTitulo": "Tus Metas Activas",
+    "statSaldoDisponible": "Saldo disponible",
+    "statProximamente": "Próximamente",
+    "hoyPrefijo": "↑ hoy: +{{val}}",
+    "statProyeccionSubNeto": "{{apy}}% APY neto",
+    "sinMeta": "Sin meta",
+    "tablistAriaLabel": "Secciones del dashboard",
+    "valRedBanxico": "Etherfuse · Banxico",
+    "valProveedorCetes": "Etherfuse CETES",
+    "valMinDeposito": "$40 MXN"
   },
   "contributionPlanner": {
     "titulo": "Configura tu ahorro",
@@ -516,7 +615,14 @@
     "bloqueado": "✓ Ahorro bloqueado",
     "bloquearBtn": "🔒 Bloquear ahorro",
     "txConfirmada": "✅ Transacción confirmada en testnet",
-    "verStellar": "Ver en Stellar Expert → "
+    "verStellar": "Ver en Stellar Expert → ",
+    "ahorroMensualMxnLabel": "Ahorro mensual (MXN)",
+    "incentivoOpcionSufijo": "{{pct}}% para ti",
+    "comoFunciona": "¿Cómo funciona?",
+    "comoFuncionaDesc": "Esta simulación te muestra cuánto crecerá tu ahorro. Para depositar, usa el botón",
+    "comoFuncionaBtn": "+ Depositar",
+    "comoFuncionaDesc2": "arriba — solo necesitas hacer un SPEI desde tu banco a la CLABE que te damos.",
+    "anualSufijo": "{{pct}} anual"
   },
   "incentiveScenarios": {
     "solo_fidelidad": {
@@ -591,7 +697,13 @@
     "rendimientoSub": "sobre lo aportado",
     "btnCrear": "Crear mi primera meta y empezar a ahorrar →",
     "btnCreando": "Creando meta...",
-    "minimoError": "El ahorro mínimo es ${{min}} MXN"
+    "minimoError": "El ahorro mínimo es ${{min}} MXN",
+    "tituloAccent": "Configura tu primera meta",
+    "tituloSufijo": "para asegurar tu futuro",
+    "amigoFallback": "amigo",
+    "errorCrear": "Error al crear la meta",
+    "minimoInline": "Mínimo ${{min}} MXN",
+    "nombreDefault": "Retiro Principal"
   },
   "errorBoundary": {
     "titulo": "Algo salió mal",
@@ -599,5 +711,32 @@
     "reintentar": "Reintentar",
     "volverInicio": "Volver al inicio",
     "detallesDev": "Detalles técnicos (solo en desarrollo)"
+  },
+  "goalCard": {
+    "principal": "Principal",
+    "editarMeta": "Editar meta",
+    "eliminarMeta": "Eliminar meta",
+    "saldo": "Saldo:",
+    "recienCreada": "(Recién creada)",
+    "progresoAria": "Progreso hacia la meta: {{pct}}%",
+    "ahorro": "Ahorro:",
+    "porMes": "/mes",
+    "meta": "Meta:",
+    "cerrar": "Cerrar",
+    "nombreLabel": "Nombre",
+    "ahorroMensualLabel": "Ahorro mensual (MXN)",
+    "montoObjetivoLabel": "Monto objetivo (MXN)",
+    "aniosRetiroLabel": "Años al retiro",
+    "cancelar": "Cancelar",
+    "guardando": "Guardando...",
+    "guardarCambios": "Guardar cambios",
+    "errorActualizar": "Error al actualizar",
+    "nuevaMeta": "Nueva meta",
+    "nombreMetaLabel": "Nombre de la meta",
+    "nombrePlaceholder": "Ej: Casa, Educación, Emergencia...",
+    "errorNombreRequerido": "El nombre es requerido",
+    "errorCrear": "Error al crear",
+    "creando": "Creando...",
+    "crearMeta": "Crear meta"
   }
 }

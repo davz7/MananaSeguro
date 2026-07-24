@@ -4,9 +4,11 @@
 // Muestra nombre, progreso, ahorro mensual y meta objetivo.
 
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { formatCurrencyMxn } from '../../../utils/formatters'
 
 export function GoalCard({ meta, saldoMxn = 0, seleccionada = false, onSeleccionar, onEditar, onEliminar, puedeEliminar = false }) {
+  const { t } = useTranslation()
   const progresoPct = meta.monto_objetivo_mxn > 0
     ? Math.min((saldoMxn / meta.monto_objetivo_mxn) * 100, 100)
     : 0
@@ -34,7 +36,7 @@ export function GoalCard({ meta, saldoMxn = 0, seleccionada = false, onSeleccion
       {/* Badge principal */}
       {meta.es_principal && (
         <span className="absolute -top-2 left-4 bg-brand text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
-          Principal
+          {t('goalCard.principal')}
         </span>
       )}
 
@@ -43,14 +45,14 @@ export function GoalCard({ meta, saldoMxn = 0, seleccionada = false, onSeleccion
         <button
           onClick={e => { e.stopPropagation(); onEditar?.() }}
           className="w-7 h-7 rounded-lg bg-ink/5 dark:bg-white/5 hover:bg-brand/10 hover:text-brand flex items-center justify-center text-ink/40 dark:text-white/40 transition-all cursor-pointer"
-          aria-label="Editar meta">
+          aria-label={t('goalCard.editarMeta')}>
           <span aria-hidden="true">✏️</span>
         </button>
         {puedeEliminar && (
           <button
             onClick={e => { e.stopPropagation(); onEliminar?.() }}
             className="w-7 h-7 rounded-lg bg-ink/5 dark:bg-white/5 hover:bg-red-500/10 hover:text-red-500 flex items-center justify-center text-ink/40 dark:text-white/40 transition-all cursor-pointer"
-            aria-label="Eliminar meta">
+            aria-label={t('goalCard.eliminarMeta')}>
             <span aria-hidden="true">🗑️</span>
           </button>
         )}
@@ -63,8 +65,8 @@ export function GoalCard({ meta, saldoMxn = 0, seleccionada = false, onSeleccion
 
       {/* Saldo actual */}
       <p className="text-xs text-ink/40 dark:text-white/40 mb-3">
-        Saldo: <span className="font-semibold text-green-600">{formatCurrencyMxn(saldoMxn)}</span>
-        {saldoMxn === 0 && <span className="ml-1 text-ink/25">(Recién creada)</span>}
+        {t('goalCard.saldo')} <span className="font-semibold text-green-600">{formatCurrencyMxn(saldoMxn)}</span>
+        {saldoMxn === 0 && <span className="ml-1 text-ink/25">{t('goalCard.recienCreada')}</span>}
       </p>
 
       {/* Barra de progreso */}
@@ -73,7 +75,7 @@ export function GoalCard({ meta, saldoMxn = 0, seleccionada = false, onSeleccion
         aria-valuenow={Math.round(progresoPct)}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label={`Progreso hacia la meta: ${Math.round(progresoPct)}%`}
+        aria-label={t('goalCard.progresoAria', { pct: Math.round(progresoPct) })}
         className="h-1.5 bg-ink/5 dark:bg-white/5 rounded-full overflow-hidden mb-2">
         <div
           className="h-full bg-gradient-to-r from-brand-dark to-brand rounded-full transition-all duration-700"
@@ -83,8 +85,8 @@ export function GoalCard({ meta, saldoMxn = 0, seleccionada = false, onSeleccion
 
       {/* Datos */}
       <div className="flex justify-between text-xs text-ink/40 dark:text-white/40">
-        <span>Ahorro: <strong className="text-ink dark:text-white">{formatCurrencyMxn(meta.ahorro_mensual_mxn)}/mes</strong></span>
-        <span>Meta: <strong className="text-ink dark:text-white">{formatCurrencyMxn(meta.monto_objetivo_mxn)}</strong></span>
+        <span>{t('goalCard.ahorro')} <strong className="text-ink dark:text-white">{formatCurrencyMxn(meta.ahorro_mensual_mxn)}{t('goalCard.porMes')}</strong></span>
+        <span>{t('goalCard.meta')} <strong className="text-ink dark:text-white">{formatCurrencyMxn(meta.monto_objetivo_mxn)}</strong></span>
       </div>
     </div>
   )
@@ -93,6 +95,7 @@ export function GoalCard({ meta, saldoMxn = 0, seleccionada = false, onSeleccion
 // ─── Modal de edición ─────────────────────────────────────────────────────────
 
 export function GoalEditModal({ meta, usuarioId, onGuardado, onCerrar }) {
+  const { t } = useTranslation()
   const [nombre, setNombre] = useState(meta.nombre)
   const [ahorroMensual, setAhorroMensual] = useState(meta.ahorro_mensual_mxn)
   const [montoObjetivo, setMontoObjetivo] = useState(meta.monto_objetivo_mxn)
@@ -116,7 +119,7 @@ export function GoalEditModal({ meta, usuarioId, onGuardado, onCerrar }) {
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Error al actualizar')
+      if (!res.ok) throw new Error(data.error || t('goalCard.errorActualizar'))
       onGuardado(data.meta)
     } catch (err) {
       setError(err.message)
@@ -136,27 +139,27 @@ export function GoalEditModal({ meta, usuarioId, onGuardado, onCerrar }) {
         className="bg-white dark:bg-[#1a1a1a] rounded-2xl p-6 w-full max-w-md shadow-2xl"
         onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-5">
-          <h5 id="goal-edit-title" className="font-display font-black text-ink dark:text-white text-lg">Editar meta</h5>
-          <button onClick={onCerrar} aria-label="Cerrar" className="text-ink/30 hover:text-ink dark:text-white/30 dark:hover:text-white text-xl cursor-pointer">✕</button>
+          <h5 id="goal-edit-title" className="font-display font-black text-ink dark:text-white text-lg">{t('goalCard.editarMeta')}</h5>
+          <button onClick={onCerrar} aria-label={t('goalCard.cerrar')} className="text-ink/30 hover:text-ink dark:text-white/30 dark:hover:text-white text-xl cursor-pointer">✕</button>
         </div>
 
         <div className="flex flex-col gap-4">
           <div>
-            <label className="text-xs text-ink/50 dark:text-white/50 font-medium mb-1.5 block">Nombre</label>
+            <label className="text-xs text-ink/50 dark:text-white/50 font-medium mb-1.5 block">{t('goalCard.nombreLabel')}</label>
             <input type="text" className={inputClass} value={nombre} onChange={e => setNombre(e.target.value)} maxLength={60} />
           </div>
           <div>
-            <label className="text-xs text-ink/50 dark:text-white/50 font-medium mb-1.5 block">Ahorro mensual (MXN)</label>
+            <label className="text-xs text-ink/50 dark:text-white/50 font-medium mb-1.5 block">{t('goalCard.ahorroMensualLabel')}</label>
             <input type="number" className={inputClass} min={40} max={100000} step={50} value={ahorroMensual} onChange={e => setAhorroMensual(Number(e.target.value))} />
           </div>
           <div>
-            <label className="text-xs text-ink/50 dark:text-white/50 font-medium mb-1.5 block">Monto objetivo (MXN)</label>
+            <label className="text-xs text-ink/50 dark:text-white/50 font-medium mb-1.5 block">{t('goalCard.montoObjetivoLabel')}</label>
             <input type="number" className={inputClass} min={1000} max={50000000} step={1000} value={montoObjetivo} onChange={e => setMontoObjetivo(Number(e.target.value))} />
           </div>
           <div>
             <div className="flex justify-between mb-1.5">
-              <label className="text-xs text-ink/50 dark:text-white/50 font-medium">Años al retiro</label>
-              <span className="text-xs font-bold text-ink dark:text-white">{anos} años</span>
+              <label className="text-xs text-ink/50 dark:text-white/50 font-medium">{t('goalCard.aniosRetiroLabel')}</label>
+              <span className="text-xs font-bold text-ink dark:text-white">{anos} {t('goalSetup.aniosSufijo')}</span>
             </div>
             <input type="range" min="1" max="40" step="1" value={anos} onChange={e => setAnos(Number(e.target.value))} className="w-full accent-brand" />
           </div>
@@ -170,10 +173,10 @@ export function GoalEditModal({ meta, usuarioId, onGuardado, onCerrar }) {
 
         <div className="flex gap-3 mt-5">
           <button onClick={onCerrar} className="flex-1 border border-ink/15 dark:border-white/15 text-ink dark:text-white font-semibold py-2.5 rounded-xl hover:bg-ink/5 transition-all cursor-pointer text-sm">
-            Cancelar
+            {t('goalCard.cancelar')}
           </button>
           <button onClick={handleGuardar} disabled={loading} className="flex-1 bg-brand hover:bg-brand-dark text-white font-semibold py-2.5 rounded-xl transition-all cursor-pointer disabled:opacity-50 text-sm">
-            {loading ? 'Guardando...' : 'Guardar cambios'}
+            {loading ? t('goalCard.guardando') : t('goalCard.guardarCambios')}
           </button>
         </div>
       </div>
@@ -184,6 +187,7 @@ export function GoalEditModal({ meta, usuarioId, onGuardado, onCerrar }) {
 // ─── Botón para agregar nueva meta ────────────────────────────────────────────
 
 export function AddGoalButton({ usuarioId, onMetaCreada }) {
+  const { t } = useTranslation()
   const [abierto, setAbierto] = useState(false)
   const [nombre, setNombre] = useState('')
   const [ahorroMensual, setAhorroMensual] = useState(500)
@@ -192,8 +196,8 @@ export function AddGoalButton({ usuarioId, onMetaCreada }) {
   const [error, setError] = useState(null)
 
   async function handleCrear() {
-    if (!nombre.trim()) { setError('El nombre es requerido'); return }
-    if (ahorroMensual < 40) { setError('Mínimo $40 MXN'); return }
+    if (!nombre.trim()) { setError(t('goalCard.errorNombreRequerido')); return }
+    if (ahorroMensual < 40) { setError(t('goalSetup.minimoInline', { min: 40 })); return }
     setLoading(true)
     setError(null)
     try {
@@ -214,7 +218,7 @@ export function AddGoalButton({ usuarioId, onMetaCreada }) {
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Error al crear')
+      if (!res.ok) throw new Error(data.error || t('goalCard.errorCrear'))
       onMetaCreada(data.meta)
       setAbierto(false)
       setNombre('')
@@ -231,7 +235,7 @@ export function AddGoalButton({ usuarioId, onMetaCreada }) {
         onClick={() => setAbierto(true)}
         className="flex items-center justify-center w-full h-full min-h-[120px] border-2 border-dashed border-ink/15 dark:border-white/15 rounded-2xl text-ink/30 dark:text-white/30 hover:border-brand/40 hover:text-brand transition-all cursor-pointer gap-2 text-sm font-medium">
         <span className="text-2xl">+</span>
-        Nueva meta
+        {t('goalCard.nuevaMeta')}
       </button>
     )
   }
@@ -245,15 +249,15 @@ export function AddGoalButton({ usuarioId, onMetaCreada }) {
         className="bg-white dark:bg-[#1a1a1a] rounded-2xl p-6 w-full max-w-sm shadow-2xl"
         onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-5">
-          <h5 id="add-goal-title" className="font-display font-black text-ink dark:text-white text-lg">Nueva meta</h5>
-          <button onClick={() => setAbierto(false)} aria-label="Cerrar" className="text-ink/30 hover:text-ink dark:text-white/30 dark:hover:text-white text-xl cursor-pointer">✕</button>
+          <h5 id="add-goal-title" className="font-display font-black text-ink dark:text-white text-lg">{t('goalCard.nuevaMeta')}</h5>
+          <button onClick={() => setAbierto(false)} aria-label={t('goalCard.cerrar')} className="text-ink/30 hover:text-ink dark:text-white/30 dark:hover:text-white text-xl cursor-pointer">✕</button>
         </div>
         <div className="flex flex-col gap-4">
           <div>
-            <label className="text-xs text-ink/50 dark:text-white/50 font-medium mb-1.5 block">Nombre de la meta</label>
+            <label className="text-xs text-ink/50 dark:text-white/50 font-medium mb-1.5 block">{t('goalCard.nombreMetaLabel')}</label>
             <input
               type="text"
-              placeholder="Ej: Casa, Educación, Emergencia..."
+              placeholder={t('goalCard.nombrePlaceholder')}
               className="w-full border border-ink/10 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm text-ink dark:text-white bg-white dark:bg-white/5 outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all"
               value={nombre}
               onChange={e => setNombre(e.target.value)}
@@ -262,7 +266,7 @@ export function AddGoalButton({ usuarioId, onMetaCreada }) {
             />
           </div>
           <div>
-            <label className="text-xs text-ink/50 dark:text-white/50 font-medium mb-1.5 block">Ahorro mensual (MXN)</label>
+            <label className="text-xs text-ink/50 dark:text-white/50 font-medium mb-1.5 block">{t('goalCard.ahorroMensualLabel')}</label>
             <input
               type="number"
               min={40} max={100000} step={50}
@@ -273,17 +277,17 @@ export function AddGoalButton({ usuarioId, onMetaCreada }) {
           </div>
           <div>
             <div className="flex justify-between mb-1.5">
-              <label className="text-xs text-ink/50 dark:text-white/50 font-medium">Años al retiro</label>
-              <span className="text-xs font-bold text-ink dark:text-white">{anos} años</span>
+              <label className="text-xs text-ink/50 dark:text-white/50 font-medium">{t('goalCard.aniosRetiroLabel')}</label>
+              <span className="text-xs font-bold text-ink dark:text-white">{anos} {t('goalSetup.aniosSufijo')}</span>
             </div>
             <input type="range" min="1" max="40" step="1" value={anos} onChange={e => setAnos(Number(e.target.value))} className="w-full accent-brand" />
           </div>
         </div>
         {error && <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 mt-3 text-sm text-red-500">⚠️ {error}</div>}
         <div className="flex gap-3 mt-5">
-          <button onClick={() => setAbierto(false)} className="flex-1 border border-ink/15 dark:border-white/15 text-ink dark:text-white font-semibold py-2.5 rounded-xl hover:bg-ink/5 transition-all cursor-pointer text-sm">Cancelar</button>
+          <button onClick={() => setAbierto(false)} className="flex-1 border border-ink/15 dark:border-white/15 text-ink dark:text-white font-semibold py-2.5 rounded-xl hover:bg-ink/5 transition-all cursor-pointer text-sm">{t('goalCard.cancelar')}</button>
           <button onClick={handleCrear} disabled={loading} className="flex-1 bg-brand hover:bg-brand-dark text-white font-semibold py-2.5 rounded-xl transition-all cursor-pointer disabled:opacity-50 text-sm">
-            {loading ? 'Creando...' : 'Crear meta'}
+            {loading ? t('goalCard.creando') : t('goalCard.crearMeta')}
           </button>
         </div>
       </div>

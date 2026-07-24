@@ -55,7 +55,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
   }, [walletAddress])
 
   async function handleConfirmar() {
-    if (!walletAddress) { setErrorMsg('Wallet no conectada'); setFase('error'); return }
+    if (!walletAddress) { setErrorMsg(t('autoloan.errorWalletNoConectada')); setFase('error'); return }
     setFase('procesando')
     setErrorMsg(null)
     try {
@@ -67,7 +67,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
       setMesesPagadosReal(0)
       setFase('activo')
     } catch (err) {
-      setErrorMsg(err.message ?? 'Error al solicitar el préstamo')
+      setErrorMsg(err.message ?? t('autoloan.errorSolicitar'))
       setFase('error')
     }
   }
@@ -87,7 +87,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
       if (mesesImpago > 0) setMesesImpago(i => Math.max(0, i - 1))
       setFase('activo')
     } catch (err) {
-      setErrorMsg(err.message ?? 'Error al pagar la cuota')
+      setErrorMsg(err.message ?? t('autoloan.errorPagar'))
       setFase('error')
     }
   }
@@ -183,8 +183,8 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
               style={{ accentColor: '#fbbf24' }}
             />
             <div className="flex justify-between">
-              <span className="text-xs text-ink/35 dark:text-white/35">$170 MXN</span>
-              <span className="text-xs text-ink/35 dark:text-white/35">{formatCurrencyUsd(maxLoan)} máx.</span>
+              <span className="text-xs text-ink/35 dark:text-white/35">{t('autoloan.montoMinimoMxn')}</span>
+              <span className="text-xs text-ink/35 dark:text-white/35">{t('autoloan.maxSufijo', { val: formatCurrencyUsd(maxLoan) })}</span>
             </div>
           </div>
 
@@ -259,7 +259,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
               }`}
             onClick={() => enoughBalance && setFase('confirmando')}
             disabled={!enoughBalance}
-            aria-label={enoughBalance ? `Solicitar préstamo de ${formatCurrencyUsd(loan.amount)}` : 'Solicitar préstamo'}>
+            aria-label={enoughBalance ? t('autoloan.ariaSolicitar', { monto: formatCurrencyUsd(loan.amount) }) : t('autoloan.ariaSolicitarVacio')}>
             {enoughBalance ? t('autoloan.solicitar', { monto: formatCurrencyUsd(loan.amount) }) : t('autoloan.solicitarVacio')}
           </button>
         </div>
@@ -275,18 +275,18 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
           <p className="text-sm text-ink/50 dark:text-white/50 mb-2">
             {t('autoloan.confirmarDesc', { monto: formatCurrencyUsd(loan.amount), pago: formatCurrencyUsd(loan.monthlyPayment) })}
           </p>
-          <p className="text-xs text-green-500 mb-6">{"Freighter firmará la transacción para completar el préstamo."}</p>
+          <p className="text-xs text-green-500 mb-6">{t('autoloan.confirmarFreighter')}</p>
           <div className="flex gap-3 justify-center">
             <button
               className="px-5 py-2.5 rounded-xl text-sm font-medium border border-ink/10 dark:border-white/10 text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white transition-all cursor-pointer"
               onClick={() => setFase('form')}
-              aria-label="Cancelar solicitud de préstamo">
+              aria-label={t('autoloan.ariaCancelarSolicitud')}>
               {t('autoloan.cancelar')}
             </button>
             <button
               className="px-5 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-yellow-600 to-yellow-400 text-black hover:-translate-y-px transition-all cursor-pointer"
               onClick={handleConfirmar}
-              aria-label="Confirmar y firmar préstamo">
+              aria-label={t('autoloan.ariaConfirmarFirmar')}>
               {t('autoloan.confirmarFirmar')}
             </button>
           </div>
@@ -311,7 +311,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
           <button
             className="px-5 py-2.5 rounded-xl text-sm font-medium border border-ink/10 dark:border-white/10 text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white transition-all cursor-pointer"
             onClick={handleReset}
-            aria-label="Intentar de nuevo">
+            aria-label={t('autoloan.ariaIntentarDeNuevo')}>
             {t('autoloan.intentarDeNuevo')}
           </button>
         </div>
@@ -397,13 +397,13 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
               <button
                 className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-green-500/10 border border-green-500/25 text-green-500 hover:bg-green-500/20 transition-all cursor-pointer"
                 onClick={handlePagarMes}
-                aria-label={`Pagar mes ${mesesPagadosReal + 1} del préstamo`}>
+                aria-label={t('autoloan.ariaPagarMes', { mes: mesesPagadosReal + 1 })}>
                 {t('autoloan.pagarMes', { mes: mesesPagadosReal + 1 })}
               </button>
               <button
                 className="flex-1 py-2.5 rounded-xl text-sm font-bold bg-red-500/8 border border-red-500/25 text-red-400 hover:bg-red-500/15 transition-all cursor-pointer"
                 onClick={() => setMesesImpago(i => i + 1)}
-                aria-label="Fallar mes de pago (demo)">
+                aria-label={t('autoloan.ariaFallarMes')}>
                 {t('autoloan.fallarMes')}
               </button>
             </div>
@@ -435,7 +435,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
           <button
             className="w-full py-2.5 rounded-xl text-sm font-medium border border-ink/10 dark:border-white/10 text-ink/40 dark:text-white/40 hover:text-ink dark:hover:text-white hover:border-ink/20 dark:hover:border-white/20 transition-all cursor-pointer"
             onClick={handleReset}
-            aria-label="Crear nueva solicitud de préstamo">
+            aria-label={t('autoloan.ariaNuevaSolicitud')}>
             {t('autoloan.nuevaSolicitud')}
           </button>
 

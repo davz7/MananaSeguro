@@ -29,7 +29,7 @@ export function GoalSetup({ usuario, onMetaCreada }) {
 
   const [ahorroMensual, setAhorroMensual] = useState(AHORRO_SUGERIDO)
   const [anos, setAnos] = useState(20)
-  const nombre = 'Retiro Principal'
+  const nombre = t('goalSetup.nombreDefault')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -38,7 +38,7 @@ export function GoalSetup({ usuario, onMetaCreada }) {
 
   async function handleCrearMeta() {
     if (ahorroMensual < AHORRO_MIN) {
-      setError(`El ahorro mínimo es $${AHORRO_MIN} MXN`)
+      setError(t('goalSetup.minimoError', { min: AHORRO_MIN }))
       return
     }
     setLoading(true)
@@ -56,7 +56,7 @@ export function GoalSetup({ usuario, onMetaCreada }) {
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Error al crear la meta')
+      if (!res.ok) throw new Error(data.error || t('goalSetup.errorCrear'))
       onMetaCreada(data.meta)
     } catch (err) {
       setError(err.message)
@@ -71,9 +71,9 @@ export function GoalSetup({ usuario, onMetaCreada }) {
       <div>
         <h2 className="font-display font-black text-ink dark:text-white tracking-tight"
           style={{ fontSize: 'clamp(1.4rem,3vw,2rem)', lineHeight: 1.1 }}>
-          ¡Bienvenido, {usuario.nombre?.split(' ')[0] ?? 'amigo'}!{' '}
-          <span className="text-brand">Configura tu primera meta</span>{' '}
-          para asegurar tu futuro
+          {t('goalSetup.bienvenido', { nombre: usuario.nombre?.split(' ')[0] ?? t('goalSetup.amigoFallback') })}{' '}
+          <span className="text-brand">{t('goalSetup.tituloAccent')}</span>{' '}
+          {t('goalSetup.tituloSufijo')}
         </h2>
       </div>
 
@@ -94,7 +94,7 @@ export function GoalSetup({ usuario, onMetaCreada }) {
                 </label>
                 <span className="flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full border bg-green-500/10 text-green-700 border-green-500/20">
                   <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                  {userRate}% APY
+                  {t('rateBadge.apySuffix', { value: userRate })}
                 </span>
               </div>
               <div className="relative">
@@ -112,7 +112,7 @@ export function GoalSetup({ usuario, onMetaCreada }) {
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-ink/40 dark:text-white/40">MXN</span>
               </div>
               {ahorroMensual < AHORRO_MIN && (
-                <p className="text-xs text-red-500 mt-1">Mínimo ${AHORRO_MIN} MXN</p>
+                <p className="text-xs text-red-500 mt-1">{t('goalSetup.minimoInline', { min: AHORRO_MIN })}</p>
               )}
               {/* Sugerencias rápidas */}
               <div className="flex gap-2 mt-2 flex-wrap">
@@ -146,8 +146,8 @@ export function GoalSetup({ usuario, onMetaCreada }) {
                 className="w-full accent-brand"
               />
               <div className="flex justify-between mt-1">
-                <span className="text-xs text-ink/35 dark:text-white/35">5 años</span>
-                <span className="text-xs text-ink/35 dark:text-white/35">40 años</span>
+                <span className="text-xs text-ink/35 dark:text-white/35">5 {t('goalSetup.aniosSufijo')}</span>
+                <span className="text-xs text-ink/35 dark:text-white/35">40 {t('goalSetup.aniosSufijo')}</span>
               </div>
             </div>
 

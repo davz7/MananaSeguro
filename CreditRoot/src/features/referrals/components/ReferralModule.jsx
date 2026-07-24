@@ -195,7 +195,7 @@ export function ReferralModule({ userName = 'Usuario', walletAddress = null }) {
                       ? 'bg-green-500/10 text-green-600 border-green-500/20'
                       : 'bg-yellow-400/10 text-yellow-600 border-yellow-400/20'
                       }`}>
-                      {isActive ? t('referrals.activo') : `${r.monthsActive}/6 meses`}
+                      {isActive ? t('referrals.activo') : t('referrals.mesesCompacto', { meses: r.monthsActive })}
                     </span>
                   </div>
 

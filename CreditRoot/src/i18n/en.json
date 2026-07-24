@@ -7,7 +7,14 @@
     "iniciarSesion": "Sign in",
     "comenzarGratis": "Get started",
     "volverInicio": "← Back to home",
-    "cerrarSesion": "Sign out"
+    "cerrarSesion": "Sign out",
+    "logoAlt": "Mañana Seguro logo",
+    "marca": "Mañana",
+    "marcaAccent": "Seguro",
+    "cambiarIdioma": "Change language",
+    "activarModoClaro": "Enable light mode",
+    "activarModoOscuro": "Enable dark mode",
+    "toggleMenu": "Toggle menu"
   },
   "landing": {
     "badge": "Retirement savings · CETES · Mexico",
@@ -74,7 +81,8 @@
     "aniosSufijo": "years",
     "min": "1 year",
     "max": "40 years",
-    "apyMxn": "Mexican pesos · at {{apy}}% net APY"
+    "apyMxn": "Mexican pesos · at {{apy}}% net APY",
+    "mascotaAlt": "Mañana Seguro mascot"
   },
   "auth": {
     "badge": "Your retirement, in your hands",
@@ -103,12 +111,36 @@
     "trust1": "No password",
     "trust2": "30 seconds",
     "trust3": "SPEI deposit",
-    "opcionesAvanzadas": "advanced options"
+    "opcionesAvanzadas": "advanced options",
+    "errorSinCredencial": "No credential received from Google. Try again.",
+    "errorLogin": "Error signing in",
+    "errorLoginReintentar": "Error signing in. Try again.",
+    "errorConfig": "Configuration error — contact the Mañana Seguro team",
+    "errorGoogleCarga": "Could not load Google. Check your connection.",
+    "errorFreighterNoInstalado": "Freighter is not installed. Install it from freighter.app",
+    "errorConexionCancelada": "You canceled the connection. Try again.",
+    "errorWalletConexion": "Could not connect the wallet. Try again.",
+    "errorCampoRequerido": "{{campo}} required",
+    "heroTitulo": "Start saving",
+    "heroTituloAccent": "in 30 seconds.",
+    "mascotaAlt": "Mañana Seguro mascot",
+    "poweredBy": "Powered by",
+    "pollarAlt": "Pollar"
   },
   "footer": {
     "stellar": "Built on Stellar",
     "etherfuse": "Powered by Etherfuse",
-    "hackathon": "Genesis Hackathon 2026"
+    "hackathon": "Genesis Hackathon 2026",
+    "derechos": "© {{year}} Mañana Seguro. All rights reserved.",
+    "privacidad": "Privacy notice",
+    "terminos": "Terms and conditions",
+    "social": {
+      "x": "X / Twitter",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "correo": "Email"
+    }
   },
   "home": {
     "badge": "🔒 Retirement savings · Etherfuse CETES · Stellar",
@@ -122,7 +154,10 @@
       "rendimiento": "Annual CETES yield",
       "empezar": "To get started",
       "comision": "Platform fee"
-    }
+    },
+    "descripcionIntro": "Connect your bank account, start saving via SPEI from $100 pesos.",
+    "cetesEnVivo": "Live CETES · {{rate}}% gross via Banxico",
+    "tipoCambio": "Exchange rate · ${{rate}} MXN/USD via Banxico"
   },
   "dashboard": {
     "badge": "Dashboard · Mañana Seguro",
@@ -143,29 +178,29 @@
     "flujoCompleto": "The full flow",
     "pasos": [
       {
-        "icon": "💵",
+        "icon": "🏦",
         "step": "You deposit from your bank",
         "desc": "From $40 MXN via SPEI, whenever you want"
       },
       {
-        "icon": "🔒",
-        "step": "Contract locks",
-        "desc": "Soroban on Stellar testnet"
+        "icon": "🔐",
+        "step": "Etherfuse holds your savings",
+        "desc": "Backed by Mexican government CETES"
       },
       {
         "icon": "📈",
-        "step": "Etherfuse yields",
-        "desc": "{{apy}}% APY in pesos via CETES"
+        "step": "Etherfuse pays yield",
+        "desc": "{{apy}}% net APY in pesos via CETES"
       },
       {
         "icon": "🎁",
-        "step": "Incentives every 5y",
-        "desc": "Up to 7% extra for loyalty"
+        "step": "Incentives every 5 years",
+        "desc": "Up to 9% extra for loyalty"
       },
       {
-        "icon": "🏆",
-        "step": "Withdraw on arrival",
-        "desc": "Everything to your wallet, no bank"
+        "icon": "👤",
+        "step": "You withdraw when ready",
+        "desc": "Straight to your bank account, no middleman bank"
       }
     ],
     "verificandoTitulo": "Verifying your retirement goal",
@@ -210,7 +245,25 @@
     "exitosoTxTitulo": "✅ Transaction confirmed on Stellar",
     "exitosoTxLink": "View on Stellar Expert → ",
     "errorTitulo": "Something went wrong",
-    "errorReintentar": "Try again"
+    "errorReintentar": "Try again",
+    "errorSinSesion": "No active session",
+    "errorSaldo": "Could not load your balance",
+    "progresoAria": "Savings progress: {{pct}}%",
+    "ahorradosSufijo": "saved",
+    "statAhorroActual": "Current savings",
+    "statFaltaMeta": "Remaining to goal",
+    "statDepositosSpei": "SPEI deposits",
+    "depositosCompletados": "{{count}} completed",
+    "statRendimientoApy": "APY yield",
+    "rendimientoNeto": "{{apy}}% net",
+    "emergenciaDescMxn": "You can access up to {{pct}}% of your savings ({{monto}}) as an auto-loan without breaking your savings.",
+    "ahorroListoRetiro": "Your savings are ready to withdraw",
+    "cardAhorroTotal": "Total savings",
+    "cardTasaCetesBruta": "Gross CETES rate",
+    "cardRendimientoNeto": "Net yield",
+    "cardComisionPlataforma": "Platform fee",
+    "retiroProximamenteTitulo": "Withdrawals available soon",
+    "retiroProximamenteDesc": "We're enabling withdrawals via SPEI. We'll notify you when it's ready."
   },
   "rateBadge": {
     "cargando": "Fetching Etherfuse rate...",
@@ -223,7 +276,8 @@
     "sdkError": "run npm install @etherfuse/stablebond-sdk",
     "tasaBaja": "⚡ CETES rate below 4% — fee automatically reduced to 0.5%",
     "enVivo": "· live",
-    "ref": "· reference"
+    "ref": "· reference",
+    "apySuffix": "{{value}}% APY"
   },
   "connectCard": {
     "badgeConectada": "✓ Account active",
@@ -244,7 +298,13 @@
     "pendiente": "Pending",
     "balanceXLM": "Network",
     "balanceUSDC": "Balance",
-    "direccion": "Wallet"
+    "direccion": "Wallet",
+    "kyc": "KYC",
+    "kycVerificado": "✓ Verified",
+    "kycPendiente": "⏳ Pending",
+    "email": "Email",
+    "miCuenta": "My account",
+    "footerActiva": "Your savings are protected and earning real CETES yield."
   },
   "referrals": {
     "titulo": "Referral system",
@@ -266,7 +326,8 @@
     "errorDuplicado": "This email is already registered",
     "statsTotales": "Total referrals",
     "statsActivos": "Active (6+ months)",
-    "statsProgreso": "In progress"
+    "statsProgreso": "In progress",
+    "mesesCompacto": "{{meses}}/6 months"
   },
   "carlos": {
     "titulo": "Simulation:",
@@ -322,7 +383,9 @@
     "platAuto": "Autoloan admin",
     "platIncentivos": "Incentives paid",
     "platNeto": "Net income",
-    "reiniciar": "↺ Restart simulation"
+    "reiniciar": "↺ Restart simulation",
+    "on": "ON",
+    "off": "OFF"
   },
   "autoloan": {
     "titulo": "Emergency autoloan",
@@ -380,7 +443,20 @@
     "impagoVarios": "⚠ {{n}} months missed — your yield dropped to",
     "prestamoCompletado": "🎉 Loan completed",
     "rendimientoCompleto": "Your yield returned to {{rate}}% APY in full.",
-    "nuevaSolicitud": "New request"
+    "nuevaSolicitud": "New request",
+    "errorWalletNoConectada": "Wallet not connected",
+    "errorSolicitar": "Error requesting the loan",
+    "errorPagar": "Error paying the installment",
+    "montoMinimoMxn": "$170 MXN",
+    "ariaSolicitar": "Request a loan for {{monto}}",
+    "ariaSolicitarVacio": "Request loan",
+    "ariaCancelarSolicitud": "Cancel loan request",
+    "ariaConfirmarFirmar": "Confirm and sign loan",
+    "ariaIntentarDeNuevo": "Try again",
+    "ariaPagarMes": "Pay month {{mes}} of the loan",
+    "ariaFallarMes": "Fail payment month (demo)",
+    "ariaNuevaSolicitud": "Create a new loan request",
+    "maxSufijo": "{{val}} max."
   },
   "history": {
     "titulo": "Contribution history",
@@ -410,7 +486,17 @@
     "tipoRendimiento": "↑ Yield",
     "verTx": "✓ View tx →",
     "confirmado": "✓ Confirmed",
-    "pendiente": "⏳ Pending"
+    "pendiente": "⏳ Pending",
+    "badgeEtherfuse": "Etherfuse",
+    "saldoBloqueado": "Locked savings",
+    "saldoBloqueadoSub": "Total completed orders",
+    "viaSpeiEtherfuse": "Via SPEI · Etherfuse",
+    "movimientosDesc": "SPEI deposits recorded on Etherfuse",
+    "cargando": "Loading history...",
+    "colClabe": "CLABE",
+    "estadoCompletado": "✓ Completed",
+    "estadoProcesando": "⏳ Processing",
+    "estadoPendienteReloj": "🕐 Pending"
   },
   "snapshot": {
     "badge": "Mañana Seguro",
@@ -474,7 +560,20 @@
     "ingresosProyeccion": "Platform revenue projection",
     "ingresosColUsuarios": "Users",
     "ingresosColActivos": "AUM",
-    "ingresosColIngreso": "Revenue/year"
+    "ingresosColIngreso": "Revenue/year",
+    "confirmarEliminarMeta": "Delete the goal \"{{nombre}}\"? This action cannot be undone.",
+    "calculando": "Calculating...",
+    "fechaRetiroFormato": "{{anio}} (~{{anos}} years)",
+    "metasActivasTitulo": "Your Active Goals",
+    "statSaldoDisponible": "Available balance",
+    "statProximamente": "Coming soon",
+    "hoyPrefijo": "↑ today: +{{val}}",
+    "statProyeccionSubNeto": "{{apy}}% net APY",
+    "sinMeta": "No goal",
+    "tablistAriaLabel": "Dashboard sections",
+    "valRedBanxico": "Etherfuse · Banxico",
+    "valProveedorCetes": "Etherfuse CETES",
+    "valMinDeposito": "$40 MXN"
   },
   "contributionPlanner": {
     "titulo": "Configure your savings",
@@ -516,7 +615,14 @@
     "bloqueado": "✓ Savings locked",
     "bloquearBtn": "🔒 Lock savings",
     "txConfirmada": "✅ Transaction confirmed on testnet",
-    "verStellar": "View on Stellar Expert → "
+    "verStellar": "View on Stellar Expert → ",
+    "ahorroMensualMxnLabel": "Monthly savings (MXN)",
+    "incentivoOpcionSufijo": "{{pct}}% for you",
+    "comoFunciona": "How does it work?",
+    "comoFuncionaDesc": "This simulation shows how much your savings will grow. To deposit, use the",
+    "comoFuncionaBtn": "+ Deposit",
+    "comoFuncionaDesc2": "button above — you just need to make a SPEI transfer from your bank to the CLABE we give you.",
+    "anualSufijo": "{{pct}} annual"
   },
   "incentiveScenarios": {
     "solo_fidelidad": {
@@ -591,7 +697,13 @@
     "rendimientoSub": "over what you deposit",
     "btnCrear": "Create my first goal and start saving →",
     "btnCreando": "Creating goal...",
-    "minimoError": "Minimum savings is ${{min}} MXN"
+    "minimoError": "Minimum savings is ${{min}} MXN",
+    "tituloAccent": "Set up your first goal",
+    "tituloSufijo": "to secure your future",
+    "amigoFallback": "friend",
+    "errorCrear": "Error creating the goal",
+    "minimoInline": "Minimum ${{min}} MXN",
+    "nombreDefault": "Main Retirement"
   },
   "errorBoundary": {
     "titulo": "Something went wrong",
@@ -599,5 +711,32 @@
     "reintentar": "Try again",
     "volverInicio": "Back to home",
     "detallesDev": "Technical details (development only)"
+  },
+  "goalCard": {
+    "principal": "Main",
+    "editarMeta": "Edit goal",
+    "eliminarMeta": "Delete goal",
+    "saldo": "Balance:",
+    "recienCreada": "(Just created)",
+    "progresoAria": "Progress toward goal: {{pct}}%",
+    "ahorro": "Savings:",
+    "porMes": "/mo",
+    "meta": "Goal:",
+    "cerrar": "Close",
+    "nombreLabel": "Name",
+    "ahorroMensualLabel": "Monthly savings (MXN)",
+    "montoObjetivoLabel": "Target amount (MXN)",
+    "aniosRetiroLabel": "Years to retirement",
+    "cancelar": "Cancel",
+    "guardando": "Saving...",
+    "guardarCambios": "Save changes",
+    "errorActualizar": "Error updating",
+    "nuevaMeta": "New goal",
+    "nombreMetaLabel": "Goal name",
+    "nombrePlaceholder": "E.g. House, Education, Emergency...",
+    "errorNombreRequerido": "Name is required",
+    "errorCrear": "Error creating",
+    "creando": "Creating...",
+    "crearMeta": "Create goal"
   }
 }
