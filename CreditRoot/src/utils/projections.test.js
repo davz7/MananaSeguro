@@ -310,13 +310,56 @@ describe("calculateLoan", () => {
 
       expect(loan.monthlyPayment).toBeCloseTo(loan.schedule[0].payment, 5);
 
-      // Capital fijo, interés sobre saldo decreciente → la cuota baja cada mes
+      // El capital se recalcula sobre el saldo y meses restantes.
       loan.schedule.forEach((p, i) => {
-        expect(p.principal).toBeCloseTo(loan.schedule[0].principal, 5);
         if (i > 0) {
           expect(p.payment).toBeLessThan(loan.schedule[i - 1].payment);
         }
       });
+  });
+
+  it("matches the contract schedule at stroop precision", () => {
+    const expected = [
+      [8333333, 1000000, 9333333, 191666668],
+      [8333333, 958333, 9291666, 183333335],
+      [8333333, 916666, 9249999, 175000002],
+      [8333333, 875000, 9208333, 166666669],
+      [8333333, 833333, 9166666, 158333336],
+      [8333333, 791666, 9124999, 150000003],
+      [8333333, 750000, 9083333, 141666670],
+      [8333333, 708333, 9041666, 133333337],
+      [8333333, 666666, 8999999, 125000004],
+      [8333333, 625000, 8958333, 116666671],
+      [8333333, 583333, 8916666, 108333338],
+      [8333333, 541666, 8874999, 100000005],
+      [8333333, 500000, 8833333, 91666672],
+      [8333333, 458333, 8791666, 83333339],
+      [8333333, 416666, 8749999, 75000006],
+      [8333334, 375000, 8708334, 66666672],
+      [8333334, 333333, 8666667, 58333338],
+      [8333334, 291666, 8625000, 50000004],
+      [8333334, 250000, 8583334, 41666670],
+      [8333334, 208333, 8541667, 33333336],
+      [8333334, 166666, 8500000, 25000002],
+      [8333334, 125000, 8458334, 16666668],
+      [8333334, 83333, 8416667, 8333334],
+      [8333334, 41666, 8375000, 0],
+    ];
+
+    const loan = calculateLoan(100, 20.0000001);
+    const actual = loan.schedule.map(({ principal, fee, payment, remaining }) => [
+      principal,
+      fee,
+      payment,
+      remaining,
+    ].map(value => Math.round(value * 10_000_000)));
+
+    expect(actual).toEqual(expected);
+    expect(actual.reduce((sum, row) => sum + row[0], 0)).toBe(200000001);
+    expect(actual.reduce((sum, row) => sum + row[1], 0)).toBe(12499992);
+    expect(actual.reduce((sum, row) => sum + row[2], 0)).toBe(212499993);
+    expect(Math.round(loan.totalFees * 10_000_000)).toBe(12499992);
+    expect(Math.round(loan.totalRepaid * 10_000_000)).toBe(212499993);
   });
 
   it("ending balance correctly decreases to zero", () => {
