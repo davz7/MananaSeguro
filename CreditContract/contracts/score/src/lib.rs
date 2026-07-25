@@ -1,6 +1,8 @@
 #![no_std]
 
-use soroban_sdk::{contract, contracterror, contractimpl, contracttype, token, Address, Env, Symbol};
+use soroban_sdk::{
+    contract, contracterror, contractimpl, contracttype, token, Address, Env, Symbol,
+};
 
 // ─── Error Enum ───────────────────────────────────────────────────────────────
 
@@ -96,7 +98,12 @@ impl MananaSeguroContract {
     /// # Errors
     /// Retorna `Error::MontoBajoMinimo` si el monto es menor a `MIN_DEPOSIT`, o
     /// `Error::AniosBloqueoInvalidos` si `anios_bloqueo` está fuera del rango (1..=40).
-    pub fn depositar(env: Env, usuario: Address, monto: i128, anios_bloqueo: u32) -> Result<(), Error> {
+    pub fn depositar(
+        env: Env,
+        usuario: Address,
+        monto: i128,
+        anios_bloqueo: u32,
+    ) -> Result<(), Error> {
         usuario.require_auth();
 
         if monto < MIN_DEPOSIT {
