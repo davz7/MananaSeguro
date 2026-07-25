@@ -1,11 +1,11 @@
 // src/features/dashboard/components/RetirementSnapshot.jsx
-//
-// ─── ISO 25010 ───────────────────────────────────────────────────────────────
-// Seguridad:      Lee usuario del localStorage — nunca expone datos ajenos.
+// 
+// ISO 25010
+// Seguridad:      Lee usuario del localStorage , nunca expone datos ajenos.
 // Fiabilidad:     Manejo de errores en cada fetch. Estados de carga explícitos.
 // Mantenibilidad: Lógica de metas separada en GoalCard/GoalSetup.
 // Usabilidad:     Primera vez → configurador de meta. Regresa → dashboard completo.
-// ─────────────────────────────────────────────────────────────────────────────
+// 
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -28,31 +28,31 @@ import { GoalSetup as GoalSetupComponent } from '../../goals/components/GoalSetu
 export function RetirementSnapshot() {
   const { t } = useTranslation()
 
-  // ── Estado de datos ───────────────────────────────────────────────────────
+  // Estado de datos
   const [lockedBalance, setLockedBalance] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState('resumen')
   const [showDeposit, setShowDeposit] = useState(false)
 
-  // ── Estado de metas ───────────────────────────────────────────────────────
+  // Estado de metas
   const [metas, setMetas] = useState([])          // todas las metas del usuario
   const [metaSeleccionada, setMetaSeleccionada] = useState(null)
   const metaIniciadaRef = useRef(false) // evita loop infinito
   const [metaEditando, setMetaEditando] = useState(null)
   const [loadingMetas, setLoadingMetas] = useState(true)
 
-  // ── Hooks de tasas ────────────────────────────────────────────────────────
+  // Hooks de tasas
   const { cetesRate, userRate, platformRate } = useEtherfuseRate()
 
-  // ── Contador animado de rendimiento ──────────────────────────────────────
+  // Contador animado de rendimiento
   const {
     isGrowing,
     yieldTodayMxn: yieldTodayMxnAnimado,
     displayBalance: saldoAnimado,
   } = useYieldCounterDirectMxn(lockedBalance, userRate, lockedBalance > 0)
 
-  // ── Tabs ──────────────────────────────────────────────────────────────────
+  // Tabs
   const tabs = [
     { key: 'resumen',   label: t('snapshot.tabs.resumen') },
     { key: 'historial', label: t('snapshot.tabs.historial') },
@@ -76,7 +76,7 @@ export function RetirementSnapshot() {
     setTimeout(() => { document.getElementById(`tab-${tabs[newIndex].key}`)?.focus() }, 0)
   }
 
-  // ── Cargar órdenes completadas ────────────────────────────────────────────
+  // Cargar órdenes completadas
   const cargarDatos = useCallback(async () => {
     try {
       const usuarioGuardado = JSON.parse(localStorage.getItem('ms_usuario') || 'null')
@@ -97,7 +97,7 @@ export function RetirementSnapshot() {
     }
   }, [])
 
-  // ── Cargar metas del usuario ──────────────────────────────────────────────
+  // Cargar metas del usuario
   const cargarMetas = useCallback(async () => {
     try {
       const usuarioGuardado = JSON.parse(localStorage.getItem('ms_usuario') || 'null')
@@ -109,7 +109,7 @@ export function RetirementSnapshot() {
       const metasData = data.metas ?? []
       setMetas(metasData)
 
-      // Seleccionar la meta principal solo la primera vez — usar ref para
+      // Seleccionar la meta principal solo la primera vez , usar ref para
       // evitar que metaSeleccionada sea dependencia y cause loop infinito
       if (metasData.length > 0 && !metaIniciadaRef.current) {
         metaIniciadaRef.current = true
@@ -117,31 +117,31 @@ export function RetirementSnapshot() {
         setMetaSeleccionada(principal)
       }
     } catch {
-      // fallo silencioso — las metas son opcionales en el render
+      // fallo silencioso , las metas son opcionales en el render
     } finally {
       setLoadingMetas(false)
     }
-  }, []) // sin dependencias — metaIniciadaRef es estable
+  }, []) // sin dependencias, metaIniciadaRef es estable
 
   useEffect(() => {
     cargarDatos()
     cargarMetas()
   }, [cargarDatos, cargarMetas])
 
-  // ── Cuando se crea una nueva meta ─────────────────────────────────────────
+  // Cuando se crea una nueva meta
   function handleMetaCreada(nuevaMeta) {
     setMetas(prev => [...prev, nuevaMeta])
     setMetaSeleccionada(nuevaMeta)
   }
 
-  // ── Cuando se edita una meta ──────────────────────────────────────────────
+  // Cuando se edita una meta
   function handleMetaEditada(metaActualizada) {
     setMetas(prev => prev.map(m => m.id === metaActualizada.id ? metaActualizada : m))
     if (metaSeleccionada?.id === metaActualizada.id) setMetaSeleccionada(metaActualizada)
     setMetaEditando(null)
   }
 
-  // ── Cuando se elimina una meta ────────────────────────────────────────────
+  // Cuando se elimina una meta
   async function handleEliminarMeta(meta) {
     const usuario = JSON.parse(localStorage.getItem('ms_usuario') || 'null')
     if (!usuario?.id) return
@@ -163,7 +163,7 @@ export function RetirementSnapshot() {
     } catch { /* fallo silencioso */ }
   }
 
-  // ── Cálculos de la meta seleccionada ─────────────────────────────────────
+  // Cálculos de la meta seleccionada
   const metaMxn = metaSeleccionada?.monto_objetivo_mxn ?? 10000
   const lockedBalanceMxn = lockedBalance  // ya en MXN desde Supabase
   const proyeccion20Mxn = lockedBalance * Math.pow(1 + userRate / 100, 20)
@@ -186,7 +186,7 @@ export function RetirementSnapshot() {
   return (
     <div className="flex flex-col gap-4">
 
-      {/* ── Header ── */}
+      {/* Header */}
       <div>
         <div className="flex items-center gap-3 flex-wrap mb-2">
           <span className="inline-block bg-brand/10 text-brand-dark border border-brand/20 rounded-lg px-3 py-1.5 text-xs font-semibold">
@@ -203,15 +203,15 @@ export function RetirementSnapshot() {
         <RateBadge compact />
       </div>
 
-      {/* ── PRIMERA VEZ: Configurador de meta ── */}
+      {/* PRIMERA VEZ: Configurador de meta */}
       {primeraVez && usuario && (
         <GoalSetupComponent usuario={usuario} onMetaCreada={handleMetaCreada} />
       )}
 
-      {/* ── CON METAS: Botón depositar + row de metas ── */}
+      {/* CON METAS: Botón depositar + row de metas */}
       {tieneMetas && (
         <>
-          {/* Botón depositar — arriba de todo cuando ya hay meta */}
+          {/* Botón depositar , arriba de todo cuando ya hay meta */}
           {!showDeposit && (
             <button
               onClick={() => setShowDeposit(true)}
@@ -256,7 +256,7 @@ export function RetirementSnapshot() {
         </>
       )}
 
-      {/* ── Modal de edición ── */}
+      {/* Modal de edición */}
       {metaEditando && usuario && (
         <GoalEditModal
           meta={metaEditando}
@@ -266,7 +266,7 @@ export function RetirementSnapshot() {
         />
       )}
 
-      {/* ── Skeleton ── */}
+      {/* Skeleton */}
       {loading && (
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-3" aria-busy="true">
           {skeletonLabels.map(label => (
@@ -279,7 +279,7 @@ export function RetirementSnapshot() {
         </div>
       )}
 
-      {/* ── Error ── */}
+      {/* Error */}
       {error && (
         <div className="bg-ink/5 dark:bg-white/5 border border-brand/20 rounded-2xl p-5">
           {error.includes('sesión') || error.includes('Sin sesión') ? (
@@ -300,10 +300,10 @@ export function RetirementSnapshot() {
         </div>
       )}
 
-      {/* ── Stat cards + tabs — solo cuando tiene metas y datos cargados ── */}
+      {/* Stat cards + tabs , solo cuando tiene metas y datos cargados */}
       {tieneMetas && !loading && (
         <>
-          {/* 4 Stat cards — cambian según meta seleccionada */}
+          {/* 4 Stat cards , cambian según meta seleccionada */}
           <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
             {[
               {
@@ -320,7 +320,7 @@ export function RetirementSnapshot() {
                       minimumFractionDigits: 5, maximumFractionDigits: 5,
                     }).format(saldoAnimado)
                   : formatCurrencyMxn(lockedBalanceMxn),
-                // Solo mostrar la flecha de rendimiento de hoy — sin subtexto fijo
+                // Solo mostrar la flecha de rendimiento de hoy , sin subtexto fijo
                 sub: null,
                 color: isGrowing ? 'text-green-500' : 'text-green-600',
                 extra: isGrowing && (
@@ -406,7 +406,7 @@ export function RetirementSnapshot() {
             </div>
           </div>
 
-          {/* ── Panel: Resumen ── */}
+          {/* Panel: Resumen */}
           {activeTab === 'resumen' && (
             <div id="panel-resumen" role="tabpanel" aria-labelledby="tab-resumen" className="flex flex-col gap-4">
               <RateBadge />
@@ -433,14 +433,14 @@ export function RetirementSnapshot() {
             </div>
           )}
 
-          {/* ── Panel: Historial ── */}
+          {/* Panel: Historial */}
           {activeTab === 'historial' && (
             <div id="panel-historial" role="tabpanel" aria-labelledby="tab-historial">
               <ContributionHistory />
             </div>
           )}
 
-          {/* ── Panel: Ciclos ── */}
+          {/* Panel: Ciclos */}
           {activeTab === 'ciclos' && (
             <div id="panel-ciclos" role="tabpanel" aria-labelledby="tab-ciclos"
               className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-5">
@@ -487,28 +487,28 @@ export function RetirementSnapshot() {
             </div>
           )}
 
-          {/* ── Panel: Préstamo ── */}
+          {/* Panel: Préstamo */}
           {activeTab === 'prestamo' && (
             <div id="panel-prestamo" role="tabpanel" aria-labelledby="tab-prestamo">
               <AutoloanCard lockedBalance={lockedBalance} walletAddress={null} />
             </div>
           )}
 
-          {/* ── Panel: Referidos ── */}
+          {/* Panel: Referidos */}
           {activeTab === 'referidos' && (
             <div id="panel-referidos" role="tabpanel" aria-labelledby="tab-referidos">
               <ReferralModule userName={usuario?.nombre?.slice(0, 8) ?? 'usuario'} walletAddress={null} />
             </div>
           )}
 
-          {/* ── Panel: Carlos ── */}
+          {/* Panel: Carlos */}
           {activeTab === 'carlos' && (
             <div id="panel-carlos" role="tabpanel" aria-labelledby="tab-carlos">
               <CarlosSimulator />
             </div>
           )}
 
-          {/* ── Panel: Ingresos ── */}
+          {/* Panel: Ingresos */}
           {activeTab === 'ingresos' && (
             <div id="panel-ingresos" role="tabpanel" aria-labelledby="tab-ingresos"
               className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-5">

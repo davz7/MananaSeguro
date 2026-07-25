@@ -2,7 +2,7 @@
 
 use soroban_sdk::{contract, contractimpl, contracttype, token, Address, Env, Symbol};
 
-// ─── Storage Keys ─────────────────────────────────────────────────────────────
+// Storage Keys
 
 #[contracttype]
 pub enum DataKey {
@@ -24,7 +24,7 @@ pub enum DataKey {
     UsdcToken,
 }
 
-// ─── Constantes del modelo de negocio ─────────────────────────────────────────
+// Constantes del modelo de negocio
 
 /// Depósito mínimo: 2 USDC (en stroops, 7 decimales Stellar).
 const MIN_DEPOSIT: i128 = 20_000_000;
@@ -39,7 +39,7 @@ const PRESTAMO_MAX_MESES: u32 = 24;
 /// 1 USDC = 10_000_000 stroops.
 const STROOP: i128 = 10_000_000;
 
-// ─── Contrato ─────────────────────────────────────────────────────────────────
+// Contrato
 
 #[contract]
 pub struct MananaSeguroContract;

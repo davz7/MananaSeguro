@@ -10,7 +10,7 @@ fn deploy(env: &Env) -> RetiroChainClient<'_> {
     RetiroChainClient::new(env, &contract_id)
 }
 
-// ─── Core tests ──────────────────────────────────────────────────────────────
+// Core tests
 
 // inicializar computes ver_retiro = now + anos * seconds_per_year
 #[test]
@@ -79,7 +79,7 @@ fn test_puede_retirar_true_after_date() {
     assert!(client.puede_retirar());
 }
 
-// ─── Edge cases ──────────────────────────────────────────────────────────────
+// Edge cases
 
 // anos = 0 → retirement date equals the current timestamp
 // the >= check means puede_retirar is immediately true
@@ -149,7 +149,7 @@ fn test_ver_balance_sin_inicializar() {
     assert_eq!(client.ver_balance(), 0);
 }
 
-// depositar also works before inicializar — unwrap_or(0) seeds the missing balance key
+// depositar also works before inicializar , unwrap_or(0) seeds the missing balance key
 #[test]
 fn test_depositar_sin_inicializar() {
     let env = Env::default();
@@ -160,7 +160,7 @@ fn test_depositar_sin_inicializar() {
 }
 
 // re-calling inicializar overwrites the retirement date because there is no
-// re-initialization guard — this test documents that behaviour so it is explicit
+// re-initialization guard , this test documents that behaviour so it is explicit
 #[test]
 fn test_inicializar_sobrescribe_retiro() {
     let env = Env::default();

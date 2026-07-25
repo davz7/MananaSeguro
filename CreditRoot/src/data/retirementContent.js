@@ -1,4 +1,4 @@
-// ─── Mañana Seguro — Constantes del modelo de negocio ───────────────────────
+// Mañana Seguro , Constantes del modelo de negocio
 
 export const MANANA_SEGURO_RATES = {
   cetesRate: 6.5,        // tasa bruta actual de Banxico (CETES 28 días)
@@ -16,7 +16,7 @@ export const MANANA_SEGURO_RATES = {
   constancyMinDeposit: 20,
 }
 
-// Incentivos cada 5 años — máximo 7%
+// Incentivos cada 5 años , máximo 7%
 export const INCENTIVE_SCENARIOS = [
   { key: 'solo_fidelidad',        label: 'Solo fidelidad',                    pct: 5, description: 'Mantienes tu ahorro sin retirar' },
   { key: 'fidelidad_constancia',  label: 'Fidelidad + constancia ($20/mes)',  pct: 7, description: '+$20 USDC mensuales mínimo' },
@@ -31,7 +31,7 @@ export const plannerDefaults = {
 }
 
 // NOTA: retirementStats.value se actualiza dinámicamente en HomeScreen
-// usando useEtherfuseRate() — este valor es solo el fallback inicial
+// usando useEtherfuseRate() , este valor es solo el fallback inicial
 export const retirementStats = [
   { label: 'Mexicanos sin pensión', value: '32M', caption: 'Trabajadores informales sin acceso al sistema tradicional.', tone: 'accent' },
   { label: 'Rendimiento vía Etherfuse', value: '~5.5%', caption: 'APY en USDC que recibe el usuario. Respaldado por CETES.', tone: 'brand' },

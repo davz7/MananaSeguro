@@ -47,7 +47,7 @@ export function CarlosSimulator() {
   return (
     <div className="flex flex-col gap-4">
 
-      {/* ── Header stepper ── */}
+      {/* Header stepper */}
       <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
         <div className="flex items-center gap-4 mb-5">
           <span className="text-4xl">🛵</span>
@@ -81,7 +81,7 @@ export function CarlosSimulator() {
         </div>
       </div>
 
-      {/* ── Parámetros ── */}
+      {/* Parámetros */}
       <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
         <h6 className="font-semibold text-ink dark:text-white mb-4">{t('carlos.personaliza')}</h6>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
@@ -119,7 +119,7 @@ export function CarlosSimulator() {
         </div>
       </div>
 
-      {/* ── Step 0: Perfil ── */}
+      {/* Step 0: Perfil */}
       {step === 0 && (
         <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
           <h6 className="font-semibold text-ink dark:text-white mb-4">{t('carlos.perfilTitulo')}</h6>
@@ -145,7 +145,7 @@ export function CarlosSimulator() {
         </div>
       )}
 
-      {/* ── Step 1: Ciclos ── */}
+      {/* Step 1: Ciclos */}
       {step === 1 && (
         <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
           <h6 className="font-semibold text-ink dark:text-white mb-1">
@@ -189,7 +189,7 @@ export function CarlosSimulator() {
         </div>
       )}
 
-      {/* ── Step 2: Emergencia ── */}
+      {/* Step 2: Emergencia */}
       {step === 2 && (
         <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
           <h6 className="font-semibold text-ink dark:text-white mb-1">
@@ -259,7 +259,7 @@ export function CarlosSimulator() {
         </div>
       )}
 
-      {/* ── Step 3: Resultado ── */}
+      {/* Step 3: Resultado */}
       {step === 3 && (
         <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
           <div className="text-center mb-6">
@@ -329,7 +329,7 @@ export function CarlosSimulator() {
   )
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// Helpers
 function estimateSaldoMes(mensual, meses, annualRate) {
   const monthlyRate = annualRate / 100 / 12
   let balance = 0

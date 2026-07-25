@@ -13,14 +13,14 @@ export function LandingScreen({ onLogin, onRegister }) {
 
   const apy = userRate > 0 ? userRate.toFixed(2) : '—'
 
-  // Puntos del hero — todos via i18n para que el cambio de idioma funcione
+  // Puntos del hero , todos via i18n para que el cambio de idioma funcione
   const puntos = [
     t('landing.puntos.apy', { apy }),
     t('landing.puntos.spei'),
     t('landing.puntos.prestamo'),
   ]
 
-  // Bancos — via i18n
+  // Bancos , via i18n
   const bancos = t('landing.bancos', { returnObjects: true })
 
   return (

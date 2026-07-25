@@ -1,6 +1,6 @@
 import { MANANA_SEGURO_RATES, INCENTIVE_SCENARIOS } from '../data/retirementContent'
 
-// ─── Proyección base con tasa del usuario (4.7%) ─────────────────────────────
+// Proyección base con tasa del usuario (4.7%)
 export function calculateRetirementProjection({
   monthlyDepositUsd,
   yearsToRetirement,
@@ -33,7 +33,7 @@ export function calculateRetirementProjection({
   }
 }
 
-// ─── Simulación por ciclos de 5 años (lógica exacta del doc) ─────────────────
+// Simulación por ciclos de 5 años (lógica exacta del doc)
 export function calculateCycles(monthlyDepositUsd, totalYears, userRate, incentivePct) {
   const cycles = Math.floor(totalYears / 5)
   let balance = 0
@@ -90,7 +90,7 @@ function calculateTotalIncentives(monthlyDeposit, years, rate, incentivePct) {
   return cycles.reduce((sum, c) => sum + c.incentiveAmount, 0)
 }
 
-// ─── Simulador de autopréstamo ────────────────────────────────────────────────
+// Simulador de autopréstamo
 export function calculateLoan(lockedBalance, requestedAmount) {
   const maxLoan = lockedBalance * MANANA_SEGURO_RATES.loanMaxPct
   const amount = Math.min(requestedAmount, maxLoan)
@@ -127,7 +127,7 @@ export function calculateLoan(lockedBalance, requestedAmount) {
   }
 }
 
-// ─── Ingresos de la plataforma con Carlos ────────────────────────────────────
+// Ingresos de la plataforma con Carlos
 export function calculatePlatformRevenue(monthlyDeposit, years, platformRate = 1.0) {
   const monthlyRate = platformRate / 100 / 12
   let balance = 0

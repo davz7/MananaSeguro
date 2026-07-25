@@ -1,6 +1,6 @@
 // src/hooks/useExchangeRate.js
 // Tipo de cambio USD/MXN en tiempo real desde Banxico
-// Caché de 4 horas — Banxico actualiza el FIX una vez al día hábil
+// Caché de 4 horas , Banxico actualiza el FIX una vez al día hábil
 
 import { useEffect, useState } from 'react'
 

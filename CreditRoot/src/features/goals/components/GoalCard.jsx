@@ -1,6 +1,6 @@
 // src/features/goals/components/GoalCard.jsx
-//
-// Tarjeta de meta de ahorro — seleccionable.
+// 
+// Tarjeta de meta de ahorro , seleccionable.
 // Muestra nombre, progreso, ahorro mensual y meta objetivo.
 
 import { useState } from 'react'
@@ -91,7 +91,7 @@ export function GoalCard({ meta, saldoMxn = 0, seleccionada = false, onSeleccion
   )
 }
 
-// ─── Modal de edición ─────────────────────────────────────────────────────────
+// Modal de edición
 
 export function GoalEditModal({ meta, usuarioId, onGuardado, onCerrar }) {
   const [nombre, setNombre] = useState(meta.nombre)
@@ -182,7 +182,7 @@ export function GoalEditModal({ meta, usuarioId, onGuardado, onCerrar }) {
   )
 }
 
-// ─── Botón para agregar nueva meta ────────────────────────────────────────────
+// Botón para agregar nueva meta
 
 export function AddGoalButton({ usuarioId, onMetaCreada }) {
   const [abierto, setAbierto] = useState(false)

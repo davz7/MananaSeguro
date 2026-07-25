@@ -65,7 +65,7 @@ fn test_depositar_minimo() {
 #[should_panic(expected = "$2 USDC")]
 fn test_depositar_bajo_minimo() {
     let (env, cliente, _admin, usuario, _usdc) = setup();
-    // $1 USDC = 10_000_000 stroops — debe fallar
+    // $1 USDC = 10_000_000 stroops , debe fallar
     cliente.depositar(&usuario, &10_000_000, &20);
 }
 
@@ -103,7 +103,7 @@ fn test_retirar_meta_alcanzada() {
     let primer_deposito = 100_000_000i128;
     cliente.depositar(&usuario, &primer_deposito, &1);
 
-    // Meta = 1_000_000_000 — depositar más para alcanzarla
+    // Meta = 1_000_000_000 , depositar más para alcanzarla
     // Mintear más USDC para el usuario
     let usdc_admin = token::StellarAssetClient::new(&env, &usdc);
     usdc_admin.mint(&usuario, &2_000_000_000);
@@ -169,7 +169,7 @@ fn test_autoprestamo_excede_limite() {
     let (env, cliente, _admin, usuario, _usdc) = setup();
 
     cliente.depositar(&usuario, &100_000_000, &20);
-    // Solicitar 40% — debe fallar
+    // Solicitar 40% , debe fallar
     cliente.solicitar_prestamo(&usuario, &40_000_000);
 }
 
@@ -207,7 +207,7 @@ fn test_no_retirar_con_prestamo_activo() {
         l.timestamp += 365 * 24 * 3600 + 1;
     });
 
-    // Intentar retirar con préstamo activo — debe fallar
+    // Intentar retirar con préstamo activo , debe fallar
     cliente.retirar(&usuario);
 }
 

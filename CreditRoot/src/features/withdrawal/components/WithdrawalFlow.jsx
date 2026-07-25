@@ -1,5 +1,5 @@
 // src/features/withdrawal/components/WithdrawalFlow.jsx
-// Flujo de retiro — lee datos de Supabase, sin Freighter/Stellar
+// Flujo de retiro , lee datos de Supabase, sin Freighter/Stellar
 // El retiro real se habilitará cuando Etherfuse lance su API de retiros
 
 import { useState, useEffect, useCallback } from 'react'
@@ -106,7 +106,7 @@ export function WithdrawalFlow({ meta = 175000 }) {
   return (
     <div className="flex flex-col gap-4">
 
-      {/* ── Verificando ── */}
+      {/* Verificando */}
       {fase === 'verificando' && (
         <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-10 text-center">
           <svg aria-hidden="true" className="animate-spin mx-auto mb-4 text-brand" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -117,7 +117,7 @@ export function WithdrawalFlow({ meta = 175000 }) {
         </div>
       )}
 
-      {/* ── Meta no alcanzada ── */}
+      {/* Meta no alcanzada */}
       {fase === 'no_alcanzada' && (
         <div className="flex flex-col gap-4">
 
@@ -216,7 +216,7 @@ export function WithdrawalFlow({ meta = 175000 }) {
         </div>
       )}
 
-      {/* ── Meta alcanzada ── */}
+      {/* Meta alcanzada */}
       {fase === 'alcanzada' && (
         <div className="flex flex-col gap-4">
           <div className="bg-green-500/8 border border-green-500/25 rounded-2xl p-8 text-center">
@@ -266,7 +266,7 @@ export function WithdrawalFlow({ meta = 175000 }) {
         </div>
       )}
 
-      {/* ── Error ── */}
+      {/* Error */}
       {fase === 'error' && (
         <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-8">
           <div className="text-center mb-5">

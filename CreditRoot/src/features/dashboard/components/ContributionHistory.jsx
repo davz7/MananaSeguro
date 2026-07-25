@@ -1,6 +1,6 @@
 // src/features/dashboard/components/ContributionHistory.jsx
-//
-// Historial de aportaciones — lee órdenes reales de Supabase
+// 
+// Historial de aportaciones , lee órdenes reales de Supabase
 // Ya no usa Stellar/Soroban ni localStorage
 
 import { useState, useEffect } from 'react'
@@ -40,7 +40,7 @@ export function ContributionHistory() {
   return (
     <div className="flex flex-col gap-4">
 
-      {/* ── Resumen ── */}
+      {/* Resumen */}
       <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-5">
           <h5 className="font-display font-black text-ink dark:text-white text-lg">
@@ -83,7 +83,7 @@ export function ContributionHistory() {
         </div>
       </div>
 
-      {/* ── Lista de órdenes ── */}
+      {/* Lista de órdenes */}
       <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
         <div className="mb-5">
           <h5 className="font-display font-black text-ink dark:text-white text-lg mb-1">
