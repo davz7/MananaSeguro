@@ -65,17 +65,20 @@ function Footer() {
 
                     {/* Redes sociales */}
                     <div className="flex items-center gap-3">
-                        {SOCIAL_LINKS.map(({ icon: Icon, href, labelKey }) => (
-                            <a
-                                key={labelKey}
-                                href={href}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                aria-label={t(labelKey)}
-                                className="text-gray dark:text-white/40 hover:text-brand dark:hover:text-brand transition-colors">
-                                <Icon size={18} />
-                            </a>
-                        ))}
+                        {SOCIAL_LINKS.map((link) => {
+                            const Icon = link.icon
+                            return (
+                                
+                                    key={link.labelKey}
+                                    href={link.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label={t(link.labelKey)}
+                                    className="text-gray dark:text-white/40 hover:text-brand dark:hover:text-brand transition-colors">
+                                    <Icon size={18} />
+                                </a>
+                            )
+                        })}
                     </div>
 
                     {/* Créditos */}
