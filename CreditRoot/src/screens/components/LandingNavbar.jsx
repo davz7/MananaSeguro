@@ -23,9 +23,9 @@ function LandingNavbar({ onLogin, onRegister, onVolver, soloVolver }) {
             <div className="container mx-auto flex justify-between items-center">
 
                 <div className="flex items-center gap-2">
-                    <img src={logoCompleto} alt="Logo Mañana Seguro" className="h-8 w-auto rounded-lg" />
+                    <img src={logoCompleto} alt={t('nav.logoAlt')} className="h-8 w-auto rounded-lg" />
                     <span className="font-display font-bold text-xl text-ink dark:text-white tracking-tight">
-                        Mañana <span className="text-brand">Seguro</span>
+                        {t('nav.marca')} <span className="text-brand">{t('nav.marcaAccent')}</span>
                     </span>
                 </div>
 
@@ -40,7 +40,7 @@ function LandingNavbar({ onLogin, onRegister, onVolver, soloVolver }) {
                         <button
                             className="text-xs font-bold px-3 py-1.5 rounded-lg border border-ink/10 dark:border-white/10 text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white hover:border-ink/20 dark:hover:border-white/20 transition-all cursor-pointer"
                             onClick={toggleLang}
-                            aria-label="Cambiar idioma">
+                            aria-label={t('nav.cambiarIdioma')}>
                             {i18n.language === 'es' ? 'EN' : 'ES'}
                         </button>
 
@@ -48,7 +48,7 @@ function LandingNavbar({ onLogin, onRegister, onVolver, soloVolver }) {
                         <button
                             className="text-xs font-bold px-3 py-1.5 rounded-lg border border-ink/10 dark:border-white/10 text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white hover:border-ink/20 transition-all cursor-pointer"
                             onClick={toggle}
-                            aria-label="Toggle dark mode">
+                            aria-label={dark ? t('nav.activarModoClaro') : t('nav.activarModoOscuro')}>
                             {dark ? '☀️' : '🌙'}
                         </button>
 

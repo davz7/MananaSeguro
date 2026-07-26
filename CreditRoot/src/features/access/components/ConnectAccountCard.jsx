@@ -17,7 +17,7 @@ export function ConnectAccountCard({ usuario }) {
             🔐 {t('connectCard.badgePendiente')}
           </span>
           <h3 className="font-display font-black text-ink dark:text-white text-xl mb-1 tracking-tight">
-            Mañana Seguro
+            {t('connectCard.titulo')}
           </h3>
           <p className="text-sm text-ink/45 dark:text-white/45 leading-relaxed">
             {t('connectCard.descripcion')}
@@ -43,12 +43,12 @@ export function ConnectAccountCard({ usuario }) {
       color: 'text-green-600',
     },
     {
-      label: 'KYC',
-      val: usuario.kycStatus === 'approved' ? '✓ Verificado' : '⏳ Pendiente',
+      label: t('connectCard.kyc'),
+      val: usuario.kycStatus === 'approved' ? t('connectCard.kycVerificado') : t('connectCard.kycPendiente'),
       color: usuario.kycStatus === 'approved' ? 'text-green-600' : 'text-yellow-500',
     },
     {
-      label: 'Email',
+      label: t('connectCard.email'),
       val: usuario.email ?? '—',
       color: 'text-ink dark:text-white',
     },
@@ -69,10 +69,10 @@ export function ConnectAccountCard({ usuario }) {
           {t('connectCard.badgeConectada')}
         </span>
         <h3 className="font-display font-black text-ink dark:text-white text-xl mb-1 tracking-tight">
-          {usuario.nombre ?? 'Mi cuenta'}
+          {usuario.nombre ?? t('connectCard.miCuenta')}
         </h3>
         <p className="text-sm text-ink/45 dark:text-white/45 leading-relaxed">
-          Tu ahorro está protegido y generando rendimiento real de CETES.
+          {t('connectCard.footerActiva')}
         </p>
       </div>
 

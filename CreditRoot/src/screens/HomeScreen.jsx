@@ -14,10 +14,10 @@ export function HomeScreen({ usuario }) {
   const apyDisplay = loading ? '···' : userRate > 0 ? `${userRate.toFixed(1)}% APY` : '—'
 
   const stats = [
-    { val: '32M',        label: 'Mexicanos sin pensión',      color: 'text-brand' },
-    { val: apyDisplay,   label: 'Rendimiento anual en pesos', color: 'text-green-600' },
-    { val: '$100 MXN',   label: 'Para empezar',               color: 'text-brand' },
-    { val: '1%',         label: 'Comisión plataforma',        color: 'text-ink/60 dark:text-white/60' },
+    { val: '32M',        label: t('home.stats.mexicanos'),   color: 'text-brand' },
+    { val: apyDisplay,   label: t('home.stats.rendimiento'), color: 'text-green-600' },
+    { val: '$100 MXN',   label: t('home.stats.empezar'),     color: 'text-brand' },
+    { val: '1%',         label: t('home.stats.comision'),    color: 'text-ink/60 dark:text-white/60' },
   ]
 
   return (
@@ -27,7 +27,7 @@ export function HomeScreen({ usuario }) {
 
           <div className="anim-fade-up-1">
             <span className="inline-block bg-brand/10 text-brand-dark border border-brand/20 rounded-lg px-4 py-1.5 text-xs font-semibold tracking-wide mb-6">
-              🔒 Ahorro para retiro · CETES · Hecho en México
+              {t('home.badge')}
             </span>
 
             <h2 className="font-display font-black text-ink dark:text-white tracking-tight mb-4"
@@ -37,7 +37,7 @@ export function HomeScreen({ usuario }) {
             </h2>
 
             <p className="text-ink/50 dark:text-white/50 text-lg leading-relaxed max-w-md mb-8">
-              Conecta tu cuenta de banco, empieza a ahorrar con SPEI desde $100 pesos. {t('home.descripcion')}
+              {t('home.descripcionIntro')} {t('home.descripcion')}
             </p>
 
             <div className="flex gap-3 flex-wrap mb-10">
@@ -71,14 +71,14 @@ export function HomeScreen({ usuario }) {
                   <div className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
                     <span className="text-xs text-ink/35 dark:text-white/35">
-                      CETES en vivo · {cetesRate.toFixed(2)}% bruto vía Banxico
+                      {t('home.cetesEnVivo', { rate: cetesRate.toFixed(2) })}
                     </span>
                   </div>
                 )}
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
                   <span className="text-xs text-ink/35 dark:text-white/35">
-                    Tipo de cambio · ${usdMxn.toFixed(2)} MXN/USD vía Banxico
+                    {t('home.tipoCambio', { rate: usdMxn.toFixed(2) })}
                   </span>
                 </div>
               </div>

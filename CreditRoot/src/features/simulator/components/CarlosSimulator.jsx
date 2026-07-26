@@ -113,7 +113,7 @@ export function CarlosSimulator() {
             value={params.escenario}
             onChange={e => setParams(p => ({ ...p, escenario: e.target.value }))}>
             {INCENTIVE_SCENARIOS.map(s => (
-              <option key={s.key} value={s.key}>{s.label} — {s.pct}%</option>
+              <option key={s.key} value={s.key}>{t(`incentiveScenarios.${s.key}.label`)} — {s.pct}%</option>
             ))}
           </select>
         </div>
@@ -127,7 +127,7 @@ export function CarlosSimulator() {
             {[
               { label: t('carlos.aporteLabel'), val: formatCurrencyUsd(params.mensual), sub: `≈ ${formatCurrencyMxn(params.mensual * 17)}` },
               { label: t('carlos.totalAportar'), val: formatCurrencyUsd(totalAportado), sub: t('carlos.enAnios', { anios: params.anios }) },
-              { label: t('carlos.tasaLabel'), val: `${userRate}% APY`, sub: t('carlos.tasaSub') },
+              { label: t('carlos.tasaLabel'), val: t('rateBadge.apySuffix', { value: userRate }), sub: t('carlos.tasaSub') },
               { label: t('carlos.incentivoLabel'), val: `${incentivePct}%`, sub: t('carlos.incentivoPorCiclo') },
             ].map(item => (
               <div key={item.label} className="bg-ink/3 dark:bg-white/3 border border-ink/6 dark:border-white/6 rounded-xl p-3">
@@ -152,7 +152,7 @@ export function CarlosSimulator() {
             {t('carlos.ciclosTitulo', { pct: incentivePct })}
           </h6>
           <p className="text-xs text-ink/40 dark:text-white/40 mb-4">
-            {INCENTIVE_SCENARIOS.find(s => s.key === params.escenario)?.label}
+            {t(`incentiveScenarios.${params.escenario}.label`)}
           </p>
           <div className="overflow-x-auto mb-5">
             <table className="w-full text-sm">
@@ -226,7 +226,7 @@ export function CarlosSimulator() {
                   : 'bg-ink/4 dark:bg-white/4 text-ink/40 dark:text-white/40 border-ink/10 dark:border-white/10'
                 }`}
               onClick={() => setParams(p => ({ ...p, simularImpago: !p.simularImpago }))}>
-              {params.simularImpago ? 'ON' : 'OFF'}
+              {params.simularImpago ? t('carlos.on') : t('carlos.off')}
             </button>
           </div>
 

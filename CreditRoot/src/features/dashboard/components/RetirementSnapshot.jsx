@@ -32,6 +32,7 @@ export function RetirementSnapshot() {
   const [lockedBalance, setLockedBalance] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [sinSesionError, setSinSesionError] = useState(false)
   const [activeTab, setActiveTab] = useState('resumen')
   const [showDeposit, setShowDeposit] = useState(false)
 
@@ -78,9 +79,13 @@ export function RetirementSnapshot() {
 
   // Cargar órdenes completadas
   const cargarDatos = useCallback(async () => {
+    setSinSesionError(false)
     try {
       const usuarioGuardado = JSON.parse(localStorage.getItem('ms_usuario') || 'null')
-      if (!usuarioGuardado?.id) throw new Error('Sin sesión activa')
+      if (!usuarioGuardado?.id) {
+        setSinSesionError(true)
+        throw new Error(t('snapshot.errorWallet'))
+      }
 
       const res = await fetch(`/api/etherfuse/order-status?usuarioId=${usuarioGuardado.id}`)
       if (res.ok) {
@@ -95,7 +100,7 @@ export function RetirementSnapshot() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   // Cargar metas del usuario
   const cargarMetas = useCallback(async () => {
@@ -145,7 +150,7 @@ export function RetirementSnapshot() {
   async function handleEliminarMeta(meta) {
     const usuario = JSON.parse(localStorage.getItem('ms_usuario') || 'null')
     if (!usuario?.id) return
-    if (!confirm(`¿Eliminar la meta "${meta.nombre}"? Esta acción no se puede deshacer.`)) return
+    if (!confirm(t('snapshot.confirmarEliminarMeta', { nombre: meta.nombre }))) return
 
     try {
       const res = await fetch(`/api/metas?id=${meta.id}`, {
@@ -170,10 +175,10 @@ export function RetirementSnapshot() {
 
   // Fecha estimada de retiro basada en meta seleccionada
   const fechaRetiroEstimada = (() => {
-    if (!metaSeleccionada || lockedBalance <= 0) return 'Calculando...'
+    if (!metaSeleccionada || lockedBalance <= 0) return t('snapshot.calculando')
     const anosRestantes = metaSeleccionada.anos_al_retiro
     const anioRetiro = new Date().getFullYear() + anosRestantes
-    return `${anioRetiro} (~${anosRestantes} años)`
+    return t('snapshot.fechaRetiroFormato', { anio: anioRetiro, anos: anosRestantes })
   })()
 
   const cycles = calculateCycles(25, 20, userRate, 9)
@@ -234,7 +239,7 @@ export function RetirementSnapshot() {
           {/* Row de tarjetas de metas */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h6 className="font-semibold text-ink dark:text-white text-sm">Tus Metas Activas</h6>
+              <h6 className="font-semibold text-ink dark:text-white text-sm">{t('snapshot.metasActivasTitulo')}</h6>
             </div>
             <div className={`grid gap-3 ${metas.length === 1 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
               {metas.map(meta => (
@@ -282,13 +287,13 @@ export function RetirementSnapshot() {
       {/* Error */}
       {error && (
         <div className="bg-ink/5 dark:bg-white/5 border border-brand/20 rounded-2xl p-5">
-          {error.includes('sesión') || error.includes('Sin sesión') ? (
+          {sinSesionError ? (
             <div>
-              <p className="font-semibold text-ink dark:text-white mb-1"><TriangleAlert size={16} className="inline shrink-0" aria-hidden="true" /> No hay sesión activa</p>
-              <p className="text-sm text-ink/50 dark:text-white/50 mb-3">Inicia sesión para ver tu dashboard.</p>
+              <p className="font-semibold text-ink dark:text-white mb-1"><TriangleAlert size={16} className="inline shrink-0" aria-hidden="true" /> {t('snapshot.errorWallet')}</p>
+              <p className="text-sm text-ink/50 dark:text-white/50 mb-3">{t('snapshot.errorWalletDesc')}</p>
               <button className="bg-brand text-white text-sm font-semibold px-4 py-2 rounded-xl cursor-pointer"
                 onClick={() => window.location.href = '/login'}>
-                Iniciar sesión
+                {t('snapshot.errorWalletBtn')}
               </button>
             </div>
           ) : (
@@ -307,13 +312,13 @@ export function RetirementSnapshot() {
           <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
             {[
               {
-                label: 'Saldo disponible',
+                label: t('snapshot.statSaldoDisponible'),
                 val: formatCurrencyMxn(0),
-                sub: 'Próximamente',
+                sub: t('snapshot.statProximamente'),
                 color: 'text-brand',
               },
               {
-                label: 'Ahorro bloqueado',
+                label: t('history.saldoBloqueado'),
                 val: isGrowing
                   ? new Intl.NumberFormat('es-MX', {
                       style: 'currency', currency: 'MXN',
@@ -325,23 +330,25 @@ export function RetirementSnapshot() {
                 color: isGrowing ? 'text-green-500' : 'text-green-600',
                 extra: isGrowing && (
                   <span className="text-xs text-green-400 mt-1 flex items-center gap-1">
-                    ↑ hoy: +{new Intl.NumberFormat('es-MX', {
-                      style: 'currency', currency: 'MXN',
-                      minimumFractionDigits: 5, maximumFractionDigits: 5,
-                    }).format(Math.max(0, yieldTodayMxnAnimado))}
+                    {t('snapshot.hoyPrefijo', {
+                      val: new Intl.NumberFormat('es-MX', {
+                        style: 'currency', currency: 'MXN',
+                        minimumFractionDigits: 5, maximumFractionDigits: 5,
+                      }).format(Math.max(0, yieldTodayMxnAnimado)),
+                    })}
                   </span>
                 ),
               },
               {
-                label: 'Proyección 20 años',
+                label: t('snapshot.statProyeccion'),
                 val: formatCurrencyMxn(proyeccion20Mxn),
-                sub: `${userRate.toFixed(2)}% APY neto`,
+                sub: t('snapshot.statProyeccionSubNeto', { apy: userRate.toFixed(2) }),
                 color: 'text-yellow-500',
               },
               {
                 label: t('snapshot.statFecha'),
                 val: fechaRetiroEstimada,
-                sub: metaSeleccionada?.nombre ?? 'Sin meta',
+                sub: metaSeleccionada?.nombre ?? t('snapshot.sinMeta'),
                 color: 'text-ink/60 dark:text-white/60',
               },
             ].map(stat => (
@@ -358,21 +365,21 @@ export function RetirementSnapshot() {
           <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-5">
             <div className="flex justify-between items-center mb-3">
               <span className="font-semibold text-ink dark:text-white text-sm">{t('snapshot.progresoTitulo')}</span>
-              <span className="text-xs text-ink/40 dark:text-white/40">Meta: {formatCurrencyMxn(metaMxn)}</span>
+              <span className="text-xs text-ink/40 dark:text-white/40">{t('snapshot.progresoMeta', { val: formatCurrencyMxn(metaMxn) })}</span>
             </div>
             <div
               role="progressbar"
               aria-valuenow={metaMxn > 0 ? Math.round(Math.min((lockedBalance / metaMxn) * 100, 100)) : 0}
               aria-valuemin={0}
               aria-valuemax={100}
-              aria-label={`Progreso hacia la meta: ${metaMxn > 0 ? Math.round(Math.min((lockedBalance / metaMxn) * 100, 100)) : 0}%`}
+              aria-label={t('goalCard.progresoAria', { pct: metaMxn > 0 ? Math.round(Math.min((lockedBalance / metaMxn) * 100, 100)) : 0 })}
               className="h-2 bg-ink/5 dark:bg-white/5 rounded-full mb-2 overflow-hidden">
               <div className="h-full bg-gradient-to-r from-brand-dark to-brand rounded-full transition-all duration-700"
                 style={{ width: `${metaMxn > 0 ? Math.min((lockedBalance / metaMxn) * 100, 100) : 0}%` }} />
             </div>
             <div className="flex justify-between">
               <span className="text-xs text-ink/40 dark:text-white/40">
-                {formatCurrencyMxn(lockedBalanceMxn)} bloqueados
+                {t('snapshot.progresoBloqueados', { val: formatCurrencyMxn(lockedBalanceMxn) })}
               </span>
               <span className="text-xs text-brand font-semibold">
                 {((lockedBalance / metaMxn) * 100).toFixed(1)}%
@@ -383,7 +390,7 @@ export function RetirementSnapshot() {
           {/* Tab bar */}
           <div className="relative">
             <div className="absolute top-0 right-0 w-12 h-full bg-gradient-to-r from-transparent to-surface dark:to-[#0f0e0d] pointer-events-none z-10" />
-            <div role="tablist" aria-label="Dashboard sections"
+            <div role="tablist" aria-label={t('snapshot.tablistAriaLabel')}
               className="flex gap-2 overflow-x-auto pb-1 tab-scroll">
               {tabs.map((tab, index) => (
                 <button
@@ -414,12 +421,12 @@ export function RetirementSnapshot() {
                 <h6 className="font-semibold text-ink dark:text-white mb-4">{t('snapshot.resumenTitulo')}</h6>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[
-                    { label: t('snapshot.resumenRed'), val: 'Etherfuse · Banxico' },
-                    { label: t('snapshot.resumenProveedor'), val: 'Etherfuse CETES' },
-                    { label: t('snapshot.resumenTasaBruta'), val: `${cetesRate.toFixed(2)}% APY` },
-                    { label: t('snapshot.resumenTasaUsuario'), val: `${userRate.toFixed(2)}% APY` },
-                    { label: t('snapshot.resumenComision'), val: `${platformRate.toFixed(2)}% APY` },
-                    { label: t('snapshot.resumenMinDeposito'), val: '$40 MXN' },
+                    { label: t('snapshot.resumenRed'), val: t('snapshot.valRedBanxico') },
+                    { label: t('snapshot.resumenProveedor'), val: t('snapshot.valProveedorCetes') },
+                    { label: t('snapshot.resumenTasaBruta'), val: t('rateBadge.apySuffix', { value: cetesRate.toFixed(2) }) },
+                    { label: t('snapshot.resumenTasaUsuario'), val: t('rateBadge.apySuffix', { value: userRate.toFixed(2) }) },
+                    { label: t('snapshot.resumenComision'), val: t('rateBadge.apySuffix', { value: platformRate.toFixed(2) }) },
+                    { label: t('snapshot.resumenMinDeposito'), val: t('snapshot.valMinDeposito') },
                     { label: t('snapshot.resumenPrestamo'), val: t('snapshot.resumenPrestamoVal', { pct: MANANA_SEGURO_RATES.loanMaxPct * 100 }) },
                     { label: t('snapshot.resumenIncentivo'), val: t('snapshot.resumenIncentivoVal') },
                   ].map(item => (

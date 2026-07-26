@@ -47,17 +47,17 @@ export function ContributionHistory() {
             {t('history.titulo')}
           </h5>
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-green-500/10 text-green-500 border border-green-500/20">
-            Etherfuse
+            {t('history.badgeEtherfuse')}
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
             {
-              label: 'Ahorro bloqueado',
+              label: t('history.saldoBloqueado'),
               val: formatCurrencyMxn(totalMxn),
               color: 'text-green-500',
-              sub: 'Total de órdenes completadas',
+              sub: t('history.saldoBloqueadoSub'),
             },
             {
               label: t('history.totalDepositos'),
@@ -65,7 +65,7 @@ export function ContributionHistory() {
                 ? t('history.totalDepositosValPlural', { n: completadas.length })
                 : t('history.totalDepositosVal', { n: completadas.length }),
               color: 'text-yellow-500',
-              sub: 'Vía SPEI · Etherfuse',
+              sub: t('history.viaSpeiEtherfuse'),
             },
             {
               label: t('history.rendimientoProyectado'),
@@ -90,7 +90,7 @@ export function ContributionHistory() {
             {t('history.movimientos')}
           </h5>
           <p className="text-xs text-ink/40 dark:text-white/40">
-            Depósitos vía SPEI registrados en Etherfuse
+            {t('history.movimientosDesc')}
           </p>
         </div>
 
@@ -99,7 +99,7 @@ export function ContributionHistory() {
             <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 12a9 9 0 1 1-6.219-8.56" />
             </svg>
-            <span className="text-sm">Cargando historial...</span>
+            <span className="text-sm">{t('history.cargando')}</span>
           </div>
         )}
 
@@ -124,7 +124,7 @@ export function ContributionHistory() {
                 <tr className="text-xs text-ink/40 dark:text-white/40 border-b border-ink/6 dark:border-white/6">
                   <th className="text-left pb-2 font-medium">{t('history.colFecha')}</th>
                   <th className="text-left pb-2 font-medium">{t('history.colMonto')}</th>
-                  <th className="text-left pb-2 font-medium">CLABE</th>
+                  <th className="text-left pb-2 font-medium">{t('history.colClabe')}</th>
                   <th className="text-left pb-2 font-medium">{t('history.colEstado')}</th>
                 </tr>
               </thead>
@@ -152,9 +152,9 @@ export function ContributionHistory() {
                           ? 'bg-yellow-400/10 text-yellow-500 border-yellow-400/20'
                           : 'bg-ink/5 text-ink/40 border-ink/10'
                       }`}>
-                        {orden.status === 'completed' ? <><Check size={12} aria-hidden="true" className="inline mr-0.5" />Completado</>
-                          : orden.status === 'funded' ? <><Hourglass size={12} aria-hidden="true" className="inline mr-0.5" />Procesando</>
-                          : <><Clock size={12} aria-hidden="true" className="inline mr-0.5" />Pendiente</>}
+                      {orden.status === 'completed' ? <><Check size={12} aria-hidden="true" className="inline mr-0.5" />{t('history.estadoCompletado')}</>
+                        : orden.status === 'funded' ? <><Hourglass size={12} aria-hidden="true" className="inline mr-0.5" />{t('history.estadoProcesando')}</>
+                        : <><Clock size={12} aria-hidden="true" className="inline mr-0.5" />{t('history.estadoPendienteReloj')}</>}
                       </span>
                     </td>
                   </tr>

@@ -28,7 +28,7 @@ function CalculadoraHero({ onRegister }) {
     <div className="relative">
       <img
         src={ardilla}
-        alt="Mascota Mañana Seguro"
+        alt={t('calc.mascotaAlt')}
         className="absolute -top-20 -right-4 h-40 object-contain z-10 hidden lg:block float-squirrel"
       />
       <div className="relative bg-surface dark:bg-white/5 rounded-3xl p-8 border border-ink/8 dark:border-white/8 overflow-hidden shadow-xl shadow-ink/5">

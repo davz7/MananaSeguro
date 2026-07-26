@@ -62,13 +62,18 @@ export function WithdrawalFlow({ meta = 175000 }) {
   const [saldoMxn, setSaldoMxn] = useState(0)
   const [depositCount, setDepositCount] = useState(0)
   const [errorMsg, setErrorMsg] = useState(null)
+  const [sinSesion, setSinSesion] = useState(false)
 
   const verificarEstado = useCallback(async () => {
     setFase('verificando')
     setErrorMsg(null)
+    setSinSesion(false)
     try {
       const usuario = JSON.parse(localStorage.getItem('ms_usuario') || 'null')
-      if (!usuario?.id) throw new Error('Sin sesión activa')
+      if (!usuario?.id) {
+        setSinSesion(true)
+        throw new Error(t('withdrawal.errorSinSesion'))
+      }
 
       const res = await fetch(`/api/etherfuse/order-status?usuarioId=${usuario.id}`)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -82,10 +87,10 @@ export function WithdrawalFlow({ meta = 175000 }) {
       setDepositCount(data.ordenes?.filter(o => o.status === 'completed').length ?? 0)
       setFase(total >= meta ? 'alcanzada' : 'no_alcanzada')
     } catch (err) {
-      setErrorMsg(err.message ?? 'No se pudo cargar tu saldo')
+      setErrorMsg(err.message ?? t('withdrawal.errorSaldo'))
       setFase('error')
     }
-  }, [meta])
+  }, [meta, t])
 
   useEffect(() => { verificarEstado() }, [verificarEstado])
 
@@ -95,13 +100,7 @@ export function WithdrawalFlow({ meta = 175000 }) {
   const progresoPct = Math.min((saldoMxn / meta) * 100, 100)
   const apy = userRate > 0 ? userRate.toFixed(1) : '—'
 
-  const pasos = [
-    { Icon: Building2, step: 'Depositas desde tu banco', desc: 'Desde $40 MXN vía SPEI, cuando quieras' },
-    { Icon: LockKeyhole, step: 'Etherfuse guarda tu ahorro', desc: 'Respaldado por CETES del gobierno mexicano' },
-    { Icon: TrendingUp, step: 'Etherfuse rinde', desc: `${apy}% APY neto en pesos vía CETES` },
-    { Icon: Gift, step: 'Incentivos c/5 años', desc: 'Hasta 9% extra por fidelidad' },
-    { Icon: User, step: 'Retiras al llegar', desc: 'Todo a tu cuenta bancaria, sin banco intermediario' },
-  ]
+  const pasos = t('withdrawal.pasos', { returnObjects: true, apy })
 
   return (
     <div className="flex flex-col gap-4">
@@ -145,17 +144,17 @@ export function WithdrawalFlow({ meta = 175000 }) {
                 aria-valuenow={Math.round(progresoPct)}
                 aria-valuemin={0}
                 aria-valuemax={100}
-                aria-label={`Progreso de ahorro: ${Math.round(progresoPct)}%`}
+                aria-label={t('withdrawal.progresoAria', { pct: Math.round(progresoPct) })}
                 className="h-3 bg-ink/5 dark:bg-white/5 rounded-full overflow-hidden mb-2">
                 <div className="h-full bg-linear-to-r from-brand-dark to-brand rounded-full transition-all duration-700"
                   style={{ width: `${progresoPct}%` }} />
               </div>
               <div className="flex justify-between">
                 <span className="text-xs text-ink/40 dark:text-white/40">
-                  {formatCurrencyMxn(saldoMxn)} ahorrados
+                  {formatCurrencyMxn(saldoMxn)} {t('withdrawal.ahorradosSufijo')}
                 </span>
                 <span className="text-xs text-ink/40 dark:text-white/40">
-                  Meta: {formatCurrencyMxn(meta)}
+                  {t('withdrawal.meta', { val: formatCurrencyMxn(meta) })}
                 </span>
               </div>
             </div>
@@ -163,10 +162,10 @@ export function WithdrawalFlow({ meta = 175000 }) {
             {/* Stats */}
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'Ahorro actual', val: formatCurrencyMxn(saldoMxn), color: 'text-brand' },
-                { label: 'Falta para meta', val: formatCurrencyMxn(falta), color: 'text-red-400' },
-                { label: 'Depósitos vía SPEI', val: `${depositCount} completados`, color: 'text-yellow-500' },
-                { label: 'Rendimiento APY', val: `${apy}% neto`, color: 'text-green-600' },
+                { label: t('withdrawal.statAhorroActual'), val: formatCurrencyMxn(saldoMxn), color: 'text-brand' },
+                { label: t('withdrawal.statFaltaMeta'), val: formatCurrencyMxn(falta), color: 'text-red-400' },
+                { label: t('withdrawal.statDepositosSpei'), val: t('withdrawal.depositosCompletados', { count: depositCount }), color: 'text-yellow-500' },
+                { label: t('withdrawal.statRendimientoApy'), val: t('withdrawal.rendimientoNeto', { apy }), color: 'text-green-600' },
               ].map(item => (
                 <div key={item.label} className="bg-ink/3 dark:bg-white/3 border border-ink/6 dark:border-white/6 rounded-xl p-3">
                   <p className="text-xs text-ink/40 dark:text-white/40 mb-1">{item.label}</p>
@@ -202,9 +201,10 @@ export function WithdrawalFlow({ meta = 175000 }) {
                     {t('withdrawal.emergenciaTitulo')}
                   </p>
                   <p className="text-sm text-ink/50 dark:text-white/50 mb-3">
-                    Puedes acceder hasta el {MANANA_SEGURO_RATES.loanMaxPct * 100}% de tu ahorro
-                    ({formatCurrencyMxn(saldoMxn * MANANA_SEGURO_RATES.loanMaxPct)}) como autopréstamo
-                    sin romper tu ahorro.
+                    {t('withdrawal.emergenciaDescMxn', {
+                      pct: MANANA_SEGURO_RATES.loanMaxPct * 100,
+                      monto: formatCurrencyMxn(saldoMxn * MANANA_SEGURO_RATES.loanMaxPct),
+                    })}
                   </p>
                   <span className="inline-block bg-yellow-400/15 text-yellow-600 border border-yellow-400/30 rounded-full px-3 py-1.5 text-xs font-semibold">
                     {t('withdrawal.emergenciaLink')}
@@ -229,7 +229,7 @@ export function WithdrawalFlow({ meta = 175000 }) {
               {formatCurrencyMxn(saldoMxn)}
             </p>
             <p className="text-sm text-ink/45 dark:text-white/45">
-              Tu ahorro está listo para retirarse
+              {t('withdrawal.ahorroListoRetiro')}
             </p>
           </div>
 
@@ -237,10 +237,10 @@ export function WithdrawalFlow({ meta = 175000 }) {
             <h6 className="font-semibold text-ink dark:text-white mb-4">{t('withdrawal.resumenTitulo')}</h6>
             <div className="flex flex-col gap-0 mb-5">
               {[
-                { label: 'Ahorro total', val: formatCurrencyMxn(saldoMxn), color: 'text-green-600' },
-                { label: 'Tasa CETES bruta', val: `${cetesRate > 0 ? cetesRate.toFixed(2) : '—'}%`, color: 'text-ink/50 dark:text-white/50' },
-                { label: 'Rendimiento neto', val: `${apy}% APY`, color: 'text-green-600' },
-                { label: 'Comisión plataforma', val: `${formatCurrencyMxn(saldoMxn * 0.01)}`, color: 'text-red-400' },
+                { label: t('withdrawal.cardAhorroTotal'), val: formatCurrencyMxn(saldoMxn), color: 'text-green-600' },
+                { label: t('withdrawal.cardTasaCetesBruta'), val: `${cetesRate > 0 ? cetesRate.toFixed(2) : '—'}%`, color: 'text-ink/50 dark:text-white/50' },
+                { label: t('withdrawal.cardRendimientoNeto'), val: t('rateBadge.apySuffix', { value: apy }), color: 'text-green-600' },
+                { label: t('withdrawal.cardComisionPlataforma'), val: `${formatCurrencyMxn(saldoMxn * 0.01)}`, color: 'text-red-400' },
               ].map(item => (
                 <div key={item.label} className="flex justify-between py-2.5 border-b border-ink/5 dark:border-white/5 last:border-0">
                   <span className="text-xs text-ink/45 dark:text-white/45">{item.label}</span>
@@ -257,9 +257,9 @@ export function WithdrawalFlow({ meta = 175000 }) {
 
             {/* Retiro próximamente */}
             <div className="bg-ink/3 dark:bg-white/3 border border-ink/8 dark:border-white/8 rounded-xl p-4 text-center">
-              <p className="text-sm font-semibold text-ink dark:text-white mb-1">Retiro disponible próximamente</p>
+              <p className="text-sm font-semibold text-ink dark:text-white mb-1">{t('withdrawal.retiroProximamenteTitulo')}</p>
               <p className="text-xs text-ink/45 dark:text-white/45">
-                Estamos habilitando la función de retiro vía SPEI. Te notificaremos cuando esté lista.
+                {t('withdrawal.retiroProximamenteDesc')}
               </p>
             </div>
           </div>
@@ -274,11 +274,11 @@ export function WithdrawalFlow({ meta = 175000 }) {
             <p className="font-semibold text-ink dark:text-white mb-1">{t('withdrawal.errorTitulo')}</p>
             <p className="text-sm text-ink/45 dark:text-white/45">{errorMsg}</p>
           </div>
-          {errorMsg?.includes('sesión') ? (
+          {sinSesion ? (
             <button
               className="w-full bg-brand text-white font-semibold py-3 rounded-xl cursor-pointer"
               onClick={() => window.location.href = '/login'}>
-              Iniciar sesión
+              {t('nav.iniciarSesion')}
             </button>
           ) : (
             <button
