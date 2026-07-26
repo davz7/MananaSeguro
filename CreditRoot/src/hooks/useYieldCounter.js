@@ -5,7 +5,7 @@ const TICK_MS = 100
 
 export function useYieldCounterDirectMxn(realBalance, annualYieldRate, running = true) {
   // El tiempo vive en state. Cada tick lo actualiza desde el interval (async, permitido).
-  // El render solo lee este valor — puro.
+  // El render solo lee este valor , puro.
   const [currentTime, setCurrentTime] = useState(() => Date.now())
 
   useEffect(() => {
@@ -14,7 +14,7 @@ export function useYieldCounterDirectMxn(realBalance, annualYieldRate, running =
     return () => clearInterval(intervalId)
   }, [running, realBalance])
 
-  // ── Caso pausado ──
+  // Caso pausado
   if (!running || realBalance <= 0) {
     return {
       isGrowing: false,
@@ -23,7 +23,7 @@ export function useYieldCounterDirectMxn(realBalance, annualYieldRate, running =
     }
   }
 
-  // ── Cálculo derivado (puro: solo depende de currentTime + props) ──
+  // Cálculo derivado (puro: solo depende de currentTime + props)
   const ratePerMs = (annualYieldRate || 0) / 100 / (365 * 24 * 60 * 60 * 1000)
   const now = new Date(currentTime)
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()

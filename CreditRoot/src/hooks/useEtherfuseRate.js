@@ -20,7 +20,7 @@ export function useEtherfuseRate() {
 
     async function fetchRate() {
       try {
-        // Llama al proxy local de Vite — el SDK corre en Node, sin CORS
+        // Llama al proxy local de Vite , el SDK corre en Node, sin CORS
         const res = await fetch('/api/cetes-rate')
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const { rate } = await res.json()
@@ -81,7 +81,7 @@ function saveToCache(rate) {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({ rate, ts: Date.now() }))
   } catch {
-    // fallo silencioso — el cache es opcional
+    // fallo silencioso , el cache es opcional
   }
 }
 

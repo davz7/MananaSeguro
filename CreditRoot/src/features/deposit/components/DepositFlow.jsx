@@ -1,13 +1,13 @@
 // src/features/deposit/components/DepositFlow.jsx
-//
+// 
 // Flujo de depósito SPEI → CETES via Etherfuse
-// Usa las Netlify functions del backend — sin Freighter, sin etherfuseRamp.js
-//
+// Usa las Netlify functions del backend , sin Freighter, sin etherfuseRamp.js
+// 
 // Props:
-//   usuarioId  — ID del usuario en Supabase
-//   kycStatus  — estado KYC del usuario ('pending' | 'approved')
-//   onComplete — callback cuando el depósito se confirma
-//   onClose    — callback para cerrar
+// usuarioId  , ID del usuario en Supabase
+// kycStatus  , estado KYC del usuario ('pending' | 'approved')
+// onComplete , callback cuando el depósito se confirma
+// onClose    , callback para cerrar
 
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -50,7 +50,7 @@ function DepositSkeleton() {
 export function DepositFlow({ usuarioId, kycStatus, onComplete, onClose }) {
   const { t } = useTranslation()
 
-  // ── Debug: forzar un crash para probar el ErrorBoundary ───────────────────
+  // Debug: forzar un crash para probar el ErrorBoundary
   // Visita la app con ?crash=1 en la URL para lanzar un error durante el render
   // y verificar que el ErrorBoundary global muestra el fallback en vez de la
   // pantalla en blanco.
@@ -70,7 +70,7 @@ export function DepositFlow({ usuarioId, kycStatus, onComplete, onClose }) {
   const [fetchingKyc, setFetchingKyc] = useState(false)
   const [error, setError] = useState(null)
 
-  // ── Polling del estado de la orden ────────────────────────────────────────
+  // Polling del estado de la orden
   useEffect(() => {
     if (!order?.orderId || orderStatus === 'completed') return
 
@@ -92,7 +92,7 @@ export function DepositFlow({ usuarioId, kycStatus, onComplete, onClose }) {
     return () => clearInterval(interval)
   }, [order, orderStatus, onComplete])
 
-  // ── KYC: abrir Etherfuse ──────────────────────────────────────────────────
+  // KYC: abrir Etherfuse
   async function handleStartKyc() {
     setFetchingKyc(true)
     setError(null)
@@ -114,7 +114,7 @@ export function DepositFlow({ usuarioId, kycStatus, onComplete, onClose }) {
     }
   }
 
-  // ── Depósito: crear orden ─────────────────────────────────────────────────
+  // Depósito: crear orden
   async function handleDepositar() {
     setLoading(true)
     setError(null)
@@ -147,7 +147,7 @@ export function DepositFlow({ usuarioId, kycStatus, onComplete, onClose }) {
   return (
     <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6 flex flex-col gap-5">
 
-      {/* ── KYC ── */}
+      {/* KYC */}
       {step === STEPS.KYC && (
         <>
           <div>
@@ -176,7 +176,7 @@ export function DepositFlow({ usuarioId, kycStatus, onComplete, onClose }) {
       )}
 
 
-      {/* ── Monto ── */}
+      {/* Monto */}
       {step === STEPS.AMOUNT && (
         <>
           <div>
@@ -232,7 +232,7 @@ export function DepositFlow({ usuarioId, kycStatus, onComplete, onClose }) {
         </>
       )}
 
-      {/* ── CLABE ── */}
+      {/* CLABE */}
       {step === STEPS.CLABE && order && (
         <>
           <div>
@@ -270,7 +270,7 @@ export function DepositFlow({ usuarioId, kycStatus, onComplete, onClose }) {
         </>
       )}
 
-      {/* ── Done ── */}
+      {/* Done */}
       {step === STEPS.DONE && (
         <div className="flex flex-col items-center text-center gap-5 py-4">
           <div className="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center text-3xl">

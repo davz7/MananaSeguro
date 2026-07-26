@@ -1,6 +1,6 @@
 // src/features/planner/components/ContributionPlanner.jsx
-// Configurador de meta de ahorro — integrado en el Dashboard
-// Ya no usa Freighter ni Stellar — el depósito real se hace desde DepositFlow
+// Configurador de meta de ahorro , integrado en el Dashboard
+// Ya no usa Freighter ni Stellar , el depósito real se hace desde DepositFlow
 
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -72,7 +72,7 @@ export function ContributionPlanner() {
   return (
     <div className="grid lg:grid-cols-12 gap-4">
 
-      {/* ── Configurador ── */}
+      {/* Configurador */}
       <div className="lg:col-span-5">
         <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6 h-full">
           <h5 className="font-display font-black text-ink dark:text-white text-lg mb-5">
@@ -185,7 +185,7 @@ export function ContributionPlanner() {
         </div>
       </div>
 
-      {/* ── Proyección ── */}
+      {/* Proyección */}
       <div className="lg:col-span-7">
         <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6 h-full">
           <h5 className="font-display font-black text-ink dark:text-white text-lg mb-5">
@@ -222,7 +222,7 @@ export function ContributionPlanner() {
         </div>
       </div>
 
-      {/* ── Ciclos ── */}
+      {/* Ciclos */}
       {showCycles && cycles.length > 0 && (
         <div className="lg:col-span-12">
           <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
@@ -261,7 +261,7 @@ export function ContributionPlanner() {
         </div>
       )}
 
-      {/* ── Info — sin bloquear con Freighter ── */}
+      {/* Info , sin bloquear con Freighter */}
       <div className="lg:col-span-12">
         <div className="bg-brand/5 border border-brand/20 rounded-2xl p-5 flex items-start gap-3">
           <span className="text-2xl shrink-0">💡</span>

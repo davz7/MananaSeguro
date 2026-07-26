@@ -1,19 +1,19 @@
 // src/components/ErrorBoundary.jsx
-//
+// 
 // Error Boundary global de la app.
-//
+// 
 // React requiere que los Error Boundaries sean componentes de clase: los
 // hooks (useState/useEffect) NO pueden capturar errores de renderizado de los
 // hijos. Por eso este componente es una clase y no una función.
-//
+// 
 // Captura cualquier error que se lance durante el render / lifecycle de los
 // componentes hijos (p. ej. DepositFlow o WithdrawalFlow cuando el polling
 // contra /api/etherfuse/order-status devuelve una forma inesperada) y muestra
 // una pantalla de respaldo amigable en lugar de dejar la app en blanco.
-//
+// 
 // Props:
-//   children — árbol a proteger
-//   onReset  — (opcional) callback extra al pulsar "Reintentar"
+// children , árbol a proteger
+// onReset  , (opcional) callback extra al pulsar "Reintentar"
 
 import { Component, Fragment } from 'react'
 import { Link } from 'react-router-dom'
@@ -38,7 +38,7 @@ export class ErrorBoundary extends Component {
     console.error('[ErrorBoundary] Componente capturado:', error, errorInfo)
 
     // TODO(Sentry): reportar a Sentry cuando esté configurado, p. ej.
-    //   Sentry.captureException(error, { extra: { componentStack: errorInfo?.componentStack } })
+    // Sentry.captureException(error, { extra: { componentStack: errorInfo?.componentStack } })
 
     this.setState({ errorInfo })
   }

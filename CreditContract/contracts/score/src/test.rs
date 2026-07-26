@@ -64,7 +64,7 @@ fn test_depositar_minimo() {
 #[test]
 fn test_depositar_bajo_minimo() {
     let (_env, cliente, _admin, usuario, _usdc) = setup();
-    // $1 USDC = 10_000_000 stroops — debe fallar con MontoBajoMinimo
+    // $1 USDC = 10_000_000 stroops, debe fallar con MontoBajoMinimo
     let res = cliente.try_depositar(&usuario, &10_000_000, &20);
     assert_eq!(res, Err(Ok(Error::MontoBajoMinimo)));
 }
@@ -72,11 +72,11 @@ fn test_depositar_bajo_minimo() {
 #[test]
 fn test_depositar_anios_bloqueo_invalidos() {
     let (_env, cliente, _admin, usuario, _usdc) = setup();
-    // Bloqueo 0 años — debe fallar con AniosBloqueoInvalidos
+    // Bloqueo 0 años, debe fallar con AniosBloqueoInvalidos
     let res_cero = cliente.try_depositar(&usuario, &20_000_000, &0);
     assert_eq!(res_cero, Err(Ok(Error::AniosBloqueoInvalidos)));
 
-    // Bloqueo 41 años — debe fallar con AniosBloqueoInvalidos
+    // Bloqueo 41 años, debe fallar con AniosBloqueoInvalidos
     let res_excede = cliente.try_depositar(&usuario, &20_000_000, &41);
     assert_eq!(res_excede, Err(Ok(Error::AniosBloqueoInvalidos)));
 }
@@ -113,7 +113,7 @@ fn test_retirar_meta_alcanzada() {
     let primer_deposito = 100_000_000i128;
     cliente.depositar(&usuario, &primer_deposito, &1);
 
-    // Meta = 1_000_000_000 — depositar más para alcanzarla
+    // Meta = 1_000_000_000, depositar más para alcanzarla
     let usdc_admin = token::StellarAssetClient::new(&env, &usdc);
     usdc_admin.mint(&usuario, &2_000_000_000);
 
@@ -185,7 +185,7 @@ fn test_autoprestamo_excede_limite() {
     let (_env, cliente, _admin, usuario, _usdc) = setup();
 
     cliente.depositar(&usuario, &100_000_000, &20);
-    // Solicitar 40% — debe fallar con ExcedeLimitePrestamo
+    // Solicitar 40%, debe fallar con ExcedeLimitePrestamo
     let res = cliente.try_solicitar_prestamo(&usuario, &40_000_000);
     assert_eq!(res, Err(Ok(Error::ExcedeLimitePrestamo)));
 }
@@ -223,7 +223,7 @@ fn test_no_retirar_con_prestamo_activo() {
         l.timestamp += 365 * 24 * 3600 + 1;
     });
 
-    // Intentar retirar con préstamo activo — debe fallar con PrestamoPendiente
+    // Intentar retirar con préstamo activo, debe fallar con PrestamoPendiente
     let res = cliente.try_retirar(&usuario);
     assert_eq!(res, Err(Ok(Error::PrestamoPendiente)));
 }

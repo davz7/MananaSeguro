@@ -19,7 +19,7 @@ export function AuthScreen({ onAuth, onVolver }) {
   const [googleListo, setGoogleListo] = useState(false)
   const googleBtnRef = useRef(null)
 
-  // ── Callback de Google — cuando el usuario selecciona su cuenta ────────────
+  // Callback de Google , cuando el usuario selecciona su cuenta
   const handleCredentialResponse = useCallback(async (response) => {
     if (!response.credential) {
       setError(t('auth.errorSinCredencial'))
@@ -44,7 +44,7 @@ export function AuthScreen({ onAuth, onVolver }) {
     }
   }, [onAuth, t])
 
-  // ── Inicializar SDK de Google ───────────────────────────────────────────────
+  // Inicializar SDK de Google
   const inicializarGoogle = useCallback(() => {
     if (!window.google?.accounts) return
     window.google.accounts.id.initialize({
@@ -67,7 +67,7 @@ export function AuthScreen({ onAuth, onVolver }) {
     setGoogleListo(true)
   }, [handleCredentialResponse])
 
-  // ── Cargar SDK de Google ───────────────────────────────────────────────────
+  // Cargar SDK de Google
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) {
       setError(t('auth.errorConfig'))
@@ -86,7 +86,7 @@ export function AuthScreen({ onAuth, onVolver }) {
     document.head.appendChild(script)
   }, [inicializarGoogle, t])
 
-  // ── Freighter: conectar wallet ─────────────────────────────────────────────
+  // Freighter: conectar wallet
   async function handleConectarFreighter() {
     setLoading(true)
     setError(null)
@@ -160,7 +160,7 @@ export function AuthScreen({ onAuth, onVolver }) {
           <div className="anim-fade-up-2">
             <div className="bg-white dark:bg-white/5 rounded-3xl p-8 lg:p-10 border border-ink/8 dark:border-white/8 shadow-xl shadow-ink/5">
 
-              {/* ── Paso inicio ── */}
+              {/* Paso inicio */}
               {paso === 'inicio' && (
                 <div className="flex flex-col gap-5">
                   <div className="text-center mb-1">
@@ -222,7 +222,7 @@ export function AuthScreen({ onAuth, onVolver }) {
                     <div className="flex-1 h-px bg-ink/8 dark:bg-white/8" />
                   </div>
 
-                  {/* Freighter — avanzado */}
+                  {/* Freighter , avanzado */}
                   <button
                     className="w-full flex items-center justify-center gap-2 border border-ink/8 dark:border-white/8 hover:border-ink/20 dark:hover:border-white/20 text-ink/35 dark:text-white/35 hover:text-ink/60 dark:hover:text-white/60 font-medium py-3 rounded-xl transition-all cursor-pointer text-sm disabled:opacity-50"
                     onClick={() => setPaso('freighter')}
@@ -244,7 +244,7 @@ export function AuthScreen({ onAuth, onVolver }) {
                 </div>
               )}
 
-              {/* ── Paso freighter ── */}
+              {/* Paso freighter */}
               {paso === 'freighter' && (
                 <div className="flex flex-col items-center text-center gap-6">
                   <div className="w-16 h-16 rounded-2xl bg-brand/10 flex items-center justify-center">
@@ -287,7 +287,7 @@ export function AuthScreen({ onAuth, onVolver }) {
                 </div>
               )}
 
-              {/* ── Paso nombre (Freighter) ── */}
+              {/* Paso nombre (Freighter) */}
               {paso === 'nombre' && (
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                   <div className="bg-green-500/8 border border-green-500/20 rounded-xl px-4 py-3 flex items-center gap-3">

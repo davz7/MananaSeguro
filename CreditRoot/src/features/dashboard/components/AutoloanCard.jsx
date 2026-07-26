@@ -48,7 +48,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
           setFase('form')
         }
       } catch {
-        /* contrato sin datos aún — mostramos formulario */
+        /* contrato sin datos aún, mostramos formulario */
         setFase('form')
       }
     }
@@ -103,7 +103,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
     setRequested(Math.max(10, Math.min(250, Math.floor(maxLoan))))
   }
 
-  // ── FASE: Cargando ────────────────────────────────────────────────────────────
+  // FASE: Cargando
   if (fase === 'cargando') return (
     <div className="p-6 rounded-2xl bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 text-center">
       <svg className="animate-spin mx-auto mb-3 text-yellow-500" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -116,7 +116,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
   return (
     <div className="flex flex-col gap-4">
 
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
         <div className="flex items-start justify-between flex-wrap gap-3">
           <div>
@@ -136,7 +136,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
         </div>
       </div>
 
-      {/* ── Sin saldo bloqueado ── */}
+      {/* Sin saldo bloqueado */}
       {lockedBalance === 0 && fase === 'form' && (
         <div className="bg-white dark:bg-white/5 border border-dashed border-ink/10 dark:border-white/10 rounded-2xl p-6 text-center">
           <div className="mb-3"><Lock size={36} aria-hidden="true" className="inline-block text-ink/30 dark:text-white/30" /></div>
@@ -148,7 +148,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
         </div>
       )}
 
-      {/* ── FASE: Formulario ── */}
+      {/* FASE: Formulario */}
       {fase === 'form' && lockedBalance > 0 && (
         <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6 flex flex-col gap-4">
 
@@ -266,7 +266,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
         </div>
       )}
 
-      {/* ── FASE: Confirmando ── */}
+      {/* FASE: Confirmando */}
       {fase === 'confirmando' && (
         <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6 text-center">
           <div className="mb-4"><TriangleAlert size={48} aria-hidden="true" className="inline-block text-yellow-500" /></div>
@@ -294,7 +294,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
         </div>
       )}
 
-      {/* ── FASE: Procesando ── */}
+      {/* FASE: Procesando */}
       {fase === 'procesando' && (
         <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6 text-center">
           <svg className="animate-spin mx-auto mb-3 text-yellow-500" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -304,7 +304,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
         </div>
       )}
 
-      {/* ── FASE: Error ── */}
+      {/* FASE: Error */}
       {fase === 'error' && (
         <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-6 text-center">
           <div className="mb-3"><XCircle size={36} aria-hidden="true" className="inline-block text-red-500" /></div>
@@ -318,7 +318,7 @@ export function AutoloanCard({ lockedBalance = 0, walletAddress = null }) {
         </div>
       )}
 
-      {/* ── FASE: Activo ── */}
+      {/* FASE: Activo */}
       {fase === 'activo' && (
         <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6 flex flex-col gap-4">
 

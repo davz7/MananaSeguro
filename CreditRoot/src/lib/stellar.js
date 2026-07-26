@@ -15,7 +15,7 @@ export const USDC_ASSET = new StellarSdk.Asset(
 // 1 USDC = 10_000_000 stroops (7 decimales Stellar)
 export const STROOP = 10_000_000
 
-// ─── Helper: construir, simular y retornar tx ─────────────────────────────────
+// Helper: construir, simular y retornar tx
 async function buildAndSimulate(account, operations) {
   const tx = new StellarSdk.TransactionBuilder(account, {
     fee: StellarSdk.BASE_FEE,
@@ -32,13 +32,13 @@ async function buildAndSimulate(account, operations) {
   return StellarSdk.rpc.assembleTransaction(built, sim).build()
 }
 
-// ─── Balances de la wallet ────────────────────────────────────────────────────
+// Balances de la wallet
 export async function getBalances(publicKey) {
   const account = await server.loadAccount(publicKey)
   return account.balances
 }
 
-// ─── Depositar USDC y bloquear ────────────────────────────────────────────────
+// Depositar USDC y bloquear
 export async function lockFunds(sourcePublicKey, amountUSDC, aniosBloqueo = 20) {
   const contract = new StellarSdk.Contract(CONTRACT_ID)
   const account = await rpc.getAccount(sourcePublicKey)
@@ -54,7 +54,7 @@ export async function lockFunds(sourcePublicKey, amountUSDC, aniosBloqueo = 20) 
   ])
 }
 
-// ─── Ver saldo bloqueado en el contrato ───────────────────────────────────────
+// Ver saldo bloqueado en el contrato
 export async function verBalanceContrato(publicKey) {
   const contract = new StellarSdk.Contract(CONTRACT_ID)
   const account = await rpc.getAccount(publicKey)
@@ -72,7 +72,7 @@ export async function verBalanceContrato(publicKey) {
   return Number(raw) / STROOP
 }
 
-// ─── Ver fecha de retiro ──────────────────────────────────────────────────────
+// Ver fecha de retiro
 export async function verFechaRetiro(publicKey) {
   const contract = new StellarSdk.Contract(CONTRACT_ID)
   const account = await rpc.getAccount(publicKey)
@@ -94,7 +94,7 @@ export async function verFechaRetiro(publicKey) {
   })
 }
 
-// ─── Ver meta de retiro ───────────────────────────────────────────────────────
+// Ver meta de retiro
 export async function verMeta(publicKey) {
   const contract = new StellarSdk.Contract(CONTRACT_ID)
   const account = await rpc.getAccount(publicKey)
@@ -111,7 +111,7 @@ export async function verMeta(publicKey) {
   return Number(raw) / STROOP
 }
 
-// ─── Ver número de depósitos ──────────────────────────────────────────────────
+// Ver número de depósitos
 export async function verDepositos(publicKey) {
   const contract = new StellarSdk.Contract(CONTRACT_ID)
   const account = await rpc.getAccount(publicKey)
@@ -127,7 +127,7 @@ export async function verDepositos(publicKey) {
   return Number(StellarSdk.scValToNative(sim.result?.retval))
 }
 
-// ─── Retirar fondos al llegar la meta ────────────────────────────────────────
+// Retirar fondos al llegar la meta
 export async function retirarFondos(publicKey) {
   const contract = new StellarSdk.Contract(CONTRACT_ID)
   const account = await rpc.getAccount(publicKey)
@@ -140,7 +140,7 @@ export async function retirarFondos(publicKey) {
   ])
 }
 
-// ─── Solicitar autopréstamo ───────────────────────────────────────────────────
+// Solicitar autopréstamo
 export async function solicitarPrestamo(publicKey, amountUSDC) {
   const contract = new StellarSdk.Contract(CONTRACT_ID)
   const account = await rpc.getAccount(publicKey)
@@ -155,7 +155,7 @@ export async function solicitarPrestamo(publicKey, amountUSDC) {
   ])
 }
 
-// ─── Pagar cuota del autopréstamo ─────────────────────────────────────────────
+// Pagar cuota del autopréstamo
 export async function pagarPrestamo(publicKey) {
   const contract = new StellarSdk.Contract(CONTRACT_ID)
   const account = await rpc.getAccount(publicKey)
@@ -168,7 +168,7 @@ export async function pagarPrestamo(publicKey) {
   ])
 }
 
-// ─── Ver estado del autopréstamo ──────────────────────────────────────────────
+// Ver estado del autopréstamo
 export async function verPrestamo(publicKey) {
   const contract = new StellarSdk.Contract(CONTRACT_ID)
   const account = await rpc.getAccount(publicKey)
@@ -188,7 +188,7 @@ export async function verPrestamo(publicKey) {
   }
 }
 
-// ─── Enviar transacción firmada ───────────────────────────────────────────────
+// Enviar transacción firmada
 export async function enviarTransaccion(signedXdr) {
   const tx = StellarSdk.TransactionBuilder.fromXDR(signedXdr, networkPassphrase)
   const result = await server.submitTransaction(tx)

@@ -1,8 +1,8 @@
 // src/features/goals/components/GoalSetup.jsx
-//
+// 
 // Componente de configuración de primera meta.
 // Se muestra cuando el usuario no tiene ninguna meta creada.
-// Simplificado — solo ahorro mensual y años al retiro.
+// Simplificado , solo ahorro mensual y años al retiro.
 
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -83,7 +83,7 @@ export function GoalSetup({ usuario, onMetaCreada }) {
         </h5>
 
         <div className="grid lg:grid-cols-2 gap-6">
-          {/* Lado izquierdo — configuración */}
+          {/* Lado izquierdo , configuración */}
           <div className="flex flex-col gap-5">
 
             {/* Ahorro mensual */}
@@ -153,7 +153,7 @@ export function GoalSetup({ usuario, onMetaCreada }) {
 
           </div>
 
-          {/* Lado derecho — proyección */}
+          {/* Lado derecho , proyección */}
           <div className="flex flex-col gap-3">
             <div className="bg-brand/5 border border-brand/15 rounded-xl p-4">
               <p className="text-xs text-ink/40 dark:text-white/40 mb-1">{t('goalSetup.totalAcumularas')}</p>

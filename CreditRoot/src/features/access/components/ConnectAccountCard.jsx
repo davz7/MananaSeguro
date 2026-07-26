@@ -1,7 +1,7 @@
 // src/features/access/components/ConnectAccountCard.jsx
-//
+// 
 // Muestra la información del usuario autenticado con Google.
-// Ya no pide conectar Freighter — el modelo es custodial via Supabase.
+// Ya no pide conectar Freighter , el modelo es custodial via Supabase.
 
 import { useTranslation } from 'react-i18next'
 
@@ -35,7 +35,7 @@ export function ConnectAccountCard({ usuario }) {
     )
   }
 
-  // Usuario autenticado — mostrar sus datos
+  // Usuario autenticado , mostrar sus datos
   const panels = [
     {
       label: t('connectCard.panelEstado'),

@@ -61,7 +61,7 @@ export function ReferralModule({ userName = 'Usuario', walletAddress = null }) {
   return (
     <div className="flex flex-col gap-4">
 
-      {/* ── Tier actual ── */}
+      {/* Tier actual */}
       <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
         <div className="flex items-start justify-between flex-wrap gap-3 mb-5">
           <div>
@@ -124,7 +124,7 @@ export function ReferralModule({ userName = 'Usuario', walletAddress = null }) {
         </div>
       </div>
 
-      {/* ── Link de referido ── */}
+      {/* Link de referido */}
       <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
         <h6 className="font-semibold text-ink dark:text-white mb-3">{t('referrals.tuLink')}</h6>
         <div className="flex gap-2 mb-2">
@@ -149,7 +149,7 @@ export function ReferralModule({ userName = 'Usuario', walletAddress = null }) {
         </p>
       </div>
 
-      {/* ── Invitar por correo ── */}
+      {/* Invitar por correo */}
       <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
         <h6 className="font-semibold text-ink dark:text-white mb-3">{t('referrals.invitarCorreo')}</h6>
         <div className="flex gap-2 mb-1">
@@ -172,7 +172,7 @@ export function ReferralModule({ userName = 'Usuario', walletAddress = null }) {
         )}
       </div>
 
-      {/* ── Lista de referidos ── */}
+      {/* Lista de referidos */}
       {referrals.length > 0 && (
         <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
           <h6 className="font-semibold text-ink dark:text-white mb-4">{t('referrals.misReferidos')}</h6>
@@ -228,7 +228,7 @@ export function ReferralModule({ userName = 'Usuario', walletAddress = null }) {
   )
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// Helpers
 function generateCode(seed) {
   let hash = 0
   for (let i = 0; i < seed.length; i++) {
