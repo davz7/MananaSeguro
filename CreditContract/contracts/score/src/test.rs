@@ -248,6 +248,71 @@ fn test_autoprestamo_ciclo_completo() {
 }
 
 #[test]
+fn test_autoprestamo_cronograma_coincide_con_frontend() {
+    let (env, cliente, admin, usuario, usdc) = setup();
+    let token_client = token::Client::new(&env, &usdc);
+    let prestamo = 200_000_001i128;
+    let esperado = [
+        (8_333_333, 1_000_000, 9_333_333, 191_666_668),
+        (8_333_333, 958_333, 9_291_666, 183_333_335),
+        (8_333_333, 916_666, 9_249_999, 175_000_002),
+        (8_333_333, 875_000, 9_208_333, 166_666_669),
+        (8_333_333, 833_333, 9_166_666, 158_333_336),
+        (8_333_333, 791_666, 9_124_999, 150_000_003),
+        (8_333_333, 750_000, 9_083_333, 141_666_670),
+        (8_333_333, 708_333, 9_041_666, 133_333_337),
+        (8_333_333, 666_666, 8_999_999, 125_000_004),
+        (8_333_333, 625_000, 8_958_333, 116_666_671),
+        (8_333_333, 583_333, 8_916_666, 108_333_338),
+        (8_333_333, 541_666, 8_874_999, 100_000_005),
+        (8_333_333, 500_000, 8_833_333, 91_666_672),
+        (8_333_333, 458_333, 8_791_666, 83_333_339),
+        (8_333_333, 416_666, 8_749_999, 75_000_006),
+        (8_333_334, 375_000, 8_708_334, 66_666_672),
+        (8_333_334, 333_333, 8_666_667, 58_333_338),
+        (8_333_334, 291_666, 8_625_000, 50_000_004),
+        (8_333_334, 250_000, 8_583_334, 41_666_670),
+        (8_333_334, 208_333, 8_541_667, 33_333_336),
+        (8_333_334, 166_666, 8_500_000, 25_000_002),
+        (8_333_334, 125_000, 8_458_334, 16_666_668),
+        (8_333_334, 83_333, 8_416_667, 8_333_334),
+        (8_333_334, 41_666, 8_375_000, 0),
+    ];
+
+    cliente.depositar(&usuario, &666_666_670, &20);
+    cliente.solicitar_prestamo(&usuario, &prestamo);
+
+    let mut capital_total = 0i128;
+    let mut interes_total = 0i128;
+    let mut pago_total = 0i128;
+
+    for (mes, &(capital, interes, pago, saldo)) in esperado.iter().enumerate() {
+        let saldo_antes = cliente.ver_prestamo(&usuario).0;
+        let usuario_antes = token_client.balance(&usuario);
+        let admin_antes = token_client.balance(&admin);
+
+        cliente.pagar_prestamo(&usuario);
+
+        let saldo_despues = cliente.ver_prestamo(&usuario).0;
+        assert_eq!(saldo_antes - saldo_despues, capital);
+        assert_eq!(admin_antes + interes, token_client.balance(&admin));
+        assert_eq!(usuario_antes - pago, token_client.balance(&usuario));
+        assert_eq!(saldo_despues, saldo);
+        if mes < 23 {
+            assert_eq!(cliente.ver_prestamo(&usuario).1, mes as u32 + 1);
+        }
+
+        capital_total += capital;
+        interes_total += interes;
+        pago_total += pago;
+    }
+
+    assert_eq!(capital_total, prestamo);
+    assert_eq!(interes_total, 12_499_992);
+    assert_eq!(pago_total, 212_499_993);
+}
+
+#[test]
 fn test_retirar_math_comision() {
     let (env, cliente, admin, usuario, usdc) = setup();
     let token_client = token::Client::new(&env, &usdc);
