@@ -68,7 +68,7 @@ function Footer() {
                         {SOCIAL_LINKS.map((link) => {
                             const Icon = link.icon
                             return (
-                                
+                                <a
                                     key={link.labelKey}
                                     href={link.href}
                                     target="_blank"
