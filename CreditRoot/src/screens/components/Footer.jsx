@@ -37,11 +37,11 @@ const MailIcon = ({ size = 18 }) => (
 )
 
 const SOCIAL_LINKS = [
-    { icon: XIcon, href: 'https://x.com/mananaseguro_mx', label: 'X / Twitter' },
-    { icon: FacebookIcon, href: 'https://www.facebook.com/61573338863765/', label: 'Facebook' },
-    { icon: InstagramIcon, href: 'https://www.instagram.com/mananaseguro_mx', label: 'Instagram' },
-    { icon: LinkedinIcon, href: 'https://linkedin.com/company/mananaseguro', label: 'LinkedIn' },
-    { icon: MailIcon, href: 'mailto: contactomananaseguro@gmail.com', label: 'Correo' },
+    { icon: XIcon, href: 'https://x.com/mananaseguro_mx', labelKey: 'footer.social.x' },
+    { icon: FacebookIcon, href: 'https://www.facebook.com/61573338863765/', labelKey: 'footer.social.facebook' },
+    { icon: InstagramIcon, href: 'https://www.instagram.com/mananaseguro_mx', labelKey: 'footer.social.instagram' },
+    { icon: LinkedinIcon, href: 'https://linkedin.com/company/mananaseguro', labelKey: 'footer.social.linkedin' },
+    { icon: MailIcon, href: 'mailto: contactomananaseguro@gmail.com', labelKey: 'footer.social.correo' },
 ]
 
 function Footer() {
@@ -57,25 +57,28 @@ function Footer() {
 
                     {/* Logo */}
                     <div className="flex items-center gap-2">
-                        <img src={logoCompleto} alt="Logo Mañana Seguro" className="h-8 w-auto rounded-lg" />
+                        <img src={logoCompleto} alt={t('nav.logoAlt')} className="h-8 w-auto rounded-lg" />
                         <span className="font-display font-bold text-lg text-ink dark:text-white tracking-tight">
-                            Mañana <span className="text-brand">Seguro</span>
+                            {t('nav.marca')} <span className="text-brand">{t('nav.marcaAccent')}</span>
                         </span>
                     </div>
 
                     {/* Redes sociales */}
                     <div className="flex items-center gap-3">
-                        {SOCIAL_LINKS.map(({ href, label }) => (
-                            <a
-                                key={label}
-                                href={href}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                aria-label={label}
-                                className="text-gray dark:text-white/40 hover:text-brand dark:hover:text-brand transition-colors">
-                                <Icon size={18} />
-                            </a>
-                        ))}
+                        {SOCIAL_LINKS.map((link) => {
+                            const Icon = link.icon
+                            return (
+                                <a
+                                    key={link.labelKey}
+                                    href={link.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label={t(link.labelKey)}
+                                    className="text-gray dark:text-white/40 hover:text-brand dark:hover:text-brand transition-colors">
+                                    <Icon size={18} />
+                                </a>
+                            )
+                        })}
                     </div>
 
                     {/* Créditos */}
@@ -91,13 +94,13 @@ function Footer() {
 
                 {/* Fila legal */}
                 <div className="flex flex-wrap justify-between items-center gap-2 border-t border-ink/8 dark:border-white/8 pt-4 text-xs text-gray/60 dark:text-white/30">
-                    <span>© {year} Mañana Seguro. Todos los derechos reservados.</span>
+                    <span>{t('footer.derechos', { year })}</span>
                     <div className="flex items-center gap-4">
                         <a href="/privacidad" className="hover:text-brand transition-colors">
-                            Aviso de privacidad
+                            {t('footer.privacidad')}
                         </a>
                         <a href="/terminos" className="hover:text-brand transition-colors">
-                            Términos y condiciones
+                            {t('footer.terminos')}
                         </a>
                     </div>
                 </div>

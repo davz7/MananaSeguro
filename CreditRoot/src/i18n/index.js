@@ -3,20 +3,14 @@ import { initReactI18next } from 'react-i18next'
 import es from './es.json'
 import en from './en.json'
 
-// Get stored language preference or detect browser language
+// Get stored language preference, defaulting to Spanish (the product's
+// primary language) when the user hasn't explicitly chosen otherwise.
 const getInitialLanguage = () => {
   const storedLang = localStorage.getItem('manana-seguro-language')
   if (storedLang && (storedLang === 'es' || storedLang === 'en')) {
     return storedLang
   }
-  
-  // Detect browser language
-  const browserLang = navigator.language || navigator.userLanguage
-  if (browserLang.startsWith('en')) {
-    return 'en'
-  }
-  
-  // Default to Spanish
+
   return 'es'
 }
 
