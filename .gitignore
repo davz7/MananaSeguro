@@ -39,3 +39,5 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+# ===== Rust build output =====
+**/target/

@@ -4,6 +4,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import {
+  Building2, LockKeyhole, TrendingUp, Gift, User,
+  Hourglass, TriangleAlert, PartyPopper
+} from 'lucide-react'
 import { useEtherfuseRate } from '../../../hooks/useEtherfuseRate'
 import { MANANA_SEGURO_RATES } from '../../../data/retirementContent'
 import { formatCurrencyMxn } from '../../../utils/formatters'
@@ -118,8 +122,8 @@ export function WithdrawalFlow({ meta = 175000 }) {
 
           <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 rounded-full bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center text-xl shrink-0">
-                ⏳
+              <div className="w-10 h-10 rounded-full bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center shrink-0">
+                <Hourglass size={20} aria-hidden="true" className="text-yellow-500" />
               </div>
               <div>
                 <h4 className="font-semibold text-ink dark:text-white">{t('withdrawal.noAlcanzadaTitulo')}</h4>
@@ -177,7 +181,7 @@ export function WithdrawalFlow({ meta = 175000 }) {
             <div className="flex flex-col gap-3">
               {pasos.map((paso, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <span className="text-xl shrink-0 mt-0.5">{paso.icon}</span>
+                  <span className="shrink-0 mt-0.5"><paso.Icon size={20} aria-hidden="true" className="text-ink/40 dark:text-white/40" /></span>
                   <div>
                     <p className="text-sm font-semibold text-ink dark:text-white">{paso.step}</p>
                     <p className="text-xs text-ink/45 dark:text-white/45">{paso.desc}</p>
@@ -191,7 +195,7 @@ export function WithdrawalFlow({ meta = 175000 }) {
           {saldoMxn > 0 && (
             <div className="bg-yellow-400/5 border border-dashed border-yellow-400/30 rounded-2xl p-5">
               <div className="flex items-start gap-3">
-                <span className="text-2xl">🚨</span>
+                <TriangleAlert size={24} aria-hidden="true" className="text-yellow-500 shrink-0" />
                 <div>
                   <p className="font-semibold text-ink dark:text-white mb-1">
                     {t('withdrawal.emergenciaTitulo')}
@@ -216,7 +220,7 @@ export function WithdrawalFlow({ meta = 175000 }) {
       {fase === 'alcanzada' && (
         <div className="flex flex-col gap-4">
           <div className="bg-green-500/8 border border-green-500/25 rounded-2xl p-8 text-center">
-            <div className="text-5xl mb-3">🎉</div>
+            <div className="mb-3"><PartyPopper size={48} aria-hidden="true" className="inline-block text-yellow-500" /></div>
             <h4 className="font-display font-black text-ink dark:text-white text-2xl mb-2">
               {t('withdrawal.alcanzadaTitulo')}
             </h4>
@@ -266,7 +270,7 @@ export function WithdrawalFlow({ meta = 175000 }) {
       {fase === 'error' && (
         <div className="bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-8">
           <div className="text-center mb-5">
-            <div className="text-4xl mb-3">⚠️</div>
+            <div className="mb-3"><TriangleAlert size={36} aria-hidden="true" className="inline-block text-red-500" /></div>
             <p className="font-semibold text-ink dark:text-white mb-1">{t('withdrawal.errorTitulo')}</p>
             <p className="text-sm text-ink/45 dark:text-white/45">{errorMsg}</p>
           </div>

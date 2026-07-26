@@ -17,6 +17,7 @@
 
 import { Component, Fragment } from 'react'
 import { Link } from 'react-router-dom'
+import { TriangleAlert } from 'lucide-react'
 import i18n from '../i18n/index.js'
 
 export class ErrorBoundary extends Component {
@@ -67,8 +68,8 @@ export class ErrorBoundary extends Component {
             role="alert"
             className="max-w-md w-full bg-white dark:bg-white/5 border border-ink/8 dark:border-white/8 rounded-2xl p-7 flex flex-col gap-5 text-center shadow-lg"
           >
-            <div className="w-16 h-16 mx-auto rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-3xl">
-              ⚠️
+            <div className="w-16 h-16 mx-auto rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+              <TriangleAlert size={32} aria-hidden="true" className="text-red-500" />
             </div>
 
             <div>

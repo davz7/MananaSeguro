@@ -5,6 +5,7 @@
 
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Pencil, Trash2, X, TriangleAlert } from 'lucide-react'
 import { formatCurrencyMxn } from '../../../utils/formatters'
 
 export function GoalCard({ meta, saldoMxn = 0, seleccionada = false, onSeleccionar, onEditar, onEliminar, puedeEliminar = false }) {
@@ -46,14 +47,15 @@ export function GoalCard({ meta, saldoMxn = 0, seleccionada = false, onSeleccion
           onClick={e => { e.stopPropagation(); onEditar?.() }}
           className="w-7 h-7 rounded-lg bg-ink/5 dark:bg-white/5 hover:bg-brand/10 hover:text-brand flex items-center justify-center text-ink/40 dark:text-white/40 transition-all cursor-pointer"
           aria-label={t('goalCard.editarMeta')}>
-          <span aria-hidden="true">✏️</span>
+          <Pencil size={14} aria-hidden="true" />
+
         </button>
         {puedeEliminar && (
           <button
             onClick={e => { e.stopPropagation(); onEliminar?.() }}
             className="w-7 h-7 rounded-lg bg-ink/5 dark:bg-white/5 hover:bg-red-500/10 hover:text-red-500 flex items-center justify-center text-ink/40 dark:text-white/40 transition-all cursor-pointer"
             aria-label={t('goalCard.eliminarMeta')}>
-            <span aria-hidden="true">🗑️</span>
+            <Trash2 size={14} aria-hidden="true" />
           </button>
         )}
       </div>
@@ -139,8 +141,8 @@ export function GoalEditModal({ meta, usuarioId, onGuardado, onCerrar }) {
         className="bg-white dark:bg-[#1a1a1a] rounded-2xl p-6 w-full max-w-md shadow-2xl"
         onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-5">
-          <h5 id="goal-edit-title" className="font-display font-black text-ink dark:text-white text-lg">{t('goalCard.editarMeta')}</h5>
-          <button onClick={onCerrar} aria-label={t('goalCard.cerrar')} className="text-ink/30 hover:text-ink dark:text-white/30 dark:hover:text-white text-xl cursor-pointer">✕</button>
+        <h5 id="goal-edit-title" className="font-display font-black text-ink dark:text-white text-lg">{t('goalCard.editarMeta')}</h5>
+        <button onClick={onCerrar} aria-label={t('goalCard.cerrar')} className="text-ink/30 hover:text-ink dark:text-white/30 dark:hover:text-white cursor-pointer"><X size={20} aria-hidden="true" /></button>
         </div>
 
         <div className="flex flex-col gap-4">
@@ -167,7 +169,7 @@ export function GoalEditModal({ meta, usuarioId, onGuardado, onCerrar }) {
 
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 mt-4">
-            <p className="text-sm text-red-500">⚠️ {error}</p>
+            <p className="text-sm text-red-500"><TriangleAlert size={16} className="inline shrink-0" aria-hidden="true" /> {error}</p>
           </div>
         )}
 
@@ -249,8 +251,8 @@ export function AddGoalButton({ usuarioId, onMetaCreada }) {
         className="bg-white dark:bg-[#1a1a1a] rounded-2xl p-6 w-full max-w-sm shadow-2xl"
         onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-5">
-          <h5 id="add-goal-title" className="font-display font-black text-ink dark:text-white text-lg">{t('goalCard.nuevaMeta')}</h5>
-          <button onClick={() => setAbierto(false)} aria-label={t('goalCard.cerrar')} className="text-ink/30 hover:text-ink dark:text-white/30 dark:hover:text-white text-xl cursor-pointer">✕</button>
+        <h5 id="add-goal-title" className="font-display font-black text-ink dark:text-white text-lg">{t('goalCard.nuevaMeta')}</h5>
+        <button onClick={() => setAbierto(false)} aria-label={t('goalCard.cerrar')} className="text-ink/30 hover:text-ink dark:text-white/30 dark:hover:text-white cursor-pointer"><X size={20} aria-hidden="true" /></button>
         </div>
         <div className="flex flex-col gap-4">
           <div>
@@ -283,7 +285,7 @@ export function AddGoalButton({ usuarioId, onMetaCreada }) {
             <input type="range" min="1" max="40" step="1" value={anos} onChange={e => setAnos(Number(e.target.value))} className="w-full accent-brand" />
           </div>
         </div>
-        {error && <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 mt-3 text-sm text-red-500">⚠️ {error}</div>}
+        {error && <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 mt-3 text-sm text-red-500"><TriangleAlert size={16} className="inline shrink-0" aria-hidden="true" /> {error}</div>}
         <div className="flex gap-3 mt-5">
           <button onClick={() => setAbierto(false)} className="flex-1 border border-ink/15 dark:border-white/15 text-ink dark:text-white font-semibold py-2.5 rounded-xl hover:bg-ink/5 transition-all cursor-pointer text-sm">{t('goalCard.cancelar')}</button>
           <button onClick={handleCrear} disabled={loading} className="flex-1 bg-brand hover:bg-brand-dark text-white font-semibold py-2.5 rounded-xl transition-all cursor-pointer disabled:opacity-50 text-sm">
