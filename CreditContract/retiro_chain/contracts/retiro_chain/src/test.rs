@@ -6,7 +6,7 @@ use soroban_sdk::{symbol_short, Env};
 const SEGUNDOS_POR_ANO: u64 = 365 * 24 * 60 * 60;
 
 fn deploy(env: &Env) -> RetiroChainClient<'_> {
-    let contract_id = env.register_contract(None, RetiroChain);
+    let contract_id = env.register(RetiroChain, ());
     RetiroChainClient::new(env, &contract_id)
 }
 
