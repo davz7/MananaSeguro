@@ -2,8 +2,9 @@
 
 use super::*;
 use soroban_sdk::{
+    symbol_short,
     testutils::{Address as _, Events, Ledger},
-    symbol_short, token, Address, Env, IntoVal, TryFromVal,
+    token, Address, Env, IntoVal, TryFromVal,
 };
 
 // Helper para crear token USDC de prueba
@@ -82,7 +83,9 @@ fn test_depositar_emite_evento() {
         m
     } else if let Ok(vec) = soroban_sdk::Vec::<soroban_sdk::Val>::try_from_val(&env, data) {
         i128::try_from_val(&env, &vec.get(0).unwrap()).unwrap()
-    } else if let Ok(map) = soroban_sdk::Map::<soroban_sdk::Symbol, soroban_sdk::Val>::try_from_val(&env, data) {
+    } else if let Ok(map) =
+        soroban_sdk::Map::<soroban_sdk::Symbol, soroban_sdk::Val>::try_from_val(&env, data)
+    {
         if let Some(val) = map.get(symbol_short!("monto")) {
             i128::try_from_val(&env, &val).unwrap()
         } else if let Some(val) = map.get(soroban_sdk::Symbol::new(&env, "monto")) {
