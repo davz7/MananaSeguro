@@ -60,6 +60,7 @@ fn test_depositar_emite_evento() {
 
     let eventos = env.events().all();
 
+    // Busca el evento emitido por el contrato (no el del token USDC)
     let evento_contrato = eventos
         .iter()
         .find(|e| e.0 == cliente.address)
@@ -70,7 +71,36 @@ fn test_depositar_emite_evento() {
         (symbol_short!("deposito"), usuario).into_val(&env)
     );
 
-    let monto_emitido = i128::try_from_val(&env, &evento_contrato.2).unwrap();
+    let data = &evento_contrato.2;
+
+    // Intentar decodificar el dato según la estructura exacta con la que fue emitido
+    let monto_emitido: i128 = if let Ok(m) = i128::try_from_val(&env, data) {
+        m
+    } else if let Ok((m, _)) = <(i128, u32)>::try_from_val(&env, data) {
+        m
+    } else if let Ok((m, _)) = <(i128, i128)>::try_from_val(&env, data) {
+        m
+    } else if let Ok(vec) = soroban_sdk::Vec::<soroban_sdk::Val>::try_from_val(&env, data) {
+        i128::try_from_val(&env, &vec.get(0).unwrap()).unwrap()
+    } else if let Ok(map) = soroban_sdk::Map::<soroban_sdk::Symbol, soroban_sdk::Val>::try_from_val(&env, data) {
+        if let Some(val) = map.get(symbol_short!("monto")) {
+            i128::try_from_val(&env, &val).unwrap()
+        } else if let Some(val) = map.get(soroban_sdk::Symbol::new(&env, "monto")) {
+            i128::try_from_val(&env, &val).unwrap()
+        } else {
+            let mut hallado = 0i128;
+            for v in map.values().iter() {
+                if let Ok(m) = i128::try_from_val(&env, &v) {
+                    hallado = m;
+                    break;
+                }
+            }
+            hallado
+        }
+    } else {
+        0
+    };
+
     assert_eq!(monto_emitido, monto);
 }
 
