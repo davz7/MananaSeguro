@@ -3,7 +3,7 @@
 use super::*;
 use soroban_sdk::{
     testutils::{Address as _, Ledger},
-    token, Address, Env,
+    symbol_short, token, Address, Env, IntoVal,
 };
 
 // Helper para crear token USDC de prueba
@@ -49,6 +49,23 @@ fn test_depositar_basico() {
     let balance = cliente.ver_balance(&usuario);
     assert_eq!(balance, monto);
     assert_eq!(cliente.ver_depositos(&usuario), 1);
+}
+
+#[test]
+fn test_depositar_emite_evento() {
+    let (env, cliente, _admin, usuario, _usdc) = setup();
+    let eventos_antes = env.events().all().len();
+    let monto = 100_000_000i128;
+
+    cliente.depositar(&usuario, &monto, &20);
+
+    let evento = env.events().all().last().unwrap();
+    assert_eq!(env.events().all().len(), eventos_antes + 1);
+    assert_eq!(evento.0, cliente.address.clone());
+    assert_eq!(
+        evento.1,
+        (symbol_short!("deposito"), usuario).into_val(&env)
+    );
 }
 
 #[test]
