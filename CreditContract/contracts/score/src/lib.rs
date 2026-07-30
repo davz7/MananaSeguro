@@ -1,7 +1,7 @@
 #![no_std]
 
 use soroban_sdk::{
-    contract, contracterror, contractimpl, contracttype, token, Address, Env, Symbol,
+    contract, contracterror, contractevent, contractimpl, contracttype, token, Address, Env,
 };
 
 // ─── Error Enum ───────────────────────────────────────────────────────────────
@@ -70,6 +70,34 @@ const PRESTAMO_FEE_MENSUAL: i128 = 50;
 const PRESTAMO_MAX_MESES: u32 = 24;
 /// 1 USDC = 10_000_000 stroops.
 const STROOP: i128 = 10_000_000;
+
+#[contractevent]
+pub struct Deposito {
+    #[topic]
+    usuario: Address,
+    monto: i128,
+}
+
+#[contractevent]
+pub struct Retiro {
+    #[topic]
+    usuario: Address,
+    monto: i128,
+}
+
+#[contractevent]
+pub struct Prestamo {
+    #[topic]
+    usuario: Address,
+    monto: i128,
+}
+
+#[contractevent]
+pub struct PagoPrestamo {
+    #[topic]
+    usuario: Address,
+    monto: i128,
+}
 
 // Contrato
 
@@ -154,8 +182,11 @@ impl MananaSeguroContract {
         }
 
         // Emitir evento
-        env.events()
-            .publish((Symbol::new(&env, "deposito"), usuario.clone()), monto);
+        Deposito {
+            usuario: usuario.clone(),
+            monto,
+        }
+        .publish(&env);
 
         Ok(())
     }
@@ -273,10 +304,11 @@ impl MananaSeguroContract {
             .remove(&DataKey::DepositCount(usuario.clone()));
 
         // Emitir evento
-        env.events().publish(
-            (Symbol::new(&env, "retiro"), usuario.clone()),
-            monto_usuario,
-        );
+        Retiro {
+            usuario: usuario.clone(),
+            monto: monto_usuario,
+        }
+        .publish(&env);
 
         Ok(())
     }
@@ -338,8 +370,11 @@ impl MananaSeguroContract {
         token_client.transfer(&env.current_contract_address(), &usuario, &monto);
 
         // Emitir evento
-        env.events()
-            .publish((Symbol::new(&env, "prestamo"), usuario.clone()), monto);
+        Prestamo {
+            usuario: usuario.clone(),
+            monto,
+        }
+        .publish(&env);
 
         Ok(())
     }
@@ -410,10 +445,11 @@ impl MananaSeguroContract {
                 .set(&DataKey::PrestamoMeses(usuario.clone()), &nuevos_meses);
         }
 
-        env.events().publish(
-            (Symbol::new(&env, "pago_prestamo"), usuario.clone()),
-            pago_total,
-        );
+        PagoPrestamo {
+            usuario: usuario.clone(),
+            monto: pago_total,
+        }
+        .publish(&env);
 
         Ok(())
     }
