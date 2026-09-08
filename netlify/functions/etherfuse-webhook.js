@@ -84,7 +84,7 @@ async function handleKycUpdated(payload, supabase, log) {
  * Cuando es 'completed', el usuario ya tiene sus CETES en Stellar.
  */
 async function handleOrderUpdated(payload, supabase, log) {
-  const { orderId, status, stellarClaimTransaction } = payload
+  const { orderId, updatedAt, amountInFiat, amountInTokens, status, stellarClaimTransaction, confirmedTxSignature } = payload;
 
   if (!orderId) {
     log.warn('order_updated sin orderId')
@@ -93,8 +93,18 @@ async function handleOrderUpdated(payload, supabase, log) {
 
   const updates = {
     status,
-    updated_at: new Date().toISOString(),
+    updated_at: updatedAt,
   }
+
+  // Traemos el estado actual de la orden (si ya existía) para poder
+  // comparar contra el webhook entrante y detectar duplicados/reintentos.
+  // Si la orden es nueva, ordenExistente será null.
+  const { data: ordenExistente, error } = await supabase
+    .from('ordenes')
+    .select('order_id, updated_at, status')
+    .eq('order_id', orderId)
+    .limit(1)
+    .single()
 
   // Si hay una transacción de claim pendiente (wallet nueva), guardarla
   // El frontend la firmará con la llave custodial del usuario
@@ -102,15 +112,25 @@ async function handleOrderUpdated(payload, supabase, log) {
     updates.stellar_claim_transaction = stellarClaimTransaction
   }
 
-  const { error } = await supabase
-    .from('ordenes')
-    .update(updates)
-    .eq('order_id', orderId)
+  // Idempotencia: Etherfuse reintenta webhooks (hasta 3 veces) si no
+  // recibe 200 a tiempo. Un reintento trae exactamente el mismo status
+  // y updatedAt que el webhook original — si ambos coinciden con lo que
+  // ya teníamos guardado, es un duplicado y no debe reprocesarse.
+  const esDuplicado = ordenExistente && status == ordenExistente.status && updatedAt == ordenExistente.updated_at
 
-  if (error) {
-    log.error('Error actualizando orden', { orderId, detail: error.message })
+  if (esDuplicado) {
+    log.info('Duplicado detectado, ignorando', { orderId })
   } else {
-    log.info('Orden actualizada', { orderId, status })
+    const { error } = await supabase
+      .from('ordenes')
+      .update(updates)
+      .eq('order_id', orderId)
+
+      if(error){
+        log.error('Error actualizando orden', { orderId, detail: error.message })
+      }else {
+        log.info('Orden actualizada', { orderId, status })
+      }
 
     // TODO cuando status === 'completed':
     // 1. Si hay stellarClaimTransaction → firmarla con la llave custodial
