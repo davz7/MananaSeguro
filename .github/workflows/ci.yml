@@ -158,7 +158,12 @@ jobs:
           cd "$CANARY_DIR"
           git init -q
           # Semilla sintética, válida en forma pero no en una red real.
-          printf 'const seed = "SBRTWWQ4EXAMPLEZ7K3MFAKE5NOTREALSEEDXYZ2345ABCDEFGH234567"\n' > canary.js
+          SEED="SBRTWWQ4EXAMPLEZ7K3MFAKE5NOTREALSEEDXYZ2345ABCDEFGH23456"
+          # Una semilla de Stellar mide exactamente 56 caracteres. Si esta
+          # carnada deja de medirlos, la regla no la detecta y la autoprueba
+          # pasaría en falso. Se verifica aquí para fallar con un mensaje claro.
+          [ ${#SEED} -eq 56 ] || { echo "::error::La carnada mide ${#SEED} y debe medir 56"; exit 1; }
+          printf 'const seed = "%s"\n' "$SEED" > canary.js
           git add -A
           git -c user.email=ci@local -c user.name=ci commit -qm canary
           if gitleaks detect --source . \
