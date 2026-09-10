@@ -56,8 +56,4 @@ paths = [
 regexes = [
   '''\bG[A-Z2-7]{55}\b''',
   '''\bC[A-Z2-7]{55}\b''',
-  # Carnada del paso de autoprueba del CI. Es una semilla con forma válida
-  # pero inexistente en cualquier red; su propósito es ser detectada.
-  # La excepción es literal a propósito: cualquier otra semilla sí se marca.
-  '''SBRTWWQ4EXAMPLEZ7K3MFAKE5NOTREALSEEDXYZ2345ABCDEFGH23456''',
 ]

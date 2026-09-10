@@ -158,7 +158,15 @@ jobs:
           cd "$CANARY_DIR"
           git init -q
           # Semilla sintética, válida en forma pero no en una red real.
-          SEED="SBRTWWQ4EXAMPLEZ7K3MFAKE5NOTREALSEEDXYZ2345ABCDEFGH23456"
+          # La semilla se arma en tiempo de ejecución. Ninguna de las dos
+          # mitades coincide con la regla por separado, así que este archivo
+          # no contiene ninguna cadena detectable y no hace falta ninguna
+          # excepción en el allowlist. Unidas sí forman una semilla válida
+          # en forma, que es exactamente lo que la autoprueba necesita.
+          PART1="SBRTWWQ4EXAMPLEZ7K3MFAKE5NOTREAL"
+          PART2="SEEDXYZ2345ABCDEFGH23456"
+          SEED="${PART1}${PART2}"
+          [ ${#SEED} -eq 56 ] || { echo "::error::La carnada mide ${#SEED} y debe medir 56"; exit 1; }
           # Una semilla de Stellar mide exactamente 56 caracteres. Si esta
           # carnada deja de medirlos, la regla no la detecta y la autoprueba
           # pasaría en falso. Se verifica aquí para fallar con un mensaje claro.
