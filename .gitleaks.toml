@@ -56,4 +56,13 @@ paths = [
 regexes = [
   '''\bG[A-Z2-7]{55}\b''',
   '''\bC[A-Z2-7]{55}\b''',
+  # Nombre de una entrada de localStorage en useEtherfuseRate.js.
+  # La regla genérica lo marca por el nombre de la variable (CACHE_KEY),
+  # no por el contenido. Se excluye el valor literal, no el archivo.
+  '''manana_seguro_cetes_rate''',
+]
+commits = [
+  # Versión anterior de ci.yml con la carnada completa de la autoprueba.
+  # No es un secreto: es la cadena que el escáner debe detectar.
+  "331f60b1d97a6ce45e39820e16dd1ffb68104009",
 ]
