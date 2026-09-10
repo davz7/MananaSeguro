@@ -1,0 +1,59 @@
+title = "Mañana Seguro — secret scanning"
+
+# Hereda las reglas base de gitleaks (AWS, Google, Supabase, tokens genéricos)
+# y encima añade las que son específicas de este proyecto.
+[extend]
+useDefault = true
+
+# ---------------------------------------------------------------
+# Regla 1 — Semilla secreta de Stellar (strkey de cuenta)
+#
+# Una semilla es siempre exactamente 56 caracteres base32.
+# El primer byte de versión (0x90) obliga a que empiece con "S",
+# y los bits restantes de ese byte limitan el segundo carácter
+# al rango A-D. Los 54 restantes son base32 libre (A-Z, 2-7).
+#
+# Este es el patrón que jamás debe aparecer en el repositorio.
+# ---------------------------------------------------------------
+[[rules]]
+id = "stellar-secret-seed"
+description = "Semilla secreta de Stellar (S...) en el código"
+regex = '''\bS[A-D][A-Z2-7]{54}\b'''
+keywords = ["S"]
+entropy = 3.5
+
+# ---------------------------------------------------------------
+# Regla 2 — La llave de cifrado global heredada del prototipo.
+# Se elimina con la migración a KMS, pero mientras exista el nombre
+# en el código, un valor asignado a esa variable no puede filtrarse.
+# ---------------------------------------------------------------
+[[rules]]
+id = "wallet-encryption-key-value"
+description = "Valor asignado a WALLET_ENCRYPTION_KEY"
+regex = '''(?i)WALLET_ENCRYPTION_KEY\s*[=:]\s*['"]?[A-Za-z0-9+/=]{32,}['"]?'''
+keywords = ["wallet_encryption_key"]
+
+# ---------------------------------------------------------------
+# Regla 3 — External id del rol de firma custodial.
+# Es un secreto compartido: si se filtra, el salto de AssumeRole
+# deja de aportar protección.
+# ---------------------------------------------------------------
+[[rules]]
+id = "aws-sts-external-id"
+description = "External id de AssumeRole embebido en el código"
+regex = '''(?i)external[_-]?id\s*[=:]\s*['"][a-f0-9]{32}['"]'''
+keywords = ["externalid", "external_id", "external-id"]
+
+[allowlist]
+description = "Rutas sin secretos reales"
+paths = [
+  '''(.*?)(package-lock\.json)$''',
+  '''(.*?)\.example$''',
+  '''^docs/''',
+]
+# Direcciones públicas de Stellar (G...) y el id del contrato (C...)
+# no son secretos y no deben generar ruido.
+regexes = [
+  '''\bG[A-Z2-7]{55}\b''',
+  '''\bC[A-Z2-7]{55}\b''',
+]
