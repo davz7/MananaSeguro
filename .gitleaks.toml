@@ -60,11 +60,6 @@ regexes = [
   # La regla genérica lo marca por el nombre de la variable (CACHE_KEY),
   # no por el contenido. Se excluye el valor literal, no el archivo.
   '''manana_seguro_cetes_rate''',
-  # Claves ficticias en archivos de prueba. Existen para que los tests
-  # tengan algo con qué firmar; no abren acceso a nada.
-  '''clave-de-prueba-de-al-menos-32-bytes-de-largo''',
-  '''otra-clave-distinta-de-al-menos-32-bytes-largo''',
-  '''clave-de-firma-de-al-menos-32-bytes-larga''',
 ]
 commits = [
   # Versión anterior de ci.yml con la carnada completa de la autoprueba.

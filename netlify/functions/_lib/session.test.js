@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { SignJWT } from 'jose'
+import { claveDePrueba } from './testing/claves.js'
 import {
   issueSession,
   verifySession,
@@ -7,8 +8,8 @@ import {
   SessionError,
 } from './session.js'
 
-const KEY = 'clave-de-prueba-de-al-menos-32-bytes-de-largo'
-const OTRA_KEY = 'otra-clave-distinta-de-al-menos-32-bytes-largo'
+const KEY = claveDePrueba()
+const OTRA_KEY = claveDePrueba()
 
 function bearer(token) {
   return { headers: { authorization: `Bearer ${token}` } }

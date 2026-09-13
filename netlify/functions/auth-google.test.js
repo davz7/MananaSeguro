@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { verifySession } from './_lib/session.js'
+import { claveDePrueba } from './_lib/testing/claves.js'
 
 // ---------------------------------------------------------------------
 // Mocks.
@@ -54,7 +55,7 @@ beforeEach(() => {
   process.env.SUPABASE_URL = 'https://proyecto.supabase.co'
   process.env.SUPABASE_SERVICE_KEY = 'service-role-de-prueba'
   process.env.WALLET_ENCRYPTION_KEY = 'a'.repeat(64)
-  process.env.SESSION_SIGNING_KEY = 'clave-de-firma-de-al-menos-32-bytes-larga'
+  process.env.SESSION_SIGNING_KEY = claveDePrueba()
   process.env.GOOGLE_CLIENT_ID = 'client-id.apps.googleusercontent.com'
 
   supabaseState = {
