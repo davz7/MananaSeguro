@@ -10,6 +10,7 @@ import { createClient } from '@supabase/supabase-js'
 import { randomUUID } from 'crypto'
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto'
 import { createLogger, errorBody } from './_lib/logger.js'
+import { issueSession } from './_lib/session.js'
 
 //  Constantes 
 
@@ -155,6 +156,15 @@ export async function handler(event) {
     }
   }
 
+  if (!process.env.SESSION_SIGNING_KEY) {
+    log.error('SESSION_SIGNING_KEY no configurada')
+    return {
+      statusCode: 500,
+      headers: CORS_HEADERS,
+      body: errorBody(log, 'Error de configuración del servidor'),
+    }
+  }
+
   // ── Parsear body ─
   let idToken
   try {
@@ -203,6 +213,7 @@ export async function handler(event) {
 
     // ── Usuario ya existe — devolver sus datos 
     if (usuarioExistente) {
+      const sesion = await issueSession(usuarioExistente.id)
       log.info('Usuario existente', { usuarioId: usuarioExistente.id })
       return {
         statusCode: 200,
@@ -218,6 +229,7 @@ export async function handler(event) {
             kycStatus: usuarioExistente.kyc_status,
             bankAccountStatus: usuarioExistente.bank_account_status,
           },
+          sesion,
           esNuevo: false,
         }),
       }
@@ -251,6 +263,7 @@ export async function handler(event) {
     }
 
     log.info('Usuario creado', { usuarioId: usuarioCreado.id })
+    const sesion = await issueSession(usuarioCreado.id)
 
     return {
       statusCode: 201,
@@ -266,6 +279,7 @@ export async function handler(event) {
           kycStatus: usuarioCreado.kyc_status,
           bankAccountStatus: usuarioCreado.bank_account_status,
         },
+        sesion,
         esNuevo: true,
       }),
     }
