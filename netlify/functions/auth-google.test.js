@@ -1,15 +1,14 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { verifySession } from './_lib/session.js'
 import { claveDePrueba } from './_lib/testing/claves.js'
+import { randomBytes } from 'crypto'
 
-// ---------------------------------------------------------------------
 // Mocks.
 //
 // No se prueba contra Supabase ni contra Google reales: haría falta un
 // token de Google válido, la prueba no sería repetible y dependería de
 // una red. Lo que aquí importa es la lógica de la función, no que
 // Supabase funcione.
-// ---------------------------------------------------------------------
 
 let supabaseState
 
@@ -21,23 +20,45 @@ vi.mock('@supabase/supabase-js', () => ({
           single: async () => supabaseState.select,
         }),
       }),
-      insert: () => ({
-        select: () => ({
-          single: async () => supabaseState.insert,
-        }),
-      }),
+      insert: (fila) => {
+        supabaseState.insertadoEn = fila
+        return {
+          select: () => ({
+            single: async () =>
+            supabaseState.devolverInsertado
+              ? { data: supabaseState.insertadoEn, error: null }
+              : supabaseState.insert,
+          }),
+        }
+      },
     }),
   }),
 }))
 
-const SEED_FALSA = 'SBRTWWQ4EXAMPLEZ7K3MFAKE5NOTREAL' + 'SEEDXYZ2345ABCDEFGH23456'
+// La custodia se mockea: su comportamiento criptográfico se prueba en
+// _lib/custody.test.js. Aquí solo interesa que auth-google la invoque con
+// el id correcto y que persista lo que devuelve sin alterarlo.
+//
+// Los valores se generan en cada corrida en lugar de ir escritos. Dos
+// razones: ninguna cadena del repositorio parece un secreto, y nadie puede
+// copiar este mock como plantilla y heredar un IV de ceros, que es
+// justamente el peor valor posible en cifrado real.
+const custodiaLlamadas = []
+const custodiaDevuelta = []
 
-vi.mock('@stellar/stellar-sdk', () => ({
-  Keypair: {
-    random: () => ({
-      publicKey: () => 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB',
-      secret: () => SEED_FALSA,
-    }),
+vi.mock('./_lib/custody.js', () => ({
+  createCustodialAccount: async (userId) => {
+    custodiaLlamadas.push(userId)
+    const columnas = {
+      stellar_public_key: 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB',
+      seed_ciphertext: randomBytes(32).toString('hex'),
+      seed_iv: randomBytes(12).toString('hex'),
+      seed_auth_tag: randomBytes(16).toString('hex'),
+      data_key_blob: randomBytes(24).toString('base64'),
+      key_scheme_version: 1,
+    }
+    custodiaDevuelta.push(columnas)
+    return columnas
   },
 }))
 
@@ -54,9 +75,11 @@ function conSesion(token) {
 beforeEach(() => {
   process.env.SUPABASE_URL = 'https://proyecto.supabase.co'
   process.env.SUPABASE_SERVICE_KEY = 'service-role-de-prueba'
-  process.env.WALLET_ENCRYPTION_KEY = 'a'.repeat(64)
+  process.env.KMS_CUSTODY_KEY_ID = 'alias/manana-seguro-custody-testnet'
   process.env.SESSION_SIGNING_KEY = claveDePrueba()
   process.env.GOOGLE_CLIENT_ID = 'client-id.apps.googleusercontent.com'
+  custodiaLlamadas.length = 0
+  custodiaDevuelta.length = 0
 
   supabaseState = {
     select: { data: null, error: { code: 'PGRST116' } },
@@ -123,30 +146,61 @@ describe('auth-google — usuario existente', () => {
 describe('auth-google — usuario nuevo', () => {
   beforeEach(() => {
     supabaseState.select = { data: null, error: { code: 'PGRST116' } }
-    supabaseState.insert = {
-      data: { ...USUARIO_EXISTENTE, id: 'usuario-nuevo-9' },
-      error: null,
-    }
+    supabaseState.insert = { data: null, error: null }
+    // El id lo genera auth-google, así que la fila devuelta es la insertada.
+    supabaseState.devolverInsertado = true
   })
 
   it('responde 201 y emite una sesión para el usuario creado', async () => {
     const res = await handler(peticion())
     expect(res.statusCode).toBe(201)
-    const { sesion } = JSON.parse(res.body)
+    const { sesion, usuario } = JSON.parse(res.body)
     const { userId } = await verifySession(conSesion(sesion.token))
-    expect(userId).toBe('usuario-nuevo-9')
+    expect(userId).toBe(usuario.id)
   })
 
-  it('la respuesta nunca contiene la semilla en claro', async () => {
+  it('la respuesta nunca contiene una semilla en claro', async () => {
     const res = await handler(peticion())
-    expect(res.body).not.toContain(SEED_FALSA)
+    expect(res.body).not.toMatch(/\bS[A-D][A-Z2-7]{54}\b/)
   })
 
-  it('la respuesta no expone la semilla cifrada', async () => {
+  it('la respuesta no expone material de custodia', async () => {
     const res = await handler(peticion())
-    // El ciphertext no le sirve de nada al cliente y no tiene por qué salir.
-    expect(res.body).not.toContain('stellar_secret_key_encrypted')
-    expect(res.body).not.toContain('iv:tag:ciphertext')
+    const custodia = custodiaDevuelta.at(-1)
+    // Ni los nombres de las columnas ni sus valores le sirven al cliente.
+    expect(res.body).not.toContain('seed_ciphertext')
+    expect(res.body).not.toContain('data_key_blob')
+    expect(res.body).not.toContain(custodia.seed_ciphertext)
+    expect(res.body).not.toContain(custodia.data_key_blob)
+    expect(res.body).not.toContain(custodia.seed_auth_tag)
+  })
+
+  it('cifra con el mismo id con el que crea al usuario', async () => {
+    const res = await handler(peticion())
+    const { usuario } = JSON.parse(res.body)
+    // Si no coincidieran, el encryption context de KMS no abriría nunca
+    // el blob de ese usuario y su cuenta quedaría irrecuperable.
+    expect(custodiaLlamadas).toEqual([usuario.id])
+  })
+
+  it('persiste las cinco columnas de custodia sin alterarlas', async () => {
+    await handler(peticion())
+    const custodia = custodiaDevuelta.at(-1)
+    const insertado = supabaseState.insertadoEn
+    for (const col of [
+      'seed_ciphertext', 'seed_iv', 'seed_auth_tag',
+      'data_key_blob', 'key_scheme_version',
+    ]) {
+      // Se compara contra el valor devuelto, no solo su presencia: así
+      // un recorte o una transformación accidental también falla.
+      expect(insertado[col]).toBe(custodia[col])
+    }
+  })
+
+  it('devuelve 500 si falta KMS_CUSTODY_KEY_ID', async () => {
+    delete process.env.KMS_CUSTODY_KEY_ID
+    const res = await handler(peticion())
+    expect(res.statusCode).toBe(500)
   })
 })
 
