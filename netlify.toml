@@ -64,3 +64,8 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+[[redirects]]
+  from = "/api/sign-intent"
+  to = "/.netlify/functions/sign-intent"
+  status = 200
