@@ -23,12 +23,6 @@
   to = "/.netlify/functions/exchange-rate"
   status = 200
 
-#  API: Etherfuse Ramp (proxy general) 
-[[redirects]]
-  from = "/api/etherfuse-ramp"
-  to = "/.netlify/functions/etherfuse-ramp"
-  status = 200
-
 #  API: autenticación 
 [[redirects]]
   from = "/api/auth/google"

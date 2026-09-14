@@ -63,6 +63,9 @@ regexes = [
 ]
 commits = [
   # Versión anterior de ci.yml con la carnada completa de la autoprueba.
-  # No es un secreto: es la cadena que el escáner debe detectar.
   "331f60b1d97a6ce45e39820e16dd1ffb68104009",
+  # Claves de prueba literales en session.test.js y auth-google.test.js,
+  # sustituidas después por valores generados con randomBytes. No dan
+  # acceso a nada: existían solo para que los tests tuvieran qué firmar.
+  "8b54e0a6dc6900dbe46b176efc1e9579e8b1637a",
 ]

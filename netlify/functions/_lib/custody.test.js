@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, beforeAll,vi } from 'vitest'
 import { randomBytes } from 'crypto'
 import {
   createCustodialAccount,
@@ -8,6 +8,9 @@ import {
   KEY_SCHEME_VERSION,
 } from './custody.js'
 
+beforeAll(async () => {
+  await import('@stellar/stellar-sdk')
+}, 30000)
 /**
  * KMS simulado.
  *
