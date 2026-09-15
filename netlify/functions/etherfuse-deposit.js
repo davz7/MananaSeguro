@@ -1,13 +1,14 @@
 // netlify/functions/etherfuse-deposit.js
 //
-// ─── ISO 25010 ───────────────────────────────────────────────────────────────
+//  ISO 25010 
 // Seguridad:      Verifica KYC aprobado antes de crear orden. Valida montos.
+//                 La orden se crea SIEMPRE para el usuario del token: el
+//                 cuerpo ya no puede designar a otro titular.
 // Fiabilidad:     Timeout en llamadas externas. Guarda la orden en Supabase
 //                 antes de responder — si el cliente cae, la orden persiste.
 // Mantenibilidad: Helpers separados para quote y order. Errores descriptivos.
 // Eficiencia:     Una sola transacción Supabase al final.
 // Usabilidad:     Mensajes de error claros y accionables para el frontend.
-// ─────────────────────────────────────────────────────────────────────────────
 //
 // Responsabilidad: crear una orden de depósito (quote + order) en Etherfuse
 // y guardarla en Supabase. Devuelve la CLABE de depósito al frontend.
@@ -23,14 +24,15 @@ import {
   validateUserId
 } from './_lib/depositValidation.js'
 import { createLogger, errorBody } from './_lib/logger.js'
+import { withSession } from './_lib/session.js'
 
-// ─── Constantes ───────────────────────────────────────────────────────────────
+//  Constantes 
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
 const ETHERFUSE_BASE =
@@ -44,7 +46,7 @@ const FETCH_TIMEOUT_MS = 10_000
 // Formato: CODE:ISSUER — verificar en docs de Etherfuse para producción
 const CETES_ASSET_STELLAR = 'CETES:GC3CW7EDYRTWQ635VDIGY6S4ZUF5L6TQ7AA4MWS7LEQDBLUSZXV7UPS4'
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+//  Helpers 
 
 async function fetchConTimeout(url, options, timeoutMs = FETCH_TIMEOUT_MS) {
   const controller = new AbortController()
@@ -79,14 +81,10 @@ async function llamarEtherfuse(path, method, body) {
   return data
 }
 
-// ─── Handler principal ────────────────────────────────────────────────────────
+//  Handler principal ──
 
-export async function handler(event) {
+async function handlerConSesion(event, usuarioId) {
   const log = createLogger('etherfuse-deposit')
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers: CORS_HEADERS, body: '' }
-  }
 
   if (event.httpMethod !== 'POST') {
     return {
@@ -96,7 +94,7 @@ export async function handler(event) {
     }
   }
 
-  // ── Validar env ───────────────────────────────────────────────────────────
+  // ── Validar env ──
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY || !process.env.ETHERFUSE_API_KEY) {
     log.error('Variables de entorno faltantes')
     return {
@@ -106,11 +104,11 @@ export async function handler(event) {
     }
   }
 
-  // ── Parsear y validar body ────────────────────────────────────────────────
-  let usuarioId, montoMxn
+  // ── Parsear y validar body 
+  // usuarioId NO se lee del cuerpo: viene del token de sesión.
+  let montoMxn
   try {
     const body = JSON.parse(event.body || '{}')
-    usuarioId = body.usuarioId
     montoMxn = Number(body.montoMxn)
 
     validateUserId(usuarioId)
@@ -130,7 +128,7 @@ export async function handler(event) {
   )
 
   try {
-    // ── Verificar usuario y estado de KYC ────────────────────────────────
+    // ── Verificar usuario y estado de KYC ──
     const { data: usuario, error: errorUsuario } = await supabase
       .from('usuarios')
       .select('id, email, customer_id, bank_account_id, stellar_public_key, kyc_status, bank_account_status')
@@ -145,7 +143,7 @@ export async function handler(event) {
       }
     }
 
-    // ── Seguridad: bloquear depósito si KYC no está aprobado ─────────────
+    // ── Seguridad: bloquear depósito si KYC no está aprobado ─
     try {
       validateKyc(usuario.kyc_status)
     } catch (err) {
@@ -170,7 +168,7 @@ export async function handler(event) {
       }
     }
 
-    // ── Paso 1: crear quote en Etherfuse ──────────────────────────────────
+    // ── Paso 1: crear quote en Etherfuse ─
     // POST /ramp/quote — MXN → CETES en Stellar
     const quoteId = randomUUID()
     const quote = await llamarEtherfuse('/ramp/quote', 'POST', {
@@ -188,7 +186,7 @@ export async function handler(event) {
 
     log.info('Quote creado', { quoteId, montoMxn })
 
-    // ── Paso 2: crear orden en Etherfuse ──────────────────────────────────
+    // ── Paso 2: crear orden en Etherfuse ─
     // POST /ramp/order — devuelve depositClabe (CLABE única por orden)
     const orderId = randomUUID()
     const orden = await llamarEtherfuse('/ramp/order', 'POST', {
@@ -210,7 +208,7 @@ export async function handler(event) {
 
     log.info('Orden creada', { orderId, depositClabe })
 
-    // ── Paso 3: guardar orden en Supabase ─────────────────────────────────
+    // ── Paso 3: guardar orden en Supabase 
     // Guardamos ANTES de responder al cliente — si el cliente cae, la orden
     // persiste y podemos recuperarla por webhook
     const { error: errorOrden } = await supabase
@@ -230,7 +228,7 @@ export async function handler(event) {
       // El webhook la recuperará cuando llegue el SPEI
     }
 
-    // ── Respuesta al frontend ─────────────────────────────────────────────
+    // ── Respuesta al frontend 
     return {
       statusCode: 200,
       headers: CORS_HEADERS,
@@ -263,4 +261,11 @@ export async function handler(event) {
       }),
     }
   }
+}
+
+export async function handler(event, context) {
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers: CORS_HEADERS, body: '' }
+  }
+  return withSession(handlerConSesion)(event, context)
 }

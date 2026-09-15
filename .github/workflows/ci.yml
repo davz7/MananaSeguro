@@ -111,3 +111,94 @@ jobs:
       # discusiones de estilo en los reviews.
       - name: Check formatting
         run: cargo fmt --all -- --check
+
+
+  # ---------------------------------------------------------------
+  # 4. Escaneo de secretos — bloquea el merge si algo se filtró.
+  #
+  # Va como job propio y no como paso de otro, para que el resultado
+  # sea legible por sí solo en la lista de checks del PR.
+  # ---------------------------------------------------------------
+  secrets:
+    name: Secret scanning (gitleaks)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Historia completa. Sin esto solo se escanea el último commit
+          # y un secreto introducido y "borrado" en un commit anterior
+          # seguiría vivo en el historial sin que nadie lo note.
+          fetch-depth: 0
+
+      - name: Install gitleaks
+        run: |
+          curl -sSL -o gitleaks.tar.gz \
+            https://github.com/gitleaks/gitleaks/releases/download/v8.24.0/gitleaks_8.24.0_linux_x64.tar.gz
+          tar -xzf gitleaks.tar.gz gitleaks
+          sudo mv gitleaks /usr/local/bin/
+          gitleaks version
+
+      # -------------------------------------------------------------
+      # Autoprueba del escáner.
+      #
+      # Un escáner en verde no prueba nada por sí solo: puede estar
+      # en verde porque no hay secretos, o porque la regla está mal
+      # escrita y no detecta ninguno. Este paso fabrica una semilla
+      # de Stellar sintética y exige que gitleaks la encuentre.
+      # Si no la encuentra, el job falla aquí y no en producción.
+      #
+      # El archivo se crea en /tmp y nunca se versiona, para que el
+      # escaneo real del repositorio no lo marque.
+      # -------------------------------------------------------------
+      - name: Scanner self-test (canary)
+        run: |
+          CANARY_DIR=$(mktemp -d)
+          cd "$CANARY_DIR"
+          git init -q
+          # Semilla sintética, válida en forma pero no en una red real.
+          # La semilla se arma en tiempo de ejecución. Ninguna de las dos
+          # mitades coincide con la regla por separado, así que este archivo
+          # no contiene ninguna cadena detectable y no hace falta ninguna
+          # excepción en el allowlist. Unidas sí forman una semilla válida
+          # en forma, que es exactamente lo que la autoprueba necesita.
+          PART1="SBRTWWQ4EXAMPLEZ7K3MFAKE5NOTREAL"
+          PART2="SEEDXYZ2345ABCDEFGH23456"
+          SEED="${PART1}${PART2}"
+          [ ${#SEED} -eq 56 ] || { echo "::error::La carnada mide ${#SEED} y debe medir 56"; exit 1; }
+          # Una semilla de Stellar mide exactamente 56 caracteres. Si esta
+          # carnada deja de medirlos, la regla no la detecta y la autoprueba
+          # pasaría en falso. Se verifica aquí para fallar con un mensaje claro.
+          [ ${#SEED} -eq 56 ] || { echo "::error::La carnada mide ${#SEED} y debe medir 56"; exit 1; }
+          printf 'const seed = "%s"\n' "$SEED" > canary.js
+          git add -A
+          git -c user.email=ci@local -c user.name=ci commit -qm canary
+          if gitleaks detect --source . \
+               --config "$GITHUB_WORKSPACE/.gitleaks.toml" \
+               --no-banner --exit-code 1; then
+            echo "::error::La autoprueba falló: gitleaks NO detectó la semilla sintética."
+            echo "::error::La regla stellar-secret-seed no está funcionando. Revísala antes de confiar en este job."
+            exit 1
+          fi
+          echo "Autoprueba correcta: el escáner detecta semillas de Stellar."
+
+      - name: Scan repository
+        run: |
+          gitleaks detect --source . \
+            --config .gitleaks.toml \
+            --redact \
+            --no-banner \
+            --report-format sarif \
+            --report-path gitleaks.sarif \
+            --exit-code 1
+
+      # Se sube siempre, también cuando el escaneo falla: el reporte
+      # es justamente lo que necesitas ver cuando falla.
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: gitleaks.sarif
+          if-no-files-found: ignore

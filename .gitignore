@@ -41,3 +41,6 @@ Thumbs.db
 *.sw?
 # ===== Rust build output =====
 **/target/
+
+
+infra/

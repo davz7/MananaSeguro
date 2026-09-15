@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+#
+# Hook de pre-commit: escanea lo que está en el staging area.
+#
+# El CI es la red de seguridad; esto es la primera línea. La diferencia
+# importa: si un secreto llega a un commit, aunque el CI lo detecte y
+# bloquee el merge, el valor ya vive en el historial de tu máquina y en
+# cualquier rama que empujes. Atajarlo aquí evita tener que rotarlo.
+#
+# Instalación:
+#   git config core.hooksPath .githooks
+#   chmod +x .githooks/pre-commit
+
+set -euo pipefail
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "gitleaks no está instalado — se omite el escaneo local."
+  echo "  macOS:   brew install gitleaks"
+  echo "  Windows: winget install gitleaks"
+  echo "El CI sí lo va a escanear, así que esto solo retrasa el hallazgo."
+  exit 0
+fi
+
+echo "Escaneando cambios en staging..."
+
+if ! gitleaks protect --staged --config .gitleaks.toml --redact --no-banner --exit-code 1; then
+  echo ""
+  echo "Commit bloqueado: se detectó algo que parece un secreto."
+  echo ""
+  echo "Si es un secreto real:"
+  echo "  1. Quítalo del código y usa una variable de entorno."
+  echo "  2. Rótalo. Aunque no hayas hecho commit, ya estuvo en disco sin cifrar."
+  echo ""
+  echo "Si es un falso positivo, añade una excepción acotada en .gitleaks.toml."
+  echo "No uses --no-verify: eso apaga el control en lugar de resolver el hallazgo."
+  exit 1
+fi
+
+echo "Sin secretos detectados."

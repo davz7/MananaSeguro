@@ -7,6 +7,7 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { createLogger, errorBody } from './_lib/logger.js'
+import { withSession } from './_lib/session.js'
 
 //  Constantes 
 
@@ -14,7 +15,7 @@ const CORS_HEADERS = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
 const ETHERFUSE_BASE =
@@ -68,12 +69,8 @@ async function llamarEtherfuse(path, method, body) {
 
 //  Handler principal 
 
-export async function handler(event) {
+async function handlerConSesion(event, usuarioId) {
   const log = createLogger('etherfuse-onboarding')
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers: CORS_HEADERS, body: '' }
-  }
 
   if (event.httpMethod !== 'POST') {
     return {
@@ -95,19 +92,9 @@ export async function handler(event) {
     }
   }
 
-  //  Parsear body ─
-  let usuarioId
-  try {
-    const body = JSON.parse(event.body || '{}')
-    usuarioId = body.usuarioId
-    if (!usuarioId) throw new Error('usuarioId requerido')
-  } catch (err) {
-    return {
-      statusCode: 400,
-      headers: CORS_HEADERS,
-      body: errorBody(log, `Body inválido: ${err.message}`),
-    }
-  }
+  // El usuarioId sale del token de sesión. Antes se leía del cuerpo, lo
+  // que permitía generar la URL de onboarding KYC de cualquier usuario
+  // conociendo su id.
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
     auth: { persistSession: false },
@@ -183,4 +170,11 @@ export async function handler(event) {
       body: errorBody(log, `Error al generar URL de onboarding: ${err.message}`),
     }
   }
+}
+
+export async function handler(event, context) {
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers: CORS_HEADERS, body: '' }
+  }
+  return withSession(handlerConSesion)(event, context)
 }

@@ -1,29 +1,32 @@
 // netlify/functions/metas.js
 //
-// ─── ISO 25010 ───────────────────────────────────────────────────────────────
+//  ISO 25010 
 // Seguridad:      Valida usuarioId en cada operación. Nunca expone datos de
 //                 otros usuarios. service_role solo en backend.
 // Fiabilidad:     Errores tipados. Validación de campos antes de tocar la BD.
 //                 Unique constraint en BD previene duplicados de meta principal.
 // Mantenibilidad: Un handler por método HTTP. Helpers separados por operación.
 // Eficiencia:     Queries mínimas — no trae campos innecesarios.
-// Funcionalidad:  GET /api/metas?usuarioId=x — listar metas del usuario
+// Seguridad:      La identidad del llamante sale EXCLUSIVAMENTE del token de
+//                 sesión. El parámetro usuarioId fue eliminado: aceptarlo,
+//                 aunque fuera como respaldo, reabriría la suplantación.
+// Funcionalidad:  GET /api/metas          — listar metas del usuario
 //                 POST /api/metas       — crear meta
 //                 PATCH /api/metas/:id  — actualizar meta
 //                 DELETE /api/metas/:id — eliminar meta (no la principal si es única)
-// ─────────────────────────────────────────────────────────────────────────────
 
 import { createClient } from '@supabase/supabase-js'
 import { createLogger, errorBody, withRequestId } from './_lib/logger.js'
+import { withSession } from './_lib/session.js'
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
-// ─── Validaciones ─────────────────────────────────────────────────────────────
+//  Validaciones ─
 
 const NOMBRES_VALIDOS_MAX = 60
 const MONTO_MIN = 1000
@@ -58,7 +61,7 @@ function validarMeta({ nombre, monto_objetivo_mxn, ahorro_mensual_mxn, anos_al_r
   return null
 }
 
-// ─── Supabase client factory ──────────────────────────────────────────────────
+//  Supabase client factory ──
 
 function getSupabase() {
   const { SUPABASE_URL, SUPABASE_SERVICE_KEY } = process.env
@@ -70,15 +73,10 @@ function getSupabase() {
   })
 }
 
-// ─── Handlers por método ──────────────────────────────────────────────────────
+//  Handlers por método 
 
-// GET /api/metas?usuarioId=xxx
-async function handleGet(event) {
-  const { usuarioId } = event.queryStringParameters || {}
-  if (!usuarioId) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'usuarioId requerido' }) }
-  }
-
+// GET /api/metas — metas del usuario autenticado
+async function handleGet(event, usuarioId) {
   const supabase = getSupabase()
   const { data, error } = await supabase
     .from('metas')
@@ -92,13 +90,9 @@ async function handleGet(event) {
 }
 
 // POST /api/metas — crear meta
-async function handlePost(event) {
+async function handlePost(event, usuarioId) {
   const body = JSON.parse(event.body || '{}')
-  const { usuarioId, nombre, descripcion, monto_objetivo_mxn, ahorro_mensual_mxn, anos_al_retiro } = body
-
-  if (!usuarioId) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'usuarioId requerido' }) }
-  }
+  const { nombre, descripcion, monto_objetivo_mxn, ahorro_mensual_mxn, anos_al_retiro } = body
 
   const errorValidacion = validarMeta({ nombre, monto_objetivo_mxn, ahorro_mensual_mxn, anos_al_retiro })
   if (errorValidacion) {
@@ -142,18 +136,14 @@ async function handlePost(event) {
 }
 
 // PATCH /api/metas?id=xxx — actualizar meta
-async function handlePatch(event) {
+async function handlePatch(event, usuarioId) {
   const { id } = event.queryStringParameters || {}
   if (!id) {
     return { statusCode: 400, body: JSON.stringify({ error: 'id de meta requerido' }) }
   }
 
   const body = JSON.parse(event.body || '{}')
-  const { usuarioId, nombre, descripcion, monto_objetivo_mxn, ahorro_mensual_mxn, anos_al_retiro } = body
-
-  if (!usuarioId) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'usuarioId requerido' }) }
-  }
+  const { nombre, descripcion, monto_objetivo_mxn, ahorro_mensual_mxn, anos_al_retiro } = body
 
   // Solo validar campos que vienen en el body
   const updates = {}
@@ -210,13 +200,11 @@ async function handlePatch(event) {
 }
 
 // DELETE /api/metas?id=xxx — eliminar meta
-async function handleDelete(event) {
+async function handleDelete(event, usuarioId) {
   const { id } = event.queryStringParameters || {}
-  const body = JSON.parse(event.body || '{}')
-  const { usuarioId } = body
 
-  if (!id || !usuarioId) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'id y usuarioId requeridos' }) }
+  if (!id) {
+    return { statusCode: 400, body: JSON.stringify({ error: 'id de meta requerido' }) }
   }
 
   const supabase = getSupabase()
@@ -268,23 +256,19 @@ async function handleDelete(event) {
   return { statusCode: 200, body: JSON.stringify({ eliminado: true }) }
 }
 
-// ─── Handler principal ────────────────────────────────────────────────────────
+//  Handler principal ──
 
-export async function handler(event) {
+async function handlerConSesion(event, usuarioId) {
   const log = createLogger('metas')
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers: CORS_HEADERS, body: '' }
-  }
 
   try {
     let result
 
     switch (event.httpMethod) {
-      case 'GET':    result = await handleGet(event);    break
-      case 'POST':   result = await handlePost(event);   break
-      case 'PATCH':  result = await handlePatch(event);  break
-      case 'DELETE': result = await handleDelete(event); break
+      case 'GET':    result = await handleGet(event, usuarioId);    break
+      case 'POST':   result = await handlePost(event, usuarioId);   break
+      case 'PATCH':  result = await handlePatch(event, usuarioId);  break
+      case 'DELETE': result = await handleDelete(event, usuarioId); break
       default:
         return {
           statusCode: 405,
@@ -305,4 +289,13 @@ export async function handler(event) {
       }),
     }
   }
+}
+
+// El preflight CORS no lleva credenciales. Si pasara por withSession
+// respondería 401 y el navegador bloquearía toda petición real después.
+export async function handler(event, context) {
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers: CORS_HEADERS, body: '' }
+  }
+  return withSession(handlerConSesion)(event, context)
 }
