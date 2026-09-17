@@ -13,6 +13,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createLogger, errorBody } from './_lib/logger.js'
 import { withSession } from './_lib/session.js'
 import { ejecutarIntent, IntentError } from './_lib/soroban.js'
+import { assertPuedeOperar, CuentaInactivaError } from './_lib/cuenta.js'
 
 const CORS_HEADERS = {
   'Content-Type': 'application/json',
@@ -26,9 +27,14 @@ const CORS_HEADERS = {
 const HTTP_POR_CODIGO = {
   INVALID_INTENT: 400,
   INSUFFICIENT_BALANCE: 400,
+  AMOUNT_BELOW_MINIMUM: 400,
+  TRUSTLINE_MISSING: 409,
   LOCK_ACTIVE: 409,
   LOAN_NOT_ELIGIBLE: 409,
   IN_PROGRESS: 409,
+  ACCOUNT_DEACTIVATED: 403,
+  KEY_DESTROYED: 403,
+  ACCOUNT_NOT_FOUND: 404,
   SIMULATION_FAILED: 422,
   RATE_LIMITED: 429,
   SUBMISSION_FAILED: 502,
@@ -39,9 +45,14 @@ const HTTP_POR_CODIGO = {
 const MENSAJES = {
   INVALID_INTENT: 'La operación solicitada no es válida.',
   INSUFFICIENT_BALANCE: 'Saldo insuficiente para completar la operación.',
+  AMOUNT_BELOW_MINIMUM: 'El monto es menor al mínimo permitido.',
+  TRUSTLINE_MISSING: 'Tu cuenta aún no está lista para recibir este activo.',
   LOCK_ACTIVE: 'Tus fondos siguen bloqueados hasta la fecha de retiro.',
   LOAN_NOT_ELIGIBLE: 'No cumples las condiciones para este préstamo.',
   IN_PROGRESS: 'Esta operación ya se está procesando.',
+  ACCOUNT_DEACTIVATED: 'Esta cuenta está dada de baja.',
+  KEY_DESTROYED: 'Esta cuenta ya no puede operar.',
+  ACCOUNT_NOT_FOUND: 'No encontramos la cuenta.',
   SIMULATION_FAILED: 'La operación fue rechazada. Revisa los datos e intenta de nuevo.',
   RATE_LIMITED: 'Demasiadas operaciones seguidas. Espera un momento.',
   SUBMISSION_FAILED: 'No se pudo enviar la operación a la red. Puedes reintentar.',
@@ -95,7 +106,7 @@ async function handlerConSesion(event, usuarioId) {
     auth: { persistSession: false },
   })
 
-  // ── Reclamar la clave de idempotencia ────────────────────────────────
+  //  Reclamar la clave de idempotencia 
   //
   // El insert es la operación que reclama: la clave primaria garantiza que
   // solo una petición gane, incluso si llegan dos a la vez. Comprobar
@@ -138,7 +149,7 @@ async function handlerConSesion(event, usuarioId) {
     return error('IN_PROGRESS')
   }
 
-  // ── Límite de tasa ───────────────────────────────────────────────────
+  //  Límite de tasa 
   const desde = new Date(Date.now() - 60_000).toISOString()
   const { count } = await supabase
     .from('intentos_firma')
@@ -151,7 +162,7 @@ async function handlerConSesion(event, usuarioId) {
     return error('RATE_LIMITED')
   }
 
-  // ── Cargar al usuario con su material de custodia ────────────────────
+  //  Cargar al usuario con su material de custodia 
   const { data: usuario, error: errorUsuario } = await supabase
     .from('usuarios')
     .select('*')
@@ -159,11 +170,23 @@ async function handlerConSesion(event, usuarioId) {
     .single()
 
   if (errorUsuario || !usuario) {
-    await marcarFallido(supabase, idempotencyKey, 'INTERNAL')
-    return error('INTERNAL')
+    await marcarFallido(supabase, idempotencyKey, 'ACCOUNT_NOT_FOUND')
+    return error('ACCOUNT_NOT_FOUND')
   }
 
-  // ── Ejecutar ─────────────────────────────────────────────────────────
+  // Una cuenta dada de baja o con su material destruido no firma, aunque
+  // presente un token válido emitido antes de la baja.
+  try {
+    assertPuedeOperar(usuario)
+  } catch (err) {
+    if (err instanceof CuentaInactivaError) {
+      await marcarFallido(supabase, idempotencyKey, err.code)
+      return error(err.code)
+    }
+    throw err
+  }
+
+  //  Ejecutar 
   try {
     const { hash, intentType } = await ejecutarIntent(intent, usuario)
 

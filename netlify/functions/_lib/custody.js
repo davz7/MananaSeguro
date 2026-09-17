@@ -73,6 +73,10 @@ function credenciales() {
   })
 }
 
+export function kmsClient() {
+  return kms()
+}
+
 function kms() {
   if (!clienteKms) {
     clienteKms = new KMSClient({
@@ -93,7 +97,7 @@ export function _resetKmsClient() {
   clienteKms = undefined
 }
 
-function idDeLlave() {
+export function idDeLlave() {
   const id = process.env.KMS_CUSTODY_KEY_ID
   if (!id) throw new Error('KMS_CUSTODY_KEY_ID no está configurada')
   return id

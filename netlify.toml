@@ -4,6 +4,8 @@
 
 [functions]
   directory = "netlify/functions"
+  node_bundler = "esbuild"
+  included_files = ["!netlify/functions/**/*.test.js"]
 
 [dev]
   command = "npm run dev --prefix CreditRoot"
@@ -59,13 +61,14 @@
   to = "/.netlify/functions/metas"
   status = 200
 
-#  SPA fallback — debe ir al final siempre 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
+#  API: firma custodial de intenciones
 [[redirects]]
   from = "/api/sign-intent"
   to = "/.netlify/functions/sign-intent"
+  status = 200
+
+#  SPA fallback — debe ir al final siempre
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
   status = 200

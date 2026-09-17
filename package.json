@@ -5,8 +5,11 @@
     "test:functions": "vitest run netlify/functions"
   },
   "dependencies": {
+    "@aws-sdk/client-kms": "^3.1133.0",
+    "@aws-sdk/credential-providers": "^3.1133.0",
     "@stellar/stellar-sdk": "^12.3.0",
-    "@supabase/supabase-js": "^2.105.4"
+    "@supabase/supabase-js": "^2.105.4",
+    "jose": "^6.2.12"
   },
   "devDependencies": {
     "vitest": "^1.6.0"

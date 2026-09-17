@@ -1,5 +1,6 @@
 import * as StellarSdk from '@stellar/stellar-sdk'
 import { withSeed } from './custody.js'
+import { traducirErrorContrato } from './erroresContrato.js'
 
 /**
  * Construcción, firma y envío de transacciones Soroban del lado del servidor.
@@ -31,7 +32,7 @@ const NETWORK_PASSPHRASE =
 // del alcance de este sprint y viven en el contrato.
 const MONTO_MAXIMO_USDC = 1_000_000
 const ANIOS_MIN = 1
-const ANIOS_MAX = 50
+const ANIOS_MAX = 40 // el contrato acepta de 1 a 40; más arriba lo rechaza
 
 const TIMEOUT_TX_SEGUNDOS = 30
 const ESPERA_MAX_MS = 30_000
@@ -156,9 +157,14 @@ async function construirYSimular(address, operacion) {
   const simulacion = await rpc().simulateTransaction(construida)
 
   if (StellarSdk.rpc.Api.isSimulationError(simulacion)) {
-    // El contrato rechazó la operación: saldo insuficiente, bloqueo
-    // vigente, préstamo no elegible. No tiene sentido reintentar.
-    throw new IntentError('SIMULATION_FAILED', String(simulacion.error))
+    // El contrato rechazó la operación. Se traduce a un código que la
+    // interfaz pueda usar; lo que no se reconoce con certeza queda como
+    // SIMULATION_FAILED en lugar de adivinarse.
+    const { codigo, detalle } = traducirErrorContrato(
+      String(simulacion.error),
+      CONTRACT_ID
+    )
+    throw new IntentError(codigo, detalle)
   }
 
   return StellarSdk.rpc.assembleTransaction(construida, simulacion).build()
