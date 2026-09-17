@@ -29,11 +29,21 @@ import { ejecutarIntent } from '../_lib/soroban.js'
 const ACTIVO = process.env.RUN_INTEGRATION === '1'
 const d = ACTIVO ? describe : describe.skip
 
-const supabase = createClient(
-  process.env.SUPABASE_URL ?? 'https://placeholder.supabase.co',
-  process.env.SUPABASE_SERVICE_KEY ?? 'placeholder',
-  { auth: { persistSession: false } }
-)
+let _supabase
+
+function db() {
+  // Perezoso a propósito: si se creara al importar el módulo, se
+  // ejecutaría incluso cuando los tests están saltados, y arrastraría
+  // al CI las dependencias de runtime del cliente de Supabase.
+  if (!_supabase) {
+    _supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_KEY,
+      { auth: { persistSession: false } }
+    )
+  }
+  return _supabase
+}
 
 const creados = []
 
@@ -51,7 +61,7 @@ async function crearUsuario() {
     bank_account_status: 'pending',
     ...custodia,
   }
-  const { error } = await supabase.from('usuarios').insert(fila)
+  const { error } = await db().from('usuarios').insert(fila)
   if (error) throw new Error(`No se pudo crear el usuario: ${error.message}`)
   creados.push(id)
   return fila
@@ -72,8 +82,8 @@ beforeAll(async () => {
 afterAll(async () => {
   if (!ACTIVO || creados.length === 0) return
   // La limpieza respeta el orden de las claves foráneas.
-  await supabase.from('intentos_firma').delete().in('usuario_id', creados)
-  await supabase.from('usuarios').delete().in('id', creados)
+  await db().from('intentos_firma').delete().in('usuario_id', creados)
+  await db().from('usuarios').delete().in('id', creados)
 })
 
 d('INT-1 · Alta de cuenta custodial contra la CMK real', () => {
@@ -83,7 +93,7 @@ d('INT-1 · Alta de cuenta custodial contra la CMK real', () => {
     expect(usuario.stellar_public_key).toMatch(/^G[A-Z2-7]{55}$/)
     expect(usuario.key_scheme_version).toBe(1)
 
-    const { data } = await supabase
+    const { data } = await db()
       .from('usuarios').select('*').eq('id', usuario.id).single()
 
     // Lo que quedó en la base no contiene ninguna semilla en claro.
@@ -114,7 +124,6 @@ d('INT-2 · Firma de una invocación Soroban en testnet', () => {
   }, 120_000)
 })
 
-// 
 d('INT-3 · Rechazo de descifrado cruzado entre usuarios', () => {
   it('el registro de A no se abre con la identidad de B', async () => {
     const a = await crearUsuario()
@@ -127,7 +136,6 @@ d('INT-3 · Rechazo de descifrado cruzado entre usuarios', () => {
   }, 60_000)
 })
 
-// 
 d('INT-4 · Rechazo sin los permisos del rol de firma', () => {
   it('la credencial base no puede usar la CMK por sí sola', async () => {
     // El usuario cuya access key vive en el entorno NO tiene permisos de
@@ -152,7 +160,6 @@ d('INT-4 · Rechazo sin los permisos del rol de firma', () => {
     ).rejects.toThrow(/not authorized/i)
   }, 30_000)
 })
-
 
 d('INT-5 · Rechazo de la CMK sin encryption context', () => {
   it('el rol de firma no puede operar sin el userId', async () => {
@@ -202,12 +209,12 @@ d('INT-7 · Recuperación desde respaldo', () => {
     const instantanea = Object.fromEntries(COLUMNAS.map((c) => [c, usuario[c]]))
 
     // Pérdida
-    await supabase
+    await db()
       .from('usuarios')
       .update(Object.fromEntries(COLUMNAS.map((c) => [c, null])))
       .eq('id', usuario.id)
 
-    const { data: roto } = await supabase
+    const { data: roto } = await db()
       .from('usuarios').select('*').eq('id', usuario.id).single()
 
     // Comprobar que la pérdida es real. Sin este paso, el éxito final
@@ -215,9 +222,9 @@ d('INT-7 · Recuperación desde respaldo', () => {
     await expect(withSeed(roto, usuario.id, () => null)).rejects.toThrow()
 
     // Restauración
-    await supabase.from('usuarios').update(instantanea).eq('id', usuario.id)
+    await db().from('usuarios').update(instantanea).eq('id', usuario.id)
 
-    const { data: restaurado } = await supabase
+    const { data: restaurado } = await db()
       .from('usuarios').select('*').eq('id', usuario.id).single()
 
     expect(await llavePublicaDesdeSemilla(restaurado)).toBe(
