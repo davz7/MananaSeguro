@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto'
+import { randomUUID, createHmac  } from 'crypto'
 
 //Crea una orden falsa para simular el webhook
 function crearOrdenFalsa() {
@@ -47,25 +47,38 @@ function enviarWebhook(payload, secret, url) {
     })
 }
 
-// Simula el flujo normal completo de un webhook de Etherfuse enviando los eventos 'created', 'funded' y 'completed' a la URL especificada con la firma generada a partir del secreto compartido
+// Simula el flujo normal completo: created → funded → completed
 async function simularFlujoNormal(secret, url) {
-    const ordenFalsa = crearOrdenFalsa()
-    await enviarWebhook(armarPayload(ordenFalsa, 'created'), secret, url)
-    await enviarWebhook(armarPayload(ordenFalsa, 'funded'), secret, url)
-    await enviarWebhook(armarPayload(ordenFalsa, 'completed'), secret, url)
+  const ordenFalsa = crearOrdenFalsa()
+  await enviarWebhook(armarPayload(ordenFalsa, 'created'), secret, url)
+  await enviarWebhook(armarPayload(ordenFalsa, 'funded'), secret, url)
+  await enviarWebhook(armarPayload(ordenFalsa, 'completed'), secret, url)
+  return ordenFalsa
 }
 
-// Simula un webhook duplicado enviando dos veces el mismo evento 'funded' a la URL especificada con la firma generada a partir del secreto compartido
+// Simula un webhook duplicado: mismo evento 'funded' enviado dos veces
 async function simularDuplicado(secret, url) {
-    const ordenFalsa = crearOrdenFalsa()
-    const payload = armarPayload(ordenFalsa, 'funded')
-    await enviarWebhook(payload, secret, url)
-    await enviarWebhook(payload, secret, url)
+  const ordenFalsa = crearOrdenFalsa()
+  const payload = armarPayload(ordenFalsa, 'funded')
+  await enviarWebhook(payload, secret, url)
+  await enviarWebhook(payload, secret, url)
+  return ordenFalsa
 }
 
-// Simula un webhook tardío enviando primero el evento 'completed' y luego el evento 'funded' a la URL especificada con la firma generada a partir del secreto compartido
+// Simula una respuesta tardía/fuera de orden: 'completed' antes que 'funded'
 async function simularRespuestaTardia(secret, url) {
-    const ordenFalsa = crearOrdenFalsa()
-    await enviarWebhook(armarPayload(ordenFalsa, 'completed'), secret, url)
-    await enviarWebhook(armarPayload(ordenFalsa, 'funded'), secret, url)
+  const ordenFalsa = crearOrdenFalsa()
+  await enviarWebhook(armarPayload(ordenFalsa, 'completed'), secret, url)
+  await enviarWebhook(armarPayload(ordenFalsa, 'funded'), secret, url)
+  return ordenFalsa
+}
+
+export {
+  crearOrdenFalsa,
+  armarPayload,
+  generaFirma,
+  enviarWebhook,
+  simularFlujoNormal,
+  simularDuplicado,
+  simularRespuestaTardia,
 }

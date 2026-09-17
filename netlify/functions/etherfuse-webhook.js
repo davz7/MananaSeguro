@@ -5,6 +5,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { createHmac, timingSafeEqual } from 'crypto'
 import { createLogger, errorBody } from './_lib/logger.js'
+import { canTransition } from './_lib/orderStateMachine.js'
 
 //  Constantes 
 
@@ -13,7 +14,7 @@ const CORS_HEADERS = {
   'Content-Type': 'application/json',
 }
 
-//  Verificación de firma HMAC-SHA256 
+//  Verificación de firma HMAC-SHA256  
 
 /**
  * Verifica la firma del webhook de Etherfuse.
@@ -118,19 +119,23 @@ async function handleOrderUpdated(payload, supabase, log) {
   // ya teníamos guardado, es un duplicado y no debe reprocesarse.
   const esDuplicado = ordenExistente && status == ordenExistente.status && updatedAt == ordenExistente.updated_at
 
-  if (esDuplicado) {
+   if (esDuplicado) {
     log.info('Duplicado detectado, ignorando', { orderId })
   } else {
-    const { error } = await supabase
-      .from('ordenes')
-      .update(updates)
-      .eq('order_id', orderId)
+    const estadoActual = ordenExistente?.status ?? null
 
-      if(error){
-        log.error('Error actualizando orden', { orderId, detail: error.message })
-      }else {
-        log.info('Orden actualizada', { orderId, status })
-      }
+    if (!canTransition(estadoActual, status)) {
+      log.warn('Transición inválida rechazada', { orderId, desde: estadoActual, hacia: status })
+      return 
+    }
+
+    const { error } = await supabase.from('ordenes').update(updates).eq('order_id', orderId)
+
+    if (error) {
+      log.error('Error actualizando orden', { orderId, detail: error.message })
+    } else {
+      log.info('Orden actualizada', { orderId, status })
+    }
 
     // TODO cuando status === 'completed':
     // 1. Si hay stellarClaimTransaction → firmarla con la llave custodial
