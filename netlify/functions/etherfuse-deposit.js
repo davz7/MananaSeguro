@@ -6,7 +6,7 @@
 //                 cuerpo ya no puede designar a otro titular.
 // Fiabilidad:     Timeout en llamadas externas. Guarda la orden en Supabase
 //                 antes de responder — si el cliente cae, la orden persiste.
-// Mantenibilidad: Helpers separados para quote y order. Errores descriptivos.
+// Mantenibilidad: Helpers separados para quote y order. Errores descriptivos. 
 // Eficiencia:     Una sola transacción Supabase al final.
 // Usabilidad:     Mensajes de error claros y accionables para el frontend.
 //
