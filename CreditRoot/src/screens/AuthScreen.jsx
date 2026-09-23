@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Shield, TriangleAlert, Lock, Zap, Building2, ArrowRight, ArrowLeft } from 'lucide-react'
+import { TriangleAlert, ArrowRight, ArrowLeft } from 'lucide-react'
 import Footer from './components/Footer'
 import LandingNavbar from './components/LandingNavbar'
 import { conectarWallet } from '../lib/wallet'
 import ardilla from '../assets/Ardilla_vector.png'
-import pollarLogo from '../assets/polo.webp'
+import { BrandLogo } from '../components/ui/BrandLogo'
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
@@ -117,130 +117,104 @@ export function AuthScreen({ onAuth, onVolver }) {
   }
 
   return (
-    <div className="bg-surface dark:bg-[#0f0e0d] min-h-screen overflow-x-hidden">
+    <div className="bg-[#0f0e0d] min-h-screen overflow-x-hidden">
       <LandingNavbar soloVolver onVolver={onVolver} />
 
-      <div className="container mx-auto px-4 py-16 lg:py-24">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <div className="container mx-auto px-4 pt-10 pb-16">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start min-h-[calc(100vh-80px)]">
 
-          {/* Copy izquierda */}
-          <div className="hidden lg:flex flex-col justify-center anim-fade-up-1">
-            <span className="inline-block bg-brand/10 text-brand-dark border border-brand/20 rounded-lg px-4 py-1.5 text-xs font-semibold tracking-wide mb-6">
-              <Shield size={14} aria-hidden="true" /> {t('auth.badge')}
-            </span>
-            <h1 className="font-display font-black text-ink dark:text-white tracking-tight mb-4"
-              style={{ fontSize: 'clamp(2.4rem,5vw,3.6rem)', lineHeight: 1.05 }}>
-              {t('auth.heroTitulo')}<br />
-              <em className="text-brand italic">{t('auth.heroTituloAccent')}</em>
-            </h1>
-            <p className="text-ink/50 dark:text-white/50 text-lg leading-relaxed max-w-md mb-8">
-              {t('auth.descWallet')}
-            </p>
-
-            <div className="flex flex-col gap-3 mb-8">
-              {[
-                { num: '1', text: t('auth.paso1') },
-                { num: '2', text: t('auth.paso2') },
-                { num: '3', text: t('auth.paso3') },
-                { num: '4', text: t('auth.paso4') },
-              ].map(p => (
-                <div key={p.num} className="flex items-center gap-3">
-                  <span className="w-7 h-7 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-xs font-black text-brand shrink-0">
-                    {p.num}
-                  </span>
-                  <span className="text-sm text-ink/60 dark:text-white/60">{p.text}</span>
-                </div>
-              ))}
+          {/* ── Columna izquierda ── */}
+          <div className="hidden lg:flex flex-col anim-fade-up-1">
+            {/* Logo + tagline */}
+            <div className="flex items-center gap-4 mb-10">
+              <BrandLogo size="lg" />
+              <div>
+                <p className="text-white/60 text-sm font-medium leading-tight">Somos</p>
+                <p className="text-white font-display font-bold text-xl leading-tight">MañanaSeguro.</p>
+              </div>
             </div>
 
-            <img src={ardilla} alt={t('auth.mascotaAlt')} className="h-40 object-contain float-squirrel" />
+            {/* H1 */}
+            <h1
+              className="font-display font-bold text-white tracking-tight"
+              style={{ fontSize: 'clamp(3rem,7vw,5rem)', lineHeight: 1.05 }}
+            >
+              Tu <em className="text-brand not-italic">dinero,</em><br />
+              Tus <em className="text-brand not-italic">reglas,</em><br />
+              Tu <em className="text-brand not-italic">retiro</em>
+            </h1>
           </div>
 
-          {/* Card de auth */}
+          {/* ── Columna derecha — card de auth ── */}
           <div className="anim-fade-up-2">
-            <div className="bg-white dark:bg-white/5 rounded-3xl p-8 lg:p-10 border border-ink/8 dark:border-white/8 shadow-xl shadow-ink/5">
+            <div className="bg-[#1a1814] border border-white/10 rounded-3xl p-8 lg:p-10">
 
               {/* Paso inicio */}
               {paso === 'inicio' && (
-                <div className="flex flex-col gap-5">
-                  <div className="text-center mb-1">
-                    <h3 className="font-display font-black text-ink dark:text-white text-2xl mb-2">
-                      {t('auth.tituloWallet')} <em className="text-brand italic">{t('auth.tituloWalletAccent')}</em>
-                    </h3>
-                    <p className="text-ink/45 dark:text-white/45 text-sm leading-relaxed">
-                      {t('auth.descNombre')}
+                <div className="flex flex-col items-center gap-5">
+                  <div className="text-center">
+                    <h2 className="font-display font-bold text-white text-4xl mb-3">
+                      Regístrate
+                    </h2>
+                    <p className="text-white/55 text-base leading-relaxed">
+                      Tener tu futuro en tus manos<br />nuca había sido tan fácil
                     </p>
                   </div>
 
+                  {/* Ardilla */}
+                  <img
+                    src={ardilla}
+                    alt={t('auth.mascotaAlt')}
+                    className="h-44 object-contain float-squirrel"
+                  />
+
                   {error && (
-                    <div className="bg-red-500/8 border border-dashed border-red-400/40 text-red-500 text-sm text-center px-4 py-3 rounded-xl">
+                    <div className="w-full bg-red-500/8 border border-dashed border-red-400/40 text-red-500 text-sm text-center px-4 py-3 rounded-xl">
                       <TriangleAlert size={16} className="inline shrink-0" aria-hidden="true" /> {error}
                     </div>
                   )}
 
-                  {/* Loading */}
                   {loading && (
-                    <div className="flex flex-col items-center gap-3 py-4">
+                    <div className="flex flex-col items-center gap-3 py-2">
                       <svg aria-hidden="true" className="animate-spin text-brand" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                       </svg>
-                      <p className="text-sm text-ink/50 dark:text-white/50">{t('auth.conectando')}</p>
+                      <p className="text-sm text-white/50">{t('auth.conectando')}</p>
                     </div>
                   )}
 
-                  {/* Botón oficial de Google */}
+                  {/* CTA principal */}
                   {!loading && (
-                    <>
-                      <div ref={googleBtnRef} className="w-full flex justify-center" style={{ minHeight: '44px' }} />
-                      {!googleListo && !error && (
-                        <div className="w-full h-11 bg-ink/5 dark:bg-white/5 rounded-lg animate-pulse" />
-                      )}
-                    </>
+                    <button
+                      className="w-full bg-brand hover:bg-brand-dark text-white font-semibold py-4 rounded-xl transition-all hover:-translate-y-px hover:shadow-lg hover:shadow-brand/30 cursor-pointer text-base"
+                      onClick={() => setPaso('freighter')}
+                    >
+                      Crear cuenta con correo
+                    </button>
                   )}
 
-                  {/* Trust indicators */}
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { icon: Lock, text: t('auth.trust1') },
-                      { icon: Zap, text: t('auth.trust2') },
-                      { icon: Building2, text: t('auth.trust3') },
-                    ].map(item => {
-                      const Icon = item.icon
-                      return (
-                      <div key={item.text} className="bg-ink/2 dark:bg-white/3 rounded-xl p-3 text-center">
-                        <div className="mb-1"><Icon size={18} aria-hidden="true" className="text-ink/40 dark:text-white/40" /></div>
-                        <div className="text-xs text-ink/45 dark:text-white/45 font-medium">{item.text}</div>
-                      </div>
-                      )
-                    })}
-                  </div>
+                  {/* Link iniciar sesión */}
+                  <p className="text-sm text-white/45">
+                    {t('calc.yaTienesCuenta')}{' '}
+                    <button
+                      onClick={onVolver}
+                      className="text-white font-semibold underline underline-offset-2 hover:text-brand transition-colors cursor-pointer"
+                    >
+                      {t('calc.iniciarSesion')}
+                    </button>
+                  </p>
 
-                  {/* Divisor */}
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 h-px bg-ink/8 dark:bg-white/8" />
-                    <span className="text-xs text-ink/25 dark:text-white/25">{t('auth.opcionesAvanzadas')}</span>
-                    <div className="flex-1 h-px bg-ink/8 dark:bg-white/8" />
-                  </div>
-
-                  {/* Freighter , avanzado */}
-                  <button
-                    className="w-full flex items-center justify-center gap-2 border border-ink/8 dark:border-white/8 hover:border-ink/20 dark:hover:border-white/20 text-ink/35 dark:text-white/35 hover:text-ink/60 dark:hover:text-white/60 font-medium py-3 rounded-xl transition-all cursor-pointer text-sm disabled:opacity-50"
-                    onClick={() => setPaso('freighter')}
-                    disabled={loading}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="2" y="7" width="20" height="14" rx="2" />
-                      <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
-                    </svg>
-                    {t('auth.usarFreighter')}
-                  </button>
-
-                  {/* Powered by Pollar */}
-                  <div className="flex items-center justify-center gap-1.5 pt-1">
-                    <span className="text-xs text-ink/25 dark:text-white/25">{t('auth.poweredBy')}</span>
-                    <a href="https://pollar.xyz" target="_blank" rel="noopener noreferrer" className="flex items-center">
-                      <img src={pollarLogo} alt={t('auth.pollarAlt')} className="h-8 w-auto opacity-60 hover:opacity-90 transition-opacity dark:invert" />
+                  {/* Términos */}
+                  <p className="text-xs text-white/30 text-center leading-relaxed">
+                    Al hacer clic en &ldquo;Continuar&rdquo; aceptas<br />
+                    los{' '}
+                    <a href="#" className="underline underline-offset-2 hover:text-white/60 transition-colors">
+                      términos y condiciones de uso
                     </a>
-                  </div>
+                  </p>
+
+                  {/* Google SDK oculto — se inicializa pero no se muestra */}
+                  <div ref={googleBtnRef} className="hidden" />
                 </div>
               )}
 

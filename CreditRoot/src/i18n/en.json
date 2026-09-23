@@ -72,17 +72,19 @@
   "calc": {
     "proyeccion": "Projection at {{anios}} years",
     "apy": "MXN · at {{apy}}% net APY",
-    "tasaVivo": "Live CETES rate · {{rate}}% gross",
-    "tasaRef": "Reference rate · {{rate}}%",
+    "tasaVivo": "Reference rate {{rate}}%",
+    "tasaRef": "Reference rate {{rate}}%",
     "cargando": "Loading rate...",
     "aporteLabel": "Monthly savings",
     "tiempoLabel": "Savings period",
-    "empezar": "Start saving →",
+    "empezar": "Create an account",
     "aniosSufijo": "years",
     "min": "1 year",
     "max": "40 years",
     "apyMxn": "Mexican pesos · at {{apy}}% net APY",
-    "mascotaAlt": "Mañana Seguro mascot"
+    "mascotaAlt": "Mañana Seguro mascot",
+    "yaTienesCuenta": "Already have an account?",
+    "iniciarSesion": "Sign in"
   },
   "auth": {
     "badge": "Your retirement, in your hands",

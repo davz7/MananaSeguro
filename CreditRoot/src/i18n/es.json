@@ -72,17 +72,19 @@
   "calc": {
     "proyeccion": "Proyección a {{anios}} años",
     "apy": "MXN · a {{apy}}% APY neto",
-    "tasaVivo": "Tasa CETES en vivo · {{rate}}% bruto",
-    "tasaRef": "Tasa referencial · {{rate}}%",
+    "tasaVivo": "Tasa de referencia {{rate}}%",
+    "tasaRef": "Tasa de referencia {{rate}}%",
     "cargando": "Cargando tasa...",
     "aporteLabel": "Ahorro mensual",
     "tiempoLabel": "Tiempo de ahorro",
-    "empezar": "Empezar a ahorrar →",
+    "empezar": "Crear una cuenta",
     "aniosSufijo": "años",
     "min": "1 año",
     "max": "40 años",
     "apyMxn": "Pesos mexicanos · a {{apy}}% APY neto",
-    "mascotaAlt": "Mascota Mañana Seguro"
+    "mascotaAlt": "Mascota Mañana Seguro",
+    "yaTienesCuenta": "¿Ya tienes cuenta?",
+    "iniciarSesion": "Iniciar sesión"
   },
   "auth": {
     "badge": "Tu retiro, en tus manos",
