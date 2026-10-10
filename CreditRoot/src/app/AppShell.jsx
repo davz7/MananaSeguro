@@ -114,20 +114,20 @@ export function AppShell() {
         estaAutenticado
           ? <Navigate to="/main" replace />
           : <SignInScreen
-              onVerificar={(email) => { setIdentificador(email); navigate('/verificacion') }}
-              onVolver={() => navigate('/')}
-              onRegister={() => navigate('/login')}
-            />
+            onVerificar={(email) => { setIdentificador(email); navigate('/verificacion') }}
+            onVolver={() => navigate('/')}
+            onRegister={() => navigate('/login')}
+          />
       } />
       <Route path="/verificacion" element={
         estaAutenticado
           ? <Navigate to="/main" replace />
           : identificador
             ? <VerificacionScreen
-                identificador={identificador}
-                onAuth={handleAuth}
-                onVolver={() => navigate('/signin')}
-              />
+              identificador={identificador}
+              onAuth={handleAuth}
+              onVolver={() => navigate('/signin')}
+            />
             : <Navigate to="/signin" replace />
       } />
       <Route path="/main" element={
