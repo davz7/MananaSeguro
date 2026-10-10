@@ -237,11 +237,26 @@
     "developedBy": "Developed by",
     "teamTitle": "Development team",
     "team": {
-      "member1": { "name": "Daniel Rosales", "role": "Co-Founder, Product Developer & UI Mobile Designer" },
-      "member2": { "name": "Renata Ortiz", "role": "Co-Founder, Product Developer & UI Mobile Designer" },
-      "member3": { "name": "Ulises Campuzano", "role": "Co-Founder & Web Developer" },
-      "member4": { "name": "Bernardo González", "role": "Co-Founder & Mobile Developer" },
-      "member5": { "name": "Davor Barrera", "role": "Co-Founder & Web Developer" }
+      "member1": {
+        "name": "Daniel Rosales",
+        "role": "Co-Founder, Product Developer & UI Mobile Designer"
+      },
+      "member2": {
+        "name": "Renata Ortiz",
+        "role": "Co-Founder, Product Developer & UI Mobile Designer"
+      },
+      "member3": {
+        "name": "Ulises Campuzano",
+        "role": "Co-Founder & Web Developer"
+      },
+      "member4": {
+        "name": "Bernardo González",
+        "role": "Co-Founder & Mobile Developer"
+      },
+      "member5": {
+        "name": "Davor Barrera",
+        "role": "Co-Founder & Web Developer"
+      }
     },
     "partners": "Our partners",
     "socialTitle": "Social media"
@@ -871,5 +886,35 @@
     "errorCrear": "Error creating",
     "creando": "Creating...",
     "crearMeta": "Create goal"
+  },
+  "perfilInfo": {
+    "regresar": "Back",
+    "tituloParte1": "Your",
+    "tituloParte2": "profile",
+    "tituloParte3": "information",
+    "subtitulo": "Your data, safe",
+    "descripcion": "All the information you share is protected under the highest security standards.",
+    "foto": "Profile photo",
+    "seleccionarArchivo": "Choose file",
+    "fotoAlt": "Preview of your photo",
+    "nombreCompleto": "Full name",
+    "nombre": "First name(s)*",
+    "apellidoPaterno": "Paternal last name*",
+    "apellidoMaterno": "Maternal last name*",
+    "crearAcceso": "Create access",
+    "telefono": "Phone number*",
+    "correo": "Email address*",
+    "contrasena": "Password*",
+    "confirmarContrasena": "Confirm your password*",
+    "errorContrasena": "Passwords do not match.",
+    "datosBancarios": "Bank details",
+    "titular": "Account holder name*",
+    "banco": "Select your bank*",
+    "cuenta": "Card number or CLABE*",
+    "beneficiario": "Primary beneficiary",
+    "beneficiarioNombre": "Beneficiary's full name*",
+    "parentesco": "Relationship*",
+    "beneficiarioTelefono": "Beneficiary's phone number*",
+    "cambiar": "Update"
   }
 }
