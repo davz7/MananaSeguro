@@ -12,7 +12,6 @@ import {
   Zap,
 } from 'lucide-react'
 import ardilla from '../assets/Ardilla_vector.png'
-import brandLogo from '../assets/LOGO_MS_orange.png'
 import Footer from './components/Footer'
 import LandingNavbar from './components/LandingNavbar'
 
@@ -36,9 +35,6 @@ export function SettingsScreen({ usuario, onLogout, onAction }) {
     .join(' ')
   const displayName = `${firstName} ${lastNames || t('settings.lastNamePlaceholder')}`
 
-  function toggleLanguage() {
-    i18n.changeLanguage(i18n.resolvedLanguage?.startsWith('es') ? 'en' : 'es')
-  }
 
   function handleAction(actionId) {
     onAction?.(actionId)

@@ -17,9 +17,7 @@ export function AboutScreen() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  function toggleLanguage() {
-    i18n.changeLanguage(i18n.resolvedLanguage?.startsWith('es') ? 'en' : 'es')
-  }
+
 
   return (
     <div className="dark flex min-h-screen flex-col bg-[#100f0e] text-[#f4f0ec]">
