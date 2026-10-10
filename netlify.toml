@@ -5,7 +5,7 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  ignore = ["**/*.test.js", "**/*.spec.js"]
+  ignore = "**/*.test.js, **/*.spec.js"
   included_files = ["!netlify/functions/**/*.test.js"]
 
 [dev]
