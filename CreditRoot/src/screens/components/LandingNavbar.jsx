@@ -22,16 +22,29 @@ function LandingNavbar({ onVolver, soloVolver, appMode }) {
         i18n.changeLanguage(i18n.language === 'es' ? 'en' : 'es')
     }
 
+    function irAlInicio() {
+        let autenticado = false
+        try {
+            autenticado = !!localStorage.getItem('ms_usuario')
+        } catch {
+            autenticado = false
+        }
+        navigate(autenticado ? '/main' : '/')
+    }
+
     return (
         <nav className={`sticky top-0 z-50 px-4 py-3 transition-shadow duration-300 bg-[#0f0e0d] border-b border-white/8 ${scrolled ? 'shadow-md shadow-black/40' : ''}`}>
             <div className="container mx-auto flex justify-between items-center">
-
-                <div className="flex items-center gap-2">
-                    <img src={logoPng} alt="Logo" className="h-8 w-8 object-contain rounded-lg shrink-0" />
+                <button
+                    type="button"
+                    onClick={irAlInicio}
+                    className="flex items-center gap-2 bg-transparent border-0 p-0 cursor-pointer"
+                    aria-label={t('nav.inicio')}>
+                    <img src={logoPng} alt="" className="h-8 w-8 object-contain rounded-lg shrink-0" />
                     <span className="font-display font-bold text-xl text-white tracking-tight">
                         {t('nav.marca')} <span className="text-brand">{t('nav.marcaAccent')}</span>
                     </span>
-                </div>
+                </button>
 
                 {appMode ? (
                     <div className="flex items-center gap-2">
