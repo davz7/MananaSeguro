@@ -20,17 +20,24 @@ async function obtenerOrdenesCompletadas(supabase, log) {
 }
 
 
-// Consulta una ruta de Horizon y devuelve el JSON, o null si la respuesta
-// no es exitosa (por ejemplo 404 cuando la transacción no existe).
+// Consulta una ruta de Horizon y devuelve el JSON, o null si Horizon
+// responde 404 (el recurso no existe). Cualquier otra respuesta no exitosa
+// (429, 5xx, 400, 401, 403...) lanza un Error: no se pudo saber si existe.
 async function consultarHorizon(ruta, hash, log) {
     const response = await fetch(`${HORIZON_TESTNET}${ruta}`)
-    let resultado = null
-    if (!response.ok) {
+
+    // Solo un 404 significa que el recurso no existe.
+    if (response.status === 404) {
         log.error('Error consultando Horizon', { hash, ruta, status: response.status, statusText: response.statusText })
-    }else{
-        resultado = await response.json()
+        return null
     }
-    return resultado
+
+    // El mensaje no incluye el hash para no repetirlo completo en los logs.
+    if (!response.ok) {
+        throw new Error(`Horizon respondió ${response.status} ${response.statusText}`)
+    }
+
+    return response.json()
 }
 
 async function consultarTransaccionStellar(hash, log) {
@@ -77,17 +84,33 @@ async function reconciliarOrdenes(supabase, log) {
         let transaccion = null
         let montoOperacion = null
         let estado_reconciliacion
+        let errorConsulta = false
 
         if (!hash) {
             // Sin hash no hay nada que buscar en Horizon.
             estado_reconciliacion = 'sin hash: la orden no tiene transacción de Stellar registrada'
         } else {
-            transaccion = await consultarTransaccionStellar(hash, log)
-            if (transaccion === null) {
+            // Un fallo de red o una respuesta ilegible marca solo esta orden;
+            // el reporte sigue con las demás.
+            try {
+                transaccion = await consultarTransaccionStellar(hash, log)
+            } catch (err) {
+                log.error('No se pudo consultar Horizon', { orderId: orden.order_id, detail: err.message })
+                errorConsulta = true
+            }
+
+            if (errorConsulta) {
+                estado_reconciliacion = 'error de consulta: no se pudo consultar Horizon'
+            } else if (transaccion === null) {
                 estado_reconciliacion = 'discrepancia: transacción no encontrada'
             } else {
-                // El monto es solo informativo para el reporte.
-                montoOperacion = await consultarMontoOperacion(hash, log)
+                // El monto es solo informativo para el reporte: si /operations
+                // falla, amount queda en null y el estado no cambia.
+                try {
+                    montoOperacion = await consultarMontoOperacion(hash, log)
+                } catch (err) {
+                    log.warn('No se pudo leer el monto de la operación', { orderId: orden.order_id, detail: err.message })
+                }
                 if (transaccion.successful !== true) {
                     estado_reconciliacion = 'discrepancia: transacción fallida'
                 } else {

@@ -50,6 +50,11 @@ const fetchFalso = vi.fn(async (url) => {
   throw new Error(`Unexpected URL in test: ${url}`)
 })
 
+// Non-ok Horizon response with its real status text.
+function respuestaError(status, statusText) {
+  return { ok: false, status, statusText, json: async () => ({ status }) }
+}
+
 const logFalso = () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() })
 
 function supabaseCon(ordenes, error = null) {
@@ -114,9 +119,91 @@ describe('reconciliarOrdenes', () => {
     expect(entrada.amount).toBeNull()
   })
 
-  it('(e) if Supabase returns an error, throws Error', async () => {
+  it('fetch throwing for one order marks only that order and the report continues', async () => {
+    // First call (tx of the first order) fails at the network level.
+    fetchFalso.mockRejectedValueOnce(new TypeError('fetch failed'))
+    const { cliente } = supabaseCon([
+      orden({ order_id: 'orden-red-caida', stellar_tx_hash: HASH_OK }),
+      orden({ order_id: 'orden-ok', stellar_tx_hash: HASH_OK }),
+    ])
+    const reporte = await reconciliarOrdenes(cliente, logFalso())
+
+    expect(reporte).toHaveLength(2)
+    expect(reporte[0]).toMatchObject({
+      id: 'orden-red-caida',
+      estado_reconciliacion: 'error de consulta: no se pudo consultar Horizon',
+      source_account: null,
+      amount: null,
+    })
+    expect(reporte[1]).toMatchObject({
+      id: 'orden-ok',
+      estado_reconciliacion: 'reconciliada: transacción existe, monto no verificado',
+    })
+  })
+
+  it('ok response with unreadable JSON marks the order as a query error', async () => {
+    fetchFalso.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      json: async () => { throw new SyntaxError('Unexpected token <') },
+    })
+    const { cliente } = supabaseCon([orden({ stellar_tx_hash: HASH_OK })])
+    const [entrada] = await reconciliarOrdenes(cliente, logFalso())
+
+    expect(entrada.estado_reconciliacion).toBe('error de consulta: no se pudo consultar Horizon')
+  })
+
+  it('/operations failing does not change the state: reconciled with amount null', async () => {
+    // Tx call answers normally; the following /operations call fails.
+    fetchFalso
+      .mockImplementationOnce(fetchFalso.getMockImplementation())
+      .mockRejectedValueOnce(new TypeError('fetch failed'))
+    const { cliente } = supabaseCon([orden({ stellar_tx_hash: HASH_OK })])
+    const [entrada] = await reconciliarOrdenes(cliente, logFalso())
+
+    expect(entrada.estado_reconciliacion).toBe('reconciliada: transacción existe, monto no verificado')
+    expect(entrada.source_account).toBe(CUENTA)
+    expect(entrada.amount).toBeNull()
+  })
+
+  it.each([
+    [503, 'Service Unavailable'],
+    [429, 'Too Many Requests'],
+    [400, 'Bad Request'],
+  ])('Horizon responds %i: query error, not "transaction not found"', async (status, statusText) => {
+    fetchFalso.mockResolvedValueOnce(respuestaError(status, statusText))
+    const { cliente } = supabaseCon([orden({ stellar_tx_hash: HASH_OK })])
+    const [entrada] = await reconciliarOrdenes(cliente, logFalso())
+
+    expect(entrada.estado_reconciliacion).toBe('error de consulta: no se pudo consultar Horizon')
+    expect(entrada.source_account).toBeNull()
+    expect(entrada.amount).toBeNull()
+  })
+
+  it('/operations responding 503 does not change the state: reconciled with amount null', async () => {
+    // Tx call answers normally; the following /operations call returns 503.
+    fetchFalso
+      .mockImplementationOnce(fetchFalso.getMockImplementation())
+      .mockResolvedValueOnce(respuestaError(503, 'Service Unavailable'))
+    const { cliente } = supabaseCon([orden({ stellar_tx_hash: HASH_OK })])
+    const [entrada] = await reconciliarOrdenes(cliente, logFalso())
+
+    expect(entrada.estado_reconciliacion).toBe('reconciliada: transacción existe, monto no verificado')
+    expect(entrada.source_account).toBe(CUENTA)
+    expect(entrada.amount).toBeNull()
+  })
+
+  it('(e) if Supabase returns an error, throws a clear Error with the original message', async () => {
+    const log = logFalso()
     const { cliente } = supabaseCon([], { message: 'fallo simulado' })
-    await expect(reconciliarOrdenes(cliente, logFalso())).rejects.toThrow(Error)
+
+    // The exact message tells this Error apart from the TypeError the old code
+    // threw when iterating over null.
+    await expect(reconciliarOrdenes(cliente, log)).rejects.toThrow(
+      /^No se pudieron obtener las órdenes completadas de Supabase: fallo simulado$/
+    )
+    expect(log.error).toHaveBeenCalledWith('Error obteniendo ordenes completadas', { detail: 'fallo simulado' })
     expect(fetchFalso).not.toHaveBeenCalled()
   })
 

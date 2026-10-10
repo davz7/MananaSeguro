@@ -52,10 +52,20 @@ async function parteB(log) {
   const detalle = []
 
   for (const { hash } of transacciones) {
-    const tx = await consultarTransaccionStellar(hash, log)
+    let tx = null
+    let errorConsulta = false
+    try {
+      tx = await consultarTransaccionStellar(hash, log)
+    } catch (err) {
+      // Un fallo de red no dice si el hash existe: se marca como desconocido
+      // y se sigue con el siguiente.
+      console.log(`No se pudo consultar ${abreviar(hash)}: ${err.message}`)
+      errorConsulta = true
+    }
     detalle.push({
       hash: abreviar(hash),
-      existe: tx !== null,
+      existe: errorConsulta ? null : tx !== null,
+      error_consulta: errorConsulta,
       successful: tx?.successful ?? null,
       source_account: tx?.source_account ?? null,
       created_at: tx?.created_at ?? null,
@@ -63,6 +73,7 @@ async function parteB(log) {
     await pausa(PAUSA_MS)
   }
 
+  const sinRespuesta = detalle.filter((d) => d.error_consulta)
   const existentes = detalle.filter((d) => d.existe)
   const exitosas = detalle.filter((d) => d.successful === true)
   const cuentas = new Set(existentes.map((d) => d.source_account).filter(Boolean))
@@ -72,8 +83,9 @@ async function parteB(log) {
     : null
 
   console.log('\n=== Parte B: hashes de evidencia en Horizon testnet ===')
-  console.table(detalle.map(({ hash, existe, successful, created_at }) => ({ hash, existe, successful, created_at })))
+  console.table(detalle.map(({ hash, existe, error_consulta, successful, created_at }) => ({ hash, existe, error_consulta, successful, created_at })))
   console.log(`Existen: ${existentes.length} de ${transacciones.length}`)
+  console.log(`No se pudieron consultar: ${sinRespuesta.length}`)
   console.log(`Con successful=true: ${exitosas.length}`)
   console.log(`Cuentas de origen distintas: ${cuentas.size}`)
   console.log(rango
@@ -83,6 +95,7 @@ async function parteB(log) {
   return {
     total: transacciones.length,
     existen: existentes.length,
+    sin_respuesta: sinRespuesta.length,
     successful_true: exitosas.length,
     cuentas_origen_distintas: cuentas.size,
     rango_created_at: rango,
