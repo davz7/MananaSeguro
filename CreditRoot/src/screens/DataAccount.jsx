@@ -1,16 +1,15 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import LandingNavbar from './components/LandingNavbar'
 import Footer from './components/Footer'
 
 const BANCOS = [
   'BBVA', 'Banamex', 'Santander', 'Banorte', 'HSBC',
-  'Scotiabank', 'Inbursa', 'Azteca', 'BanBajío', 'Otro',
+  'Scotiabank', 'Inbursa', 'Azteca', 'BanBajío',
 ]
 
-const RELACIONES = [
-  'Cónyuge', 'Hijo/a', 'Padre', 'Madre', 'Hermano/a', 'Otro',
-]
+const RELACIONES = ['spouse', 'child', 'father', 'mother', 'sibling', 'other']
 
 function SelectField({ name, value, onChange, placeholder, options = [] }) {
   return (
@@ -24,7 +23,7 @@ function SelectField({ name, value, onChange, placeholder, options = [] }) {
       >
         <option value="" disabled>{placeholder}</option>
         {options.map((opt) => (
-          <option key={opt} value={opt} className="bg-[#1c1b1a]">{opt}</option>
+          <option key={opt.value} value={opt.value} className="bg-[#1c1b1a]">{opt.label}</option>
         ))}
       </select>
       <svg
@@ -48,6 +47,7 @@ function InputField({ name, value, onChange, placeholder, prefix }) {
         value={value}
         onChange={onChange}
         placeholder={placeholder}
+        aria-label={placeholder}
         className={`w-full bg-[#1c1b1a] text-white text-sm border border-white/20 rounded-xl py-3 pr-4 outline-none transition-colors focus:border-[#d96b00] focus:ring-2 focus:ring-[#d96b00]/40 placeholder:text-white/35 ${prefix ? 'pl-14' : 'pl-4'}`}
       />
     </div>
@@ -65,7 +65,17 @@ const INITIAL = {
 
 export function DataAccount() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [form, setForm] = useState(INITIAL)
+
+  const bankOptions = [
+    ...BANCOS.map((b) => ({ value: b, label: b })),
+    { value: 'other', label: t('dataAccount.other') },
+  ]
+  const relationOptions = RELACIONES.map((r) => ({
+    value: r,
+    label: t(`dataAccount.relations.${r}`),
+  }))
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -90,11 +100,13 @@ export function DataAccount() {
                 className="font-display font-bold text-white tracking-tight leading-[1.05]"
                 style={{ fontSize: 'clamp(3rem,6vw,5rem)' }}
               >
-                Datos{' '}
-                <em className="text-[#d96b00] not-italic">bancarios y<br />beneficiarios</em>
+                {t('dataAccount.titleLead')}{' '}
+                <em className="text-[#d96b00] not-italic">
+                  {t('dataAccount.titleAccent1')}<br />{t('dataAccount.titleAccent2')}
+                </em>
               </h1>
               <p className="text-white/55 text-base leading-relaxed max-w-md">
-                Para poder manejar tus movimientos, ingresa una cuenta de débito personal y elige a tu beneficiario en caso de deceso.
+                {t('dataAccount.description')}
               </p>
             </div>
 
@@ -111,48 +123,48 @@ export function DataAccount() {
                   <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                   </svg>
-                  <span>Regresar</span>
+                  <span>{t('dataAccount.back')}</span>
                 </button>
 
                 {/* Encabezado móvil */}
                 <div className="lg:hidden mb-6 text-left">
                   <h2 className="font-display font-bold text-white text-3xl tracking-tight mb-2">
-                    Datos <em className="text-[#d96b00] not-italic">bancarios</em>
+                    {t('dataAccount.mobileTitleLead')} <em className="text-[#d96b00] not-italic">{t('dataAccount.mobileTitleAccent')}</em>
                   </h2>
                   <p className="text-white/55 text-sm leading-relaxed">
-                    Ingresa tu cuenta y elige a tu beneficiario.
+                    {t('dataAccount.mobileSubtitle')}
                   </p>
                 </div>
 
                 {/* Encabezado escritorio */}
                 <div className="hidden lg:block mb-8 text-center">
                   <h3 className="font-display font-bold text-2xl text-white leading-snug">
-                    Ingresa tu cuenta y<br />elige a tu beneficiario
+                    {t('dataAccount.cardTitle1')}<br />{t('dataAccount.cardTitle2')}
                   </h3>
                 </div>
 
                 {/* Datos bancarios */}
                 <fieldset className="mb-4">
-                  <legend className="text-sm font-semibold text-white mb-2">Datos bancarios</legend>
+                  <legend className="text-sm font-semibold text-white mb-2">{t('dataAccount.bankDetails')}</legend>
                   <div className="flex flex-col gap-2">
-                    <InputField name="nombreTitular" value={form.nombreTitular} onChange={handleChange} placeholder="Nombre completo" />
-                    <SelectField name="banco" value={form.banco} onChange={handleChange} placeholder="Elige tu banco" options={BANCOS} />
-                    <InputField name="clabe" value={form.clabe} onChange={handleChange} placeholder="Tarjeta o cuenta CLABE" />
+                    <InputField name="nombreTitular" value={form.nombreTitular} onChange={handleChange} placeholder={t('dataAccount.fullName')} />
+                    <SelectField name="banco" value={form.banco} onChange={handleChange} placeholder={t('dataAccount.chooseBank')} options={bankOptions} />
+                    <InputField name="clabe" value={form.clabe} onChange={handleChange} placeholder={t('dataAccount.cardOrClabe')} />
                   </div>
                 </fieldset>
 
                 {/* Beneficiario principal */}
                 <fieldset className="mb-5">
-                  <legend className="text-sm font-semibold text-white mb-2">Beneficiario principal</legend>
+                  <legend className="text-sm font-semibold text-white mb-2">{t('dataAccount.beneficiary')}</legend>
                   <div className="flex flex-col gap-2">
-                    <InputField name="nombreBeneficiario" value={form.nombreBeneficiario} onChange={handleChange} placeholder="Nombre completo*" />
-                    <SelectField name="relacion" value={form.relacion} onChange={handleChange} placeholder="Relación con la persona*" options={RELACIONES} />
-                    <InputField name="telefono" value={form.telefono} onChange={handleChange} placeholder="Número de teléfono*" prefix="+52" />
+                    <InputField name="nombreBeneficiario" value={form.nombreBeneficiario} onChange={handleChange} placeholder={t('dataAccount.beneficiaryName')} />
+                    <SelectField name="relacion" value={form.relacion} onChange={handleChange} placeholder={t('dataAccount.relationship')} options={relationOptions} />
+                    <InputField name="telefono" value={form.telefono} onChange={handleChange} placeholder={t('dataAccount.phone')} prefix="+52" />
                   </div>
                   <p className="text-center text-white/45 text-xs mt-3">
-                    ¿Tu beneficiario tiene cuenta de Mañana Seguro?{' '}
+                    {t('dataAccount.hasAccountQuestion')}{' '}
                     <a href="#" onClick={e => { e.preventDefault(); navigate('/conexion-rapida') }} className="text-[#d96b00] underline underline-offset-2 hover:text-[#f07a10] cursor-pointer">
-                      Haz una conexión rápida.
+                      {t('dataAccount.quickConnect')}
                     </a>
                   </p>
                 </fieldset>
@@ -163,12 +175,12 @@ export function DataAccount() {
                   onClick={handleSubmit}
                   className="w-full bg-[#d96b00] hover:bg-[#c05e00] active:scale-[0.98] text-white font-semibold py-4 px-6 rounded-xl transition-all hover:-translate-y-px hover:shadow-lg hover:shadow-[#d96b00]/30 mb-4 text-base cursor-pointer"
                 >
-                  Continuar
+                  {t('dataAccount.continue')}
                 </button>
 
                 {/* Nota legal */}
                 <p className="text-center text-white/40 text-xs leading-relaxed max-w-xs mx-auto">
-                  Toda la información es encriptada y tratada con respecto a las leyes mexicanas. Puedes cambiar de beneficiario más adelante.
+                  {t('dataAccount.legal')}
                 </p>
 
               </div>
