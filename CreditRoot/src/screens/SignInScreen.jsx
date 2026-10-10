@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Mail, Lock, TriangleAlert } from 'lucide-react'
 import LandingNavbar from './components/LandingNavbar'
 import Footer from './components/Footer'
@@ -9,16 +10,17 @@ import logoGoogle from '../assets/Logo_Google.png'
 export function SignInScreen({ onVerificar, onVolver, onRegister }) {
   const navigate = useNavigate()
   const location = useLocation()
+  const { t } = useTranslation()
   const cuentaCreada = location.state?.cuentaCreada ?? false
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState(null) // 'emptyFields' | 'invalidCredentials'
 
   async function handleSubmit(e) {
     e.preventDefault()
     if (!email.trim() || !password) {
-      setError('Ingresa tu correo y contraseña.')
+      setError('emptyFields')
       return
     }
     setLoading(true)
@@ -29,7 +31,7 @@ export function SignInScreen({ onVerificar, onVolver, onRegister }) {
       if (usuario) {
         onVerificar(email)   // pasa el identificador a /verificacion
       } else {
-        setError('Correo o contraseña incorrectos.')
+        setError('invalidCredentials')
       }
     }, 600)
   }
@@ -47,9 +49,9 @@ export function SignInScreen({ onVerificar, onVolver, onRegister }) {
               className="font-display font-bold text-white tracking-tight"
               style={{ fontSize: 'clamp(3rem,7vw,5rem)', lineHeight: 1.05 }}
             >
-              Tu <em className="text-brand not-italic">dinero,</em><br />
-              Tus <em className="text-brand not-italic">reglas,</em><br />
-              Tu <em className="text-brand not-italic">retiro</em>
+              {t('signIn.tagline1Pre')} <em className="text-brand not-italic">{t('signIn.tagline1Accent')}</em><br />
+              {t('signIn.tagline2Pre')} <em className="text-brand not-italic">{t('signIn.tagline2Accent')}</em><br />
+              {t('signIn.tagline3Pre')} <em className="text-brand not-italic">{t('signIn.tagline3Accent')}</em>
             </h1>
           </div>
 
@@ -60,22 +62,22 @@ export function SignInScreen({ onVerificar, onVolver, onRegister }) {
 
                 <div className="text-center mb-1">
                   <h2 className="font-display font-bold text-white text-4xl mb-3">
-                    Inicio de sesión
+                    {t('signIn.title')}
                   </h2>
                   <p className="text-white/55 text-base leading-relaxed">
-                    Accede a tu cuenta,<br />ingresa tu correo y contraseña
+                    {t('signIn.subtitle1')}<br />{t('signIn.subtitle2')}
                   </p>
                 </div>
 
                 {cuentaCreada && (
                   <div className="bg-green-500/10 border border-green-500/30 text-green-400 text-sm text-center px-4 py-3 rounded-xl font-medium">
-                    ✓ Cuenta creada correctamente
+                    ✓ {t('signIn.accountCreated')}
                   </div>
                 )}
 
                 {error && (
-                  <div className="bg-red-500/8 border border-dashed border-red-400/40 text-red-500 text-sm text-center px-4 py-3 rounded-xl">
-                    <TriangleAlert size={16} className="inline shrink-0 mr-1" aria-hidden="true" />{error}
+                  <div className="bg-red-500/8 border border-dashed border-red-400/40 text-red-500 text-sm text-center px-4 py-3 rounded-xl" role="alert">
+                    <TriangleAlert size={16} className="inline shrink-0 mr-1" aria-hidden="true" />{t(`signIn.errors.${error}`)}
                   </div>
                 )}
 
@@ -85,7 +87,8 @@ export function SignInScreen({ onVerificar, onVolver, onRegister }) {
                     <Mail size={16} className="text-white/40 shrink-0" aria-hidden="true" />
                     <input
                       type="email"
-                      placeholder="Correo electrónico"
+                      placeholder={t('signIn.email')}
+                      aria-label={t('signIn.email')}
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                       className="flex-1 bg-transparent text-white text-sm placeholder:text-white/35 outline-none"
@@ -98,7 +101,8 @@ export function SignInScreen({ onVerificar, onVolver, onRegister }) {
                     <Lock size={16} className="text-white/40 shrink-0" aria-hidden="true" />
                     <input
                       type="password"
-                      placeholder="Contraseña"
+                      placeholder={t('signIn.password')}
+                      aria-label={t('signIn.password')}
                       value={password}
                       onChange={e => setPassword(e.target.value)}
                       className="flex-1 bg-transparent text-white text-sm placeholder:text-white/35 outline-none"
@@ -108,9 +112,9 @@ export function SignInScreen({ onVerificar, onVolver, onRegister }) {
 
                   {/* Recuperar */}
                   <p className="text-xs text-white/40 text-center">
-                    ¿Olvidaste tu contraseña?{' '}
+                    {t('signIn.forgot')}{' '}
                     <button type="button" onClick={() => navigate('/change-password')} className="text-white/60 underline underline-offset-2 hover:text-white transition-colors cursor-pointer">
-                      Recuperar
+                      {t('signIn.recover')}
                     </button>
                   </p>
 
@@ -123,42 +127,42 @@ export function SignInScreen({ onVerificar, onVolver, onRegister }) {
                     {loading ? (
                       <span className="flex items-center justify-center gap-2">
                         <svg aria-hidden="true" className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
-                        Entrando...
+                        {t('signIn.loading')}
                       </span>
-                    ) : 'Continuar'}
+                    ) : t('signIn.continue')}
                   </button>
                 </form>
 
                 {/* Divisor */}
                 <div className="flex items-center gap-3">
                   <div className="flex-1 h-px bg-white/10" />
-                  <span className="text-xs text-white/30">o</span>
+                  <span className="text-xs text-white/30">{t('signIn.or')}</span>
                   <div className="flex-1 h-px bg-white/10" />
                 </div>
 
                 {/* Google */}
                 <button type="button" disabled className="w-full flex items-center justify-center gap-3 bg-white text-black font-medium py-3.5 rounded-xl border border-gray-200 cursor-not-allowed opacity-80">
-                      <img src={logoGoogle} alt="Google" className="w-5 h-5 object-contain" />
-                          Continuar con Google
+                  <img src={logoGoogle} alt="Google" className="w-5 h-5 object-contain" />
+                  {t('signIn.google')}
                 </button>
 
                 {/* Link registro */}
                 <p className="text-sm text-white/45 text-center">
-                  ¿No tienes cuenta?{' '}
+                  {t('signIn.noAccount')}{' '}
                   <button
                     onClick={onRegister}
                     className="text-white font-semibold underline underline-offset-2 hover:text-brand transition-colors cursor-pointer"
                   >
-                    Regístrate
+                    {t('signIn.register')}
                   </button>
                 </p>
 
                 {/* Términos */}
                 <p className="text-xs text-white/30 text-center leading-relaxed">
-                  Al hacer clic en &ldquo;Continuar&rdquo; aceptas<br />
-                  los{' '}
+                  {t('signIn.terms1')}<br />
+                  {t('signIn.terms2Pre')}{' '}
                   <a href="#" className="underline underline-offset-2 hover:text-white/60 transition-colors">
-                    términos y condiciones de uso
+                    {t('signIn.termsLink')}
                   </a>
                 </p>
 

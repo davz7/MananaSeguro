@@ -1005,5 +1005,34 @@
       "completed": "Completada",
       "failed": "Fallida"
     }
+  },
+  "signIn": {
+    "tagline1Pre": "Tu",
+    "tagline1Accent": "dinero,",
+    "tagline2Pre": "Tus",
+    "tagline2Accent": "reglas,",
+    "tagline3Pre": "Tu",
+    "tagline3Accent": "retiro",
+    "title": "Inicio de sesión",
+    "subtitle1": "Accede a tu cuenta,",
+    "subtitle2": "ingresa tu correo y contraseña",
+    "accountCreated": "Cuenta creada correctamente",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "forgot": "¿Olvidaste tu contraseña?",
+    "recover": "Recuperar",
+    "loading": "Entrando...",
+    "continue": "Continuar",
+    "or": "o",
+    "google": "Continuar con Google",
+    "noAccount": "¿No tienes cuenta?",
+    "register": "Regístrate",
+    "terms1": "Al hacer clic en “Continuar” aceptas",
+    "terms2Pre": "los",
+    "termsLink": "términos y condiciones de uso",
+    "errors": {
+      "emptyFields": "Ingresa tu correo y contraseña.",
+      "invalidCredentials": "Correo o contraseña incorrectos."
+    }
   }
 }

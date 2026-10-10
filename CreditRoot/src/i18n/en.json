@@ -1004,5 +1004,34 @@
       "completed": "Completed",
       "failed": "Failed"
     }
+  },
+  "signIn": {
+    "tagline1Pre": "Your",
+    "tagline1Accent": "money,",
+    "tagline2Pre": "Your",
+    "tagline2Accent": "rules,",
+    "tagline3Pre": "Your",
+    "tagline3Accent": "retirement",
+    "title": "Sign in",
+    "subtitle1": "Access your account,",
+    "subtitle2": "enter your email and password",
+    "accountCreated": "Account created successfully",
+    "email": "Email address",
+    "password": "Password",
+    "forgot": "Forgot your password?",
+    "recover": "Recover it",
+    "loading": "Signing in...",
+    "continue": "Continue",
+    "or": "or",
+    "google": "Continue with Google",
+    "noAccount": "Don't have an account?",
+    "register": "Sign up",
+    "terms1": "By clicking “Continue” you accept",
+    "terms2Pre": "the",
+    "termsLink": "terms and conditions of use",
+    "errors": {
+      "emptyFields": "Enter your email and password.",
+      "invalidCredentials": "Incorrect email or password."
+    }
   }
 }
