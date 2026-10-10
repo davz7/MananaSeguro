@@ -946,5 +946,38 @@
     "emergencyQuestion": "¿Tienes una emergencia?",
     "weUnderstand": "Te entendemos",
     "emergencyText": "Conoce cómo tomar prestado hasta el 30% de tu ahorro."
+  },
+  "dataAccount": {
+    "titleLead": "Datos",
+    "titleAccent1": "bancarios y",
+    "titleAccent2": "beneficiarios",
+    "description": "Para poder manejar tus movimientos, ingresa una cuenta de débito personal y elige a tu beneficiario en caso de deceso.",
+    "back": "Regresar",
+    "mobileTitleLead": "Datos",
+    "mobileTitleAccent": "bancarios",
+    "mobileSubtitle": "Ingresa tu cuenta y elige a tu beneficiario.",
+    "cardTitle1": "Ingresa tu cuenta y",
+    "cardTitle2": "elige a tu beneficiario",
+    "bankDetails": "Datos bancarios",
+    "fullName": "Nombre completo",
+    "chooseBank": "Elige tu banco",
+    "cardOrClabe": "Tarjeta o cuenta CLABE",
+    "other": "Otro",
+    "beneficiary": "Beneficiario principal",
+    "beneficiaryName": "Nombre completo*",
+    "relationship": "Relación con la persona*",
+    "phone": "Número de teléfono*",
+    "hasAccountQuestion": "¿Tu beneficiario tiene cuenta de Mañana Seguro?",
+    "quickConnect": "Haz una conexión rápida.",
+    "continue": "Continuar",
+    "legal": "Toda la información es encriptada y tratada con respecto a las leyes mexicanas. Puedes cambiar de beneficiario más adelante.",
+    "relations": {
+      "spouse": "Cónyuge",
+      "child": "Hijo/a",
+      "father": "Padre",
+      "mother": "Madre",
+      "sibling": "Hermano/a",
+      "other": "Otro"
+    }
   }
 }

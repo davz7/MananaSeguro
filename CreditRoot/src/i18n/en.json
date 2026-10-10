@@ -945,5 +945,38 @@
     "emergencyQuestion": "Have an emergency?",
     "weUnderstand": "We understand",
     "emergencyText": "Learn how to borrow up to 30% of your savings."
+  },
+  "dataAccount": {
+    "titleLead": "Bank details",
+    "titleAccent1": "and",
+    "titleAccent2": "beneficiaries",
+    "description": "To manage your transactions, enter a personal debit account and choose your beneficiary in case of death.",
+    "back": "Back",
+    "mobileTitleLead": "Bank",
+    "mobileTitleAccent": "details",
+    "mobileSubtitle": "Enter your account and choose your beneficiary.",
+    "cardTitle1": "Enter your account and",
+    "cardTitle2": "choose your beneficiary",
+    "bankDetails": "Bank details",
+    "fullName": "Full name",
+    "chooseBank": "Choose your bank",
+    "cardOrClabe": "Card or CLABE account",
+    "other": "Other",
+    "beneficiary": "Primary beneficiary",
+    "beneficiaryName": "Full name*",
+    "relationship": "Relationship to this person*",
+    "phone": "Phone number*",
+    "hasAccountQuestion": "Does your beneficiary have a Mañana Seguro account?",
+    "quickConnect": "Make a quick connection.",
+    "continue": "Continue",
+    "legal": "All information is encrypted and handled in accordance with Mexican law. You can change your beneficiary later.",
+    "relations": {
+      "spouse": "Spouse",
+      "child": "Son/Daughter",
+      "father": "Father",
+      "mother": "Mother",
+      "sibling": "Brother/Sister",
+      "other": "Other"
+    }
   }
 }
