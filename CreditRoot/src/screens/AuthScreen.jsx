@@ -24,9 +24,9 @@ export function AuthScreen({ onVolver, onIrADatosPersonales }) {
               className="font-display font-bold text-white tracking-tight"
               style={{ fontSize: 'clamp(3rem,7vw,5rem)', lineHeight: 1.05 }}
             >
-              Tu <em className="text-brand not-italic">dinero,</em><br />
-              Tus <em className="text-brand not-italic">reglas,</em><br />
-              Tu <em className="text-brand not-italic">retiro</em>
+              {t('authScreen.tagline1Pre')} <em className="text-brand not-italic">{t('authScreen.tagline1Accent')}</em><br />
+              {t('authScreen.tagline2Pre')} <em className="text-brand not-italic">{t('authScreen.tagline2Accent')}</em><br />
+              {t('authScreen.tagline3Pre')} <em className="text-brand not-italic">{t('authScreen.tagline3Accent')}</em>
             </h1>
           </div>
 
@@ -37,10 +37,10 @@ export function AuthScreen({ onVolver, onIrADatosPersonales }) {
 
                 <div className="text-center">
                   <h2 className="font-display font-bold text-white text-4xl mb-3">
-                    Regístrate
+                    {t('authScreen.title')}
                   </h2>
                   <p className="text-white/55 text-base leading-relaxed">
-                    Tener tu futuro en tus manos<br />nunca había sido tan fácil
+                    {t('authScreen.subtitle1')}<br />{t('authScreen.subtitle2')}
                   </p>
                 </div>
 
@@ -51,7 +51,7 @@ export function AuthScreen({ onVolver, onIrADatosPersonales }) {
                 />
 
                 {error && (
-                  <div className="w-full bg-red-500/8 border border-dashed border-red-400/40 text-red-500 text-sm text-center px-4 py-3 rounded-xl">
+                  <div className="w-full bg-red-500/8 border border-dashed border-red-400/40 text-red-500 text-sm text-center px-4 py-3 rounded-xl" role="alert">
                     <TriangleAlert size={16} className="inline shrink-0" aria-hidden="true" /> {error}
                   </div>
                 )}
@@ -60,7 +60,7 @@ export function AuthScreen({ onVolver, onIrADatosPersonales }) {
                   className="w-full bg-brand hover:bg-brand-dark text-white font-semibold py-4 rounded-xl transition-all hover:-translate-y-px hover:shadow-lg hover:shadow-brand/30 cursor-pointer text-base"
                   onClick={onIrADatosPersonales}
                 >
-                  Crear cuenta con correo
+                  {t('authScreen.createWithEmail')}
                 </button>
 
                 <p className="text-sm text-white/45">
@@ -74,10 +74,10 @@ export function AuthScreen({ onVolver, onIrADatosPersonales }) {
                 </p>
 
                 <p className="text-xs text-white/30 text-center leading-relaxed">
-                  Al hacer clic en &ldquo;Continuar&rdquo; aceptas<br />
-                  los{' '}
+                  {t('authScreen.terms1')}<br />
+                  {t('authScreen.terms2Pre')}{' '}
                   <a href="#" className="underline underline-offset-2 hover:text-white/60 transition-colors">
-                    términos y condiciones de uso
+                    {t('authScreen.termsLink')}
                   </a>
                 </p>
 

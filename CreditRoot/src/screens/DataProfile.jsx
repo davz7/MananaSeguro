@@ -37,11 +37,11 @@ export function DataProfile({ onContinuar }) {
   const localizedCountry = getLocalizedCountryName(selectedCountry, i18n.resolvedLanguage ?? i18n.language)
 
   const requirements = [
-    { id: 'length',    valid: form.password.length >= 12 },
+    { id: 'length', valid: form.password.length >= 12 },
     { id: 'uppercase', valid: /\p{Lu}/u.test(form.password) },
     { id: 'lowercase', valid: /\p{Ll}/u.test(form.password) },
-    { id: 'number',    valid: /\p{N}/u.test(form.password) },
-    { id: 'symbol',    valid: /[^\p{L}\p{N}]/u.test(form.password) },
+    { id: 'number', valid: /\p{N}/u.test(form.password) },
+    { id: 'symbol', valid: /[^\p{L}\p{N}]/u.test(form.password) },
   ]
 
   function handleChange(e) {
@@ -72,29 +72,29 @@ export function DataProfile({ onContinuar }) {
           <div className="hidden lg:flex flex-col justify-start pt-4 anim-fade-up-1">
             <h1 className="font-display font-bold text-white tracking-tight leading-[1.0] mb-5"
               style={{ fontSize: 'clamp(3.5rem,7vw,5.5rem)' }}>
-              Datos<br />
-              <em className="text-brand not-italic">personales</em>
+              {t('dataProfile.titleLead')}<br />
+              <em className="text-brand not-italic">{t('dataProfile.titleAccent')}</em>
             </h1>
             <p className="text-white/55 text-base leading-relaxed max-w-sm mb-12">
-              Para poder crear tu cuenta necesitamos algunos datos personales.
+              {t('dataProfile.intro')}
             </p>
 
             <div className="flex flex-col gap-8">
               <div className="border-l-2 border-brand pl-4">
                 <h3 className="font-display font-bold text-white text-2xl leading-tight mb-2">
-                  Tus datos, seguros
+                  {t('dataProfile.secureTitle')}
                 </h3>
                 <p className="text-white/55 text-sm leading-relaxed max-w-xs">
-                  Toda la información que compartes está protegida bajo los más altos estándares de seguridad.
+                  {t('dataProfile.secureText')}
                 </p>
               </div>
 
               <div className="border-l-2 border-brand pl-4">
                 <h3 className="font-display font-bold text-white text-2xl leading-tight mb-2">
-                  Proceso rápido
+                  {t('dataProfile.fastTitle')}
                 </h3>
                 <p className="text-white/55 text-sm leading-relaxed max-w-xs">
-                  Completa tu registro en menos de 3 minutos y accede a todos los beneficios de tu cuenta.
+                  {t('dataProfile.fastText')}
                 </p>
               </div>
             </div>
@@ -105,13 +105,13 @@ export function DataProfile({ onContinuar }) {
             <div className="bg-card border border-white/10 rounded-3xl p-8 lg:p-10">
 
               <h2 className="font-display font-bold text-white text-2xl mb-6">
-                Regístrate en minutos
+                {t('dataProfile.formTitle')}
               </h2>
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
                 {error && (
-                  <div className="bg-red-500/8 border border-dashed border-red-400/40 text-red-400 text-sm px-4 py-3 rounded-xl flex items-center gap-2">
+                  <div className="bg-red-500/8 border border-dashed border-red-400/40 text-red-400 text-sm px-4 py-3 rounded-xl flex items-center gap-2" role="alert">
                     <TriangleAlert size={15} className="shrink-0" aria-hidden="true" />
                     {error}
                   </div>
@@ -119,22 +119,22 @@ export function DataProfile({ onContinuar }) {
 
                 {/* Nombre completo */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-white/50 uppercase tracking-widest font-sans">
-                    Nombre completo
-                  </label>
-                  <input name="nombre" type="text" placeholder="Nombre(s)*"
+                  <span className="text-xs font-semibold text-white/50 uppercase tracking-widest font-sans">
+                    {t('dataProfile.fullName')}
+                  </span>
+                  <input name="nombre" type="text" placeholder={t('dataProfile.firstName')} aria-label={t('dataProfile.firstName')}
                     value={form.nombre} onChange={handleChange} className={inputCls} />
-                  <input name="apellidoPaterno" type="text" placeholder="Apellido paterno*"
+                  <input name="apellidoPaterno" type="text" placeholder={t('dataProfile.paternalName')} aria-label={t('dataProfile.paternalName')}
                     value={form.apellidoPaterno} onChange={handleChange} className={inputCls} />
-                  <input name="apellidoMaterno" type="text" placeholder="Apellido materno*"
+                  <input name="apellidoMaterno" type="text" placeholder={t('dataProfile.maternalName')} aria-label={t('dataProfile.maternalName')}
                     value={form.apellidoMaterno} onChange={handleChange} className={inputCls} />
                 </div>
 
                 {/* Crear acceso */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-white/50 uppercase tracking-widest font-sans">
-                    Crear acceso
-                  </label>
+                  <span className="text-xs font-semibold text-white/50 uppercase tracking-widest font-sans">
+                    {t('dataProfile.createAccess')}
+                  </span>
 
                   {/* Teléfono con prefijo */}
                   <div className="relative">
@@ -150,7 +150,7 @@ export function DataProfile({ onContinuar }) {
                         <span className="sr-only">{localizedCountry}</span>
                         <span>{selectedCountry.code}</span>
                       </button>
-                      <input name="telefono" type="tel" placeholder={t('auth.registro.telefono')}
+                      <input name="telefono" type="tel" placeholder={t('auth.registro.telefono')} aria-label={t('auth.registro.telefono')}
                         value={form.telefono} onChange={handleChange}
                         className="flex-1 bg-transparent px-4 py-3 text-sm text-white placeholder:text-white/35 outline-none" />
                     </div>
@@ -163,6 +163,7 @@ export function DataProfile({ onContinuar }) {
                             value={countrySearch}
                             onChange={(event) => setCountrySearch(event.target.value)}
                             placeholder={t('auth.registro.buscarPais')}
+                            aria-label={t('auth.registro.buscarPais')}
                             className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35 focus:border-brand"
                           />
                         </div>
@@ -192,9 +193,9 @@ export function DataProfile({ onContinuar }) {
                     )}
                   </div>
 
-                  <input name="email" type="email" placeholder="Correo electrónico*"
+                  <input name="email" type="email" placeholder={t('dataProfile.email')} aria-label={t('dataProfile.email')}
                     value={form.email} onChange={handleChange} className={inputCls} />
-                  <input name="password" type="password" placeholder="Contraseña*"
+                  <input name="password" type="password" placeholder={t('dataProfile.password')} aria-label={t('dataProfile.password')}
                     value={form.password} onChange={handleChange} className={inputCls} />
 
                   {form.password.length > 0 && (
@@ -211,7 +212,7 @@ export function DataProfile({ onContinuar }) {
                     </div>
                   )}
 
-                  <input name="confirmPassword" type="password" placeholder="Confirma tu contraseña*"
+                  <input name="confirmPassword" type="password" placeholder={t('dataProfile.confirmPassword')} aria-label={t('dataProfile.confirmPassword')}
                     value={form.confirmPassword} onChange={handleChange} className={inputCls} />
                 </div>
 
@@ -220,13 +221,13 @@ export function DataProfile({ onContinuar }) {
                   disabled={loading}
                   className="w-full bg-brand hover:bg-brand-dark text-white font-semibold py-3.5 rounded-xl transition-all hover:-translate-y-px hover:shadow-lg hover:shadow-brand/30 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-base mt-1"
                 >
-                  {loading ? 'Procesando...' : 'Continuar'}
+                  {loading ? t('dataProfile.processing') : t('dataProfile.continue')}
                 </button>
 
                 <p className="text-center text-xs text-white/35 leading-relaxed">
-                  Puedes revisar cómo tratamos y resguardamos tus datos conforme a lo establecido en la ley{' '}
+                  {t('dataProfile.privacyPre')}{' '}
                   <a href="#" className="underline underline-offset-2 hover:text-white/60 transition-colors">
-                    aquí
+                    {t('dataProfile.privacyLink')}
                   </a>
                 </p>
 
