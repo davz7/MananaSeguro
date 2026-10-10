@@ -7,6 +7,8 @@ import bafLogo from '../assets/LOGO_BAF.png'
 import etherfuseLogo from '../assets/LOGO_Etherfuse.png'
 import Footer from './components/Footer'
 import { socialLinks } from '../data/socialLinks'
+import LandingNavbar from './components/LandingNavbar'
+
 
 const teamMembers = ['member1', 'member2', 'member3', 'member4', 'member5']
 
@@ -21,36 +23,10 @@ export function AboutScreen() {
 
   return (
     <div className="dark flex min-h-screen flex-col bg-[#100f0e] text-[#f4f0ec]">
-      <header className="flex h-[60px] items-center justify-between border-b border-white/10 px-4 sm:px-8">
-        <div className="flex items-center gap-2 sm:gap-5">
-          <button
-            type="button"
-            onClick={() => navigate(location.state?.from || '/')}
-            className="flex h-9 items-center gap-1 rounded-lg px-2 text-sm text-white/65 transition hover:bg-white/5 hover:text-white"
-            aria-label={t('about.back')}
-          >
-            <ArrowLeft size={17} aria-hidden="true" />
-            <span className="hidden sm:inline">{t('about.back')}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-left"
-            aria-label={t('about.goHome')}
-          >
-            <img src={whiteLogo} alt="" className="h-8 w-8 object-contain" />
-            <span className="font-display text-lg font-bold text-white sm:text-xl">Mañana <span className="text-brand">Seguro</span></span>
-          </button>
-        </div>
-        <button
-          type="button"
-          onClick={toggleLanguage}
-          className="h-9 min-w-10 rounded-lg border border-white/25 px-2 text-xs font-semibold transition hover:border-white/60 hover:bg-white/5"
-          aria-label={t('nav.cambiarIdioma')}
-        >
-          {i18n.resolvedLanguage?.startsWith('es') ? 'EN' : 'ES'}
-        </button>
-      </header>
+      <LandingNavbar
+        soloVolver
+        onVolver={() => navigate(location.state?.from || '/main')}
+      />
 
       <main className="mx-auto grid w-full max-w-[1240px] flex-1 items-center gap-10 px-5 py-10 sm:px-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16 lg:px-12">
         <section className="flex flex-col justify-center" aria-labelledby="about-promise">
