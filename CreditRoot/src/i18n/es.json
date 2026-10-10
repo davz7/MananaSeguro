@@ -979,5 +979,31 @@
       "sibling": "Hermano/a",
       "other": "Otro"
     }
+  },
+  "deposits": {
+    "heroAccent": "Deposita",
+    "heroMid": "en",
+    "heroEnd": "segundos",
+    "cardTitle": "Haz crecer tu retiro en 2 sencillos pasos",
+    "step1": "1- Deposita la cantidad deseada en la siguiente cuenta",
+    "bank": "Banco",
+    "copy": "Copiar en portapapeles",
+    "copied": "¡Copiado!",
+    "step2": "2- Tu depósito será reflejado en unos minutos",
+    "supportPre": "(si tarda más de un día en reflejarse contacta a",
+    "supportLink": "Soporte Mañana Seguro",
+    "supportPost": ")",
+    "recentTitle": "Últimos movimientos",
+    "colDate": "Fecha de depósito",
+    "colAmount": "Cantidad de depósito",
+    "colStatus": "Estado",
+    "colBank": "Banco",
+    "hoursSuffix": "hr.",
+    "empty": "Sin movimientos aún",
+    "status": {
+      "processing": "En proceso",
+      "completed": "Completada",
+      "failed": "Fallida"
+    }
   }
 }

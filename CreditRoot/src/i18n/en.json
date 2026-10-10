@@ -978,5 +978,31 @@
       "sibling": "Brother/Sister",
       "other": "Other"
     }
+  },
+  "deposits": {
+    "heroAccent": "Deposit",
+    "heroMid": "in",
+    "heroEnd": "seconds",
+    "cardTitle": "Grow your retirement in 2 simple steps",
+    "step1": "1- Deposit the amount you want into the following account",
+    "bank": "Bank",
+    "copy": "Copy to clipboard",
+    "copied": "Copied!",
+    "step2": "2- Your deposit will show up in a few minutes",
+    "supportPre": "(if it takes more than a day to show up, contact",
+    "supportLink": "Mañana Seguro Support",
+    "supportPost": ")",
+    "recentTitle": "Recent transactions",
+    "colDate": "Deposit date",
+    "colAmount": "Deposit amount",
+    "colStatus": "Status",
+    "colBank": "Bank",
+    "hoursSuffix": "hrs.",
+    "empty": "No transactions yet",
+    "status": {
+      "processing": "Processing",
+      "completed": "Completed",
+      "failed": "Failed"
+    }
   }
 }
