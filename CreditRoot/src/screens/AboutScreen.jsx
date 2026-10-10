@@ -13,7 +13,7 @@ import LandingNavbar from './components/LandingNavbar'
 const teamMembers = ['member1', 'member2', 'member3', 'member4', 'member5']
 
 export function AboutScreen() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
 

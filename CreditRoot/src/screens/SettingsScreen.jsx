@@ -26,7 +26,7 @@ const settingsActions = [
 ]
 
 export function SettingsScreen({ usuario, onLogout, onAction }) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const firstName = usuario?.nombre?.trim() || t('settings.namePlaceholder')
