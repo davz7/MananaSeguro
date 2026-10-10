@@ -1052,5 +1052,20 @@
       "descripcion": "Opción 2: Tus seres queridos también necesitan un Mañana Seguro. Con unos cuantos clics haz que dos personas comiencen a ahorrar y pasa del 5% al 7% de incentivos.",
       "boton": "Seleccionar opción 2"
     }
+  },
+  "metaEstablecida": {
+    "tituloParte1": "Meta",
+    "tituloParte2": "establecida",
+    "cambiarMeta": "Cambiar meta",
+    "aviso": "Recuerda que solo se puede cambiar la meta 1 vez al año*",
+    "acepto": "Acepto los",
+    "terminos": "términos y condiciones de uso",
+    "tuMeta": "Tu meta es a:",
+    "totalFinal": "Total estimado al final de la meta",
+    "graficaLabel": "Proyección de crecimiento de tu ahorro",
+    "totalEstimado": "Total estimado:",
+    "botonCambiar": "Cambiar meta",
+    "anios_one": "{{count}} año",
+    "anios_other": "{{count}} años"
   }
 }

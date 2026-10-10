@@ -50,7 +50,7 @@ function SelectField({ id, name, value, onChange, options = [], placeholder }) {
       >
         {placeholder && <option value="" disabled>{placeholder}</option>}
         {options.map((opt) => (
-          <option key={opt} value={opt} className="bg-card">{opt}</option>
+          <option key={opt.value} value={opt.value} className="bg-card">{opt.label}</option>
         ))}
       </select>
       <svg
@@ -66,14 +66,19 @@ function SelectField({ id, name, value, onChange, options = [], placeholder }) {
 }
 
 export function GoalEstablishedScreen({
-  meta = '15 años',          // TODO: vendrá del perfil del usuario
+  meta = 15,                 // años. TODO: vendrá del perfil del usuario
   totalEstimado = 1000000,   // TODO: vendrá del cálculo de proyección
   onCambiarMeta,
 }) {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const [nuevaMeta, setNuevaMeta] = useState('10 años')
+  const [nuevaMeta, setNuevaMeta] = useState(10)
   const [aceptaTerminos, setAceptaTerminos] = useState(false)
+
+  const goalOptions = GOALS.map((y) => ({
+    value: y,
+    label: t('metaEstablecida.anios', { count: y }),
+  }))
 
   const puedeCambiar = nuevaMeta !== '' && aceptaTerminos
 
@@ -112,8 +117,8 @@ export function GoalEstablishedScreen({
                   id="nuevaMeta"
                   name="nuevaMeta"
                   value={nuevaMeta}
-                  onChange={(e) => setNuevaMeta(e.target.value)}
-                  options={GOALS}
+                  onChange={(e) => setNuevaMeta(Number(e.target.value))}
+                  options={goalOptions}
                 />
                 <p className="text-xs text-white/60 mt-3 leading-relaxed">
                   {t('metaEstablecida.aviso', 'Recuerda que solo se puede cambiar la meta 1 vez al año*')}
@@ -151,7 +156,7 @@ export function GoalEstablishedScreen({
                   {t('metaEstablecida.tuMeta', 'Tu meta es a:')}
                 </p>
                 <p className="font-display font-bold text-white tracking-tight mt-1" style={{ fontSize: 'clamp(2.5rem,5vw,4rem)' }}>
-                  {meta}
+                  {t('metaEstablecida.anios', { count: meta })}
                 </p>
                 <p className="text-sm text-white/60 mt-2">
                   {t('metaEstablecida.totalFinal', 'Total estimado al final de la meta')}

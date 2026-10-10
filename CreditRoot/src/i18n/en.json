@@ -1051,5 +1051,20 @@
       "descripcion": "Option 2: Your loved ones also need a Mañana Seguro. With a few clicks, get two people to start saving and move from 5% to 7% in incentives.",
       "boton": "Select option 2"
     }
+  },
+  "metaEstablecida": {
+    "tituloParte1": "Goal",
+    "tituloParte2": "set",
+    "cambiarMeta": "Change goal",
+    "aviso": "Remember that you can only change your goal once a year*",
+    "acepto": "I accept the",
+    "terminos": "terms and conditions of use",
+    "tuMeta": "Your goal is:",
+    "totalFinal": "Estimated total at the end of the goal",
+    "graficaLabel": "Projected growth of your savings",
+    "totalEstimado": "Estimated total:",
+    "botonCambiar": "Change goal",
+    "anios_one": "{{count}} year",
+    "anios_other": "{{count}} years"
   }
 }
