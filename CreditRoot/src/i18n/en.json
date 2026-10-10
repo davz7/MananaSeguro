@@ -1081,5 +1081,27 @@
     "terms1": "By clicking “Continue” you accept",
     "terms2Pre": "the",
     "termsLink": "terms and conditions of use"
+  },
+  "dataProfile": {
+    "titleLead": "Personal",
+    "titleAccent": "details",
+    "intro": "To create your account we need some personal details.",
+    "secureTitle": "Your data, safe",
+    "secureText": "All the information you share is protected under the highest security standards.",
+    "fastTitle": "Quick process",
+    "fastText": "Complete your registration in under 3 minutes and access all the benefits of your account.",
+    "formTitle": "Sign up in minutes",
+    "fullName": "Full name",
+    "firstName": "First name(s)*",
+    "paternalName": "Paternal last name*",
+    "maternalName": "Maternal last name*",
+    "createAccess": "Create access",
+    "email": "Email address*",
+    "password": "Password*",
+    "confirmPassword": "Confirm your password*",
+    "processing": "Processing...",
+    "continue": "Continue",
+    "privacyPre": "You can review how we handle and protect your data in accordance with the law",
+    "privacyLink": "here"
   }
 }

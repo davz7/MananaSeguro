@@ -1082,5 +1082,27 @@
     "terms1": "Al hacer clic en “Continuar” aceptas",
     "terms2Pre": "los",
     "termsLink": "términos y condiciones de uso"
+  },
+  "dataProfile": {
+    "titleLead": "Datos",
+    "titleAccent": "personales",
+    "intro": "Para poder crear tu cuenta necesitamos algunos datos personales.",
+    "secureTitle": "Tus datos, seguros",
+    "secureText": "Toda la información que compartes está protegida bajo los más altos estándares de seguridad.",
+    "fastTitle": "Proceso rápido",
+    "fastText": "Completa tu registro en menos de 3 minutos y accede a todos los beneficios de tu cuenta.",
+    "formTitle": "Regístrate en minutos",
+    "fullName": "Nombre completo",
+    "firstName": "Nombre(s)*",
+    "paternalName": "Apellido paterno*",
+    "maternalName": "Apellido materno*",
+    "createAccess": "Crear acceso",
+    "email": "Correo electrónico*",
+    "password": "Contraseña*",
+    "confirmPassword": "Confirma tu contraseña*",
+    "processing": "Procesando...",
+    "continue": "Continuar",
+    "privacyPre": "Puedes revisar cómo tratamos y resguardamos tus datos conforme a lo establecido en la ley",
+    "privacyLink": "aquí"
   }
 }
