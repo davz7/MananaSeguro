@@ -1066,5 +1066,20 @@
     "botonCambiar": "Change goal",
     "anios_one": "{{count}} year",
     "anios_other": "{{count}} years"
+  },
+  "authScreen": {
+    "tagline1Pre": "Your",
+    "tagline1Accent": "money,",
+    "tagline2Pre": "Your",
+    "tagline2Accent": "rules,",
+    "tagline3Pre": "Your",
+    "tagline3Accent": "retirement",
+    "title": "Sign up",
+    "subtitle1": "Having your future in your hands",
+    "subtitle2": "has never been so easy",
+    "createWithEmail": "Create account with email",
+    "terms1": "By clicking “Continue” you accept",
+    "terms2Pre": "the",
+    "termsLink": "terms and conditions of use"
   }
 }

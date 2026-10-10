@@ -1067,5 +1067,20 @@
     "botonCambiar": "Cambiar meta",
     "anios_one": "{{count}} año",
     "anios_other": "{{count}} años"
+  },
+  "authScreen": {
+    "tagline1Pre": "Tu",
+    "tagline1Accent": "dinero,",
+    "tagline2Pre": "Tus",
+    "tagline2Accent": "reglas,",
+    "tagline3Pre": "Tu",
+    "tagline3Accent": "retiro",
+    "title": "Regístrate",
+    "subtitle1": "Tener tu futuro en tus manos",
+    "subtitle2": "nunca había sido tan fácil",
+    "createWithEmail": "Crear cuenta con correo",
+    "terms1": "Al hacer clic en “Continuar” aceptas",
+    "terms2Pre": "los",
+    "termsLink": "términos y condiciones de uso"
   }
 }

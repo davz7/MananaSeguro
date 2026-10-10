@@ -16,9 +16,9 @@ function Footer({ dark = false }) {
                     {/* Logo */}
                     <div className="flex items-center gap-2">
                         <img src={logoCompleto} alt={t('nav.logoAlt')} className="h-8 w-auto rounded-lg" />
-                             <span className="font-display font-bold text-lg text-white tracking-tight">
-                                 {t('nav.marca')} <span className="text-brand">{t('nav.marcaAccent')}</span>
-                             </span>
+                        <span className="font-display font-bold text-lg text-white tracking-tight">
+                            {t('nav.marca')} <span className="text-brand">{t('nav.marcaAccent')}</span>
+                        </span>
                     </div>
 
                     {/* Redes sociales */}
