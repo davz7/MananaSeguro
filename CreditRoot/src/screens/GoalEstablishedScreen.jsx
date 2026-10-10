@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next'
 import LandingNavbar from './components/LandingNavbar'
 import Footer from './components/Footer'
 
-// TODO: reemplazar por catálogo real (API / constantes)
-const GOALS = ['5 años', '10 años', '15 años', '20 años']
+const GOALS = [5, 10, 15, 20]
 
 const formatMXN = (amount) =>
   new Intl.NumberFormat('es-MX', {
