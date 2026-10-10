@@ -1033,5 +1033,23 @@
       "emptyFields": "Enter your email and password.",
       "invalidCredentials": "Incorrect email or password."
     }
+  },
+  "incentivos": {
+    "tituloParte1": "Incentive",
+    "tituloParte2": "program",
+    "subtitulo": "Get a share of all your effort.",
+    "descripcion": "Mañana Seguro rewards you with 5% of your effort. Saving doesn't have to be boring, so every 5 years we give you the boost you need.",
+    "seleccionada": "Selected option",
+    "nota": "Once selected, you will have only 1 month to change your choice. After that, no changes can be made.",
+    "fidelidad": {
+      "titulo": "Loyalty incentive.",
+      "descripcion": "Option 1: Your challenge is with your future. In all 12 months of the year, contribute at least 5 dollars to your account. With your consistency, your incentive will go from 5% to 7%.",
+      "boton": "Select option 1"
+    },
+    "confianza": {
+      "titulo": "Trust incentive.",
+      "descripcion": "Option 2: Your loved ones also need a Mañana Seguro. With a few clicks, get two people to start saving and move from 5% to 7% in incentives.",
+      "boton": "Select option 2"
+    }
   }
 }

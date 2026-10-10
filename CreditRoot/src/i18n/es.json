@@ -1034,5 +1034,23 @@
       "emptyFields": "Ingresa tu correo y contraseña.",
       "invalidCredentials": "Correo o contraseña incorrectos."
     }
+  },
+  "incentivos": {
+    "tituloParte1": "Programa de",
+    "tituloParte2": "incentivos",
+    "subtitulo": "Recibe una parte de todo tu esfuerzo.",
+    "descripcion": "Mañana Seguro te recompensa con un 5% de tu esfuerzo. Porque ahorrar no tiene que ser aburrido, cada 5 años te damos ese empujón que necesitas.",
+    "seleccionada": "Opción seleccionada",
+    "nota": "Una vez seleccionada, tendrás solo 1 mes para modificar la selección. Pasado ese tiempo no se podrá hacer ningún cambio.",
+    "fidelidad": {
+      "titulo": "Incentivo por fidelidad.",
+      "descripcion": "Opción 1: Tu reto es con tu futuro. Todos los 12 meses del año aporta a tu cuenta un mínimo de 5 dólares. Con tu constancia, tu incentivo pasará de 5% a 7%.",
+      "boton": "Seleccionar opción 1"
+    },
+    "confianza": {
+      "titulo": "Incentivo por confianza.",
+      "descripcion": "Opción 2: Tus seres queridos también necesitan un Mañana Seguro. Con unos cuantos clics haz que dos personas comiencen a ahorrar y pasa del 5% al 7% de incentivos.",
+      "boton": "Seleccionar opción 2"
+    }
   }
 }
