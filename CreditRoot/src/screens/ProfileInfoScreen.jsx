@@ -7,7 +7,8 @@ import Footer from './components/Footer'
 
 // TODO: reemplazar por catálogos reales (API / constantes)
 const BANKS = ['BBVA', 'Santander', 'Banorte', 'Citibanamex', 'HSBC', 'Scotiabank']
-const RELATIONSHIPS = ['Madre biológica', 'Padre biológico', 'Cónyuge', 'Hijo(a)', 'Hermano(a)', 'Otro']
+// Claves de dataAccount.relations en es.json / en.json (las mismas que usa DataAccount)
+const RELATIONSHIPS = ['mother', 'father', 'spouse', 'child', 'sibling', 'other']
 
 const INITIAL_FORM = {
   foto: null,
@@ -65,7 +66,7 @@ function SelectField({ label, name, value, onChange, options = [] }) {
       >
         <option value="" disabled>{label}</option>
         {options.map((opt) => (
-          <option key={opt} value={opt} className="bg-[#1c1b1a] text-white">{opt}</option>
+          <option key={opt.value} value={opt.value} className="bg-[#1c1b1a] text-white">{opt.label}</option>
         ))}
       </select>
       <svg
@@ -95,6 +96,9 @@ export function ProfileInfoScreen({ initialData = {}, onSubmit }) {
   const { t } = useTranslation()
   const [form, setForm] = useState({ ...INITIAL_FORM, ...initialData })
   const [fotoPreview, setFotoPreview] = useState(null)
+
+  const bankOptions = BANKS.map((b) => ({ value: b, label: b }))
+  const relationshipOptions = RELATIONSHIPS.map((r) => ({ value: r, label: t(`dataAccount.relations.${r}`) }))
 
   useEffect(() => {
     if (!fotoPreview) return
@@ -226,14 +230,14 @@ export function ProfileInfoScreen({ initialData = {}, onSubmit }) {
               {/* ---------- Datos bancarios ---------- */}
               <FormSection title={t('perfilInfo.datosBancarios', 'Datos bancarios')}>
                 <TextField name="titular" value={form.titular} onChange={handleChange} autoComplete="cc-name" label={t('perfilInfo.titular', 'Nombre del titular*')} />
-                <SelectField name="banco" value={form.banco} onChange={handleChange} options={BANKS} label={t('perfilInfo.banco', 'Selecciona tu banco*')} />
+                <SelectField name="banco" value={form.banco} onChange={handleChange} options={bankOptions} label={t('perfilInfo.banco', 'Selecciona tu banco*')} />
                 <TextField name="cuenta" value={form.cuenta} onChange={handleChange} inputMode="numeric" autoComplete="off" label={t('perfilInfo.cuenta', 'Número de tarjeta o CLABE*')} />
               </FormSection>
 
               {/* ---------- Beneficiario principal ---------- */}
               <FormSection title={t('perfilInfo.beneficiario', 'Beneficiario principal')}>
                 <TextField name="beneficiarioNombre" value={form.beneficiarioNombre} onChange={handleChange} label={t('perfilInfo.beneficiarioNombre', 'Nombre completo del beneficiario*')} />
-                <SelectField name="beneficiarioParentesco" value={form.beneficiarioParentesco} onChange={handleChange} options={RELATIONSHIPS} label={t('perfilInfo.parentesco', 'Parentesco*')} />
+                <SelectField name="beneficiarioParentesco" value={form.beneficiarioParentesco} onChange={handleChange} options={relationshipOptions} label={t('perfilInfo.parentesco', 'Parentesco*')} />
                 <PhoneField name="beneficiarioTelefono" value={form.beneficiarioTelefono} onChange={handleChange} label={t('perfilInfo.beneficiarioTelefono', 'Teléfono del beneficiario*')} />
               </FormSection>
 
