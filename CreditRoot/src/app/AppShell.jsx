@@ -19,6 +19,7 @@ import { DataAccount } from '../screens/DataAccount'
 import { DepositsScreen } from '../screens/DepositsScreen'
 import { AboutScreen } from '../screens/AboutScreen'
 import { ErrorBoundary } from '../components/ErrorBoundary'
+import { SESION_EXPIRADA_EVENT, limpiarSesion } from '../lib/api'
 
 export function AppShell() {
   const navigate = useNavigate()
@@ -51,10 +52,23 @@ export function AppShell() {
     navigate('/main')
   }
 
+  // Una API protegida respondió 401 (ver lib/api.js): la sesión expiró. Se
+  // cierra sesión y se manda al login para obtener un token nuevo.
+  useEffect(() => {
+    function onSesionExpirada() {
+      setUsuario(null)
+      localStorage.removeItem('ms_usuario')
+      navigate('/signin')
+    }
+    window.addEventListener(SESION_EXPIRADA_EVENT, onSesionExpirada)
+    return () => window.removeEventListener(SESION_EXPIRADA_EVENT, onSesionExpirada)
+  }, [navigate])
+
   function handleLogout() {
     setUsuario(null)
     setIdentificador(null)
     localStorage.removeItem('ms_usuario')
+    limpiarSesion()
     navigate('/')
   }
 
@@ -104,6 +118,7 @@ export function AppShell() {
       <Route path="/signin-registro" element={
         <SignInScreen
           onVerificar={(email) => { setIdentificador(email); navigate('/verificacion') }}
+            onAuth={handleAuth}
           onVolver={() => navigate('/')}
           onRegister={() => navigate('/login')}
         />
@@ -115,6 +130,7 @@ export function AppShell() {
           ? <Navigate to="/main" replace />
           : <SignInScreen
             onVerificar={(email) => { setIdentificador(email); navigate('/verificacion') }}
+            onAuth={handleAuth}
             onVolver={() => navigate('/')}
             onRegister={() => navigate('/login')}
           />

@@ -4,10 +4,10 @@ import { useTranslation } from 'react-i18next'
 import { Mail, Lock, TriangleAlert } from 'lucide-react'
 import LandingNavbar from './components/LandingNavbar'
 import Footer from './components/Footer'
+import { GoogleSignInButton } from './components/GoogleSignInButton'
 import { autenticarUsuario } from '../data/mockUsers'
-import logoGoogle from '../assets/Logo_Google.png'
 
-export function SignInScreen({ onVerificar, onVolver, onRegister }) {
+export function SignInScreen({ onVerificar, onAuth, onVolver, onRegister }) {
   const navigate = useNavigate()
   const location = useLocation()
   const { t } = useTranslation()
@@ -141,10 +141,7 @@ export function SignInScreen({ onVerificar, onVolver, onRegister }) {
                 </div>
 
                 {/* Google */}
-                <button type="button" disabled className="w-full flex items-center justify-center gap-3 bg-white text-black font-medium py-3.5 rounded-xl border border-gray-200 cursor-not-allowed opacity-80">
-                  <img src={logoGoogle} alt="Google" className="w-5 h-5 object-contain" />
-                  {t('signIn.google')}
-                </button>
+                <GoogleSignInButton onAuth={onAuth} />
 
                 {/* Link registro */}
                 <p className="text-sm text-white/45 text-center">
