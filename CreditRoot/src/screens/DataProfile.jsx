@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Check, Circle, TriangleAlert } from 'lucide-react'
+import { TriangleAlert } from 'lucide-react'
 import LandingNavbar from './components/LandingNavbar'
 import Footer from './components/Footer'
 import { COUNTRY_LIST, COUNTRY_LOOKUP, getLocalizedCountryName } from '../data/countries'
@@ -15,19 +15,19 @@ function getCountryFlagUrl(flag) {
   return `https://flagcdn.com/w40/${countryCode}.png`
 }
 
-export function DataProfile({ onContinuar }) {
+// Primer paso del registro, después de entrar con Google. El correo viene de
+// la cuenta de Google y no se puede editar; no hay contraseña.
+// TODO(back): guardar con PATCH /api/perfil cuando exista el endpoint.
+export function DataProfile({ usuario, onContinuar }) {
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
 
   const [form, setForm] = useState({
-    nombre: '',
+    nombre: usuario?.nombre ?? '',
     apellidoPaterno: '',
     apellidoMaterno: '',
     telefono: '',
     pais: 'México',
-    email: '',
-    password: '',
-    confirmPassword: '',
   })
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -35,14 +35,6 @@ export function DataProfile({ onContinuar }) {
   const [countrySearch, setCountrySearch] = useState('')
   const selectedCountry = COUNTRY_LOOKUP[form.pais] ?? COUNTRY_LOOKUP['México']
   const localizedCountry = getLocalizedCountryName(selectedCountry, i18n.resolvedLanguage ?? i18n.language)
-
-  const requirements = [
-    { id: 'length', valid: form.password.length >= 12 },
-    { id: 'uppercase', valid: /\p{Lu}/u.test(form.password) },
-    { id: 'lowercase', valid: /\p{Ll}/u.test(form.password) },
-    { id: 'number', valid: /\p{N}/u.test(form.password) },
-    { id: 'symbol', valid: /[^\p{L}\p{N}]/u.test(form.password) },
-  ]
 
   function handleChange(e) {
     const { name, value } = e.target
@@ -55,7 +47,7 @@ export function DataProfile({ onContinuar }) {
     setLoading(true)
     setTimeout(() => {
       setLoading(false)
-      onContinuar ? onContinuar(form) : navigate('/verificacion-registro')
+      onContinuar ? onContinuar(form) : navigate('/perfil-meta')
     }, 400)
   }
 
@@ -63,7 +55,7 @@ export function DataProfile({ onContinuar }) {
 
   return (
     <div className="bg-bg min-h-screen flex flex-col overflow-x-hidden">
-      <LandingNavbar soloVolver onVolver={() => navigate('/login')} />
+      <LandingNavbar soloVolver onVolver={() => navigate('/main')} />
 
       <div className="container mx-auto px-4 pt-10 pb-16 flex-1">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
@@ -133,7 +125,7 @@ export function DataProfile({ onContinuar }) {
                 {/* Crear acceso */}
                 <div className="flex flex-col gap-1.5">
                   <span className="text-xs font-semibold text-white/50 uppercase tracking-widest font-sans">
-                    {t('dataProfile.createAccess')}
+                    {t('dataProfile.contact')}
                   </span>
 
                   {/* Teléfono con prefijo */}
@@ -193,27 +185,10 @@ export function DataProfile({ onContinuar }) {
                     )}
                   </div>
 
-                  <input name="email" type="email" placeholder={t('dataProfile.email')} aria-label={t('dataProfile.email')}
-                    value={form.email} onChange={handleChange} className={inputCls} />
-                  <input name="password" type="password" placeholder={t('dataProfile.password')} aria-label={t('dataProfile.password')}
-                    value={form.password} onChange={handleChange} className={inputCls} />
-
-                  {form.password.length > 0 && (
-                    <div className="rounded-xl border border-white/10 bg-[#1c1b1a] p-4">
-                      <p className="mb-3 text-sm font-semibold text-white">{t('changePassword.requirementsTitle')}</p>
-                      <ul className="space-y-2">
-                        {requirements.map(({ id, valid }) => (
-                          <li key={id} className={`flex items-center gap-2 text-sm ${valid ? 'text-green-400' : 'text-white/45'}`}>
-                            {valid ? <Check size={14} /> : <Circle size={12} />}
-                            <span>{t(`changePassword.requirements.${id}`)}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  <input name="confirmPassword" type="password" placeholder={t('dataProfile.confirmPassword')} aria-label={t('dataProfile.confirmPassword')}
-                    value={form.confirmPassword} onChange={handleChange} className={inputCls} />
+                  <input type="email" value={usuario?.email ?? ''} readOnly disabled
+                    aria-label={t('dataProfile.emailGoogle')} title={t('dataProfile.emailGoogle')}
+                    className={`${inputCls} opacity-60 cursor-not-allowed`} />
+                  <p className="text-xs text-white/40">{t('dataProfile.emailGoogle')}</p>
                 </div>
 
                 <button

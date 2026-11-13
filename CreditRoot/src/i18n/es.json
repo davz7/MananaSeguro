@@ -14,7 +14,8 @@
     "cambiarIdioma": "Cambiar idioma",
     "activarModoClaro": "Activar modo claro",
     "activarModoOscuro": "Activar modo oscuro",
-    "toggleMenu": "Abrir menú"
+    "toggleMenu": "Abrir menú",
+    "perfil": "Perfil"
   },
   "landing": {
     "badge": "Ahorro para retiro · CETES · México",
@@ -156,49 +157,39 @@
     "requestReady": "La solicitud está lista para conectarse al backend.",
     "aviso": "Puedes cambiar tu beneficiario más adelante en la configuración, recuerda que los cambios están sujetos a revisión de seguridad."
   },
-  "changePassword": {
-    "back": "Regresar",
-    "forgot": "¿Necesitas cambiar tu contraseña?",
-    "title": "Cambia tu",
-    "titleAccent": "contraseña",
-    "description": "Valida que eres tú, ahora cambia tu contraseña por una contraseña segura.",
-    "cardTitle": "Cambio de contraseña",
-    "cardSubtitle": "Ingresa tu nueva clave para asegurar tu cuenta",
-    "newPassword": "Nueva contraseña",
-    "confirmPassword": "Confirmar nueva contraseña",
-    "showPassword": "Mostrar u ocultar contraseña",
-    "showConfirmPassword": "Mostrar u ocultar confirmación de contraseña",
-    "requirementsTitle": "Tu contraseña debe incluir",
-    "requirements": {
-      "length": "Al menos 12 caracteres",
-      "uppercase": "Una letra mayúscula",
-      "lowercase": "Una letra minúscula",
-      "number": "Un número",
-      "symbol": "Un símbolo (por ejemplo: !, #, $)"
-    },
-    "passwordsMatch": "Las contraseñas coinciden",
-    "passwordsDoNotMatch": "Las contraseñas no coinciden",
-    "requestReady": "La solicitud está lista para conectarse al servicio de cambio de contraseña.",
-    "submit": "Cambiar contraseña"
-  },
   "emergencyWithdrawal": {
-    "brand": "Somos",
-    "brandAccent": "MañanaSeguro.",
     "title": "Retiro de",
     "titleAccent": "emergencia",
     "accountLabel": "Cuenta principal",
     "availableLabel": "Disponible",
     "rateLabel": "Activo CETES",
-    "stepOne": "Paso 1: Seleccione cantidad a retirar:",
-    "stepTwo": "Paso 2: Seleccione los meses a pagar su aporte:",
-    "optionLabel": "meses",
-    "disposable": "Disponible del 30%",
+    "stepOne": "Paso 1: ¿Cuánto necesitas? (MXN)",
+    "stepTwo": "Paso 2: Revisa las condiciones",
+    "disposable": "Disponible: {{amount}} ({{pct}}% de tu saldo)",
     "terms": "Acepto los términos y condiciones de uso",
     "submit": "Acceder a retiro de emergencia",
-    "statusLabel": "Solicitud lista",
-    "statusMessage": "La solicitud está preparada para enviarse al backend cuando se conecte la integración.",
-    "availableExplanation": "Cantidad disponible para retiro de emergencia. Este valor se usa como base del cálculo del 30%.",
-    "termDetails": "Cada mes retrasado reduce el rendimiento en 1% durante un año."
+    "statusLabel": "Solicitud enviada",
+    "statusMessage": "Tu retiro de emergencia de {{amount}} ({{usdc}}) quedó registrado.",
+    "availableExplanation": "Cantidad disponible para retiro de emergencia: el {{pct}}% de tu saldo.",
+    "intro": "Estamos contigo en los momentos imprevistos. Pide prestado hasta el 30% de tu ahorro y págalo en cuotas mensuales.",
+    "balanceLabel": "Saldo depositado",
+    "balanceHint": "Calculado con tus depósitos completados.",
+    "approxUsdc": "≈ {{usdc}}",
+    "termMonths": "Se paga en {{months}} cuotas mensuales.",
+    "termInterest": "Interés de {{rate}}% mensual sobre el saldo pendiente.",
+    "termLock": "Mientras tengas un préstamo activo no podrás retirar tus ahorros.",
+    "firstPayment": "Primera cuota estimada: {{amount}}",
+    "amountErrors": {
+      "invalid": "Ingresa un monto válido.",
+      "min": "El monto mínimo es {{min}} (1 USDC).",
+      "max": "Supera tu disponible de {{max}}.",
+      "sinSaldo": "Todavía no tienes saldo disponible."
+    },
+    "noBalance": "Aún no tienes depósitos completados. Cuando tengas saldo podrás pedir un retiro de emergencia.",
+    "goDeposit": "Hacer un depósito",
+    "retry": "Reintentar",
+    "submitting": "Enviando solicitud…",
+    "viewTx": "Ver transacción en Stellar"
   },
   "settings": {
     "back": "Regresar",
@@ -839,21 +830,6 @@
     "minimoInline": "Mínimo ${{min}} MXN",
     "nombreDefault": "Retiro Principal"
   },
-  "verificacion": {
-    "tituloIzq": "Verificación",
-    "descIzq": "Confirma tu identidad con el código de un solo uso que enviamos a tu dispositivo.",
-    "titulo": "Código de verificación",
-    "subtitulo": "Código de un solo uso · duración 3 minutos",
-    "instruccion": "Enviamos un código de 5 dígitos a tu {{medio}}, ingrésalo debajo para acceder.",
-    "medio": "número de teléfono",
-    "acceder": "Acceder",
-    "verificando": "Verificando...",
-    "reenviarEn": "Solicitar otro código en {{tiempo}} segundos",
-    "solicitarOtro": "Solicitar otro código",
-    "errorTitulo": "Error: datos incorrectos",
-    "errorCodigo": "El código ingresado no es válido. Verifica e intenta de nuevo.",
-    "regresar": "Regresar"
-  },
   "errorBoundary": {
     "titulo": "Algo salió mal",
     "descripcion": "Ocurrió un error inesperado al procesar tu solicitud. Tu dinero y tu información están seguros. Intenta de nuevo o vuelve al inicio.",
@@ -945,7 +921,15 @@
     "promoRest": "generado por tu ahorro constante.",
     "emergencyQuestion": "¿Tienes una emergencia?",
     "weUnderstand": "Te entendemos",
-    "emergencyText": "Conoce cómo tomar prestado hasta el 30% de tu ahorro."
+    "emergencyText": "Conoce cómo tomar prestado hasta el 30% de tu ahorro.",
+    "kycPending": "Verifica tu identidad para empezar a depositar.",
+    "kycInReview": "Tu verificación está en revisión. Te avisaremos cuando quede aprobada.",
+    "kycApproved": "¡Identidad verificada! Ya puedes depositar.",
+    "kycChecking": "Revisando el estado de tu verificación…",
+    "kycCta": "Verificar identidad",
+    "kycLoading": "Abriendo verificación…",
+    "goalNone": "Sin meta definida",
+    "kycUrlError": "No pudimos abrir la verificación. Intenta de nuevo."
   },
   "dataAccount": {
     "titleLead": "Datos",
@@ -1003,8 +987,33 @@
     "status": {
       "processing": "En proceso",
       "completed": "Completada",
-      "failed": "Fallida"
-    }
+      "failed": "Fallida",
+      "funded": "Pago recibido",
+      "cancelled": "Cancelada",
+      "unknown": "Desconocido"
+    },
+    "step1Amount": "1- ¿Cuánto quieres depositar? (MXN)",
+    "step1Transfer": "1- Transfiere exactamente {{amount}} MXN por SPEI a esta CLABE",
+    "approxUsdc": "≈ {{usdc}} (tipo de cambio {{rate}} MXN/USD)",
+    "limits": "Mínimo ${{min}} MXN · máximo ${{max}} MXN",
+    "amountErrors": {
+      "invalid": "Ingresa un monto válido (máximo 2 decimales).",
+      "min": "El monto mínimo es ${{min}} MXN.",
+      "max": "El monto máximo es ${{max}} MXN."
+    },
+    "generate": "Generar CLABE de depósito",
+    "creating": "Generando CLABE…",
+    "exactAmountWarning": "El monto debe ser exacto. Esta CLABE es solo para este depósito.",
+    "newDeposit": "Hacer otro depósito",
+    "orderStatus": "Estado del depósito",
+    "autoRefresh": "Se actualiza automáticamente cada 10 segundos.",
+    "colClabe": "CLABE",
+    "loading": "Cargando movimientos…",
+    "retry": "Reintentar",
+    "kycRequired": "Para depositar primero debes verificar tu identidad.",
+    "kycCta": "Verificar identidad",
+    "kycLoading": "Abriendo verificación…",
+    "bankPending": "Tu cuenta bancaria aún está en verificación. Intenta en unos minutos."
   },
   "signIn": {
     "tagline1Pre": "Tu",
@@ -1015,25 +1024,14 @@
     "tagline3Accent": "retiro",
     "title": "Inicio de sesión",
     "subtitle1": "Accede a tu cuenta,",
-    "subtitle2": "ingresa tu correo y contraseña",
-    "accountCreated": "Cuenta creada correctamente",
-    "email": "Correo electrónico",
-    "password": "Contraseña",
-    "forgot": "¿Olvidaste tu contraseña?",
-    "recover": "Recuperar",
-    "loading": "Entrando...",
-    "continue": "Continuar",
-    "or": "o",
     "google": "Continuar con Google",
     "noAccount": "¿No tienes cuenta?",
     "register": "Regístrate",
     "terms1": "Al hacer clic en “Continuar” aceptas",
     "terms2Pre": "los",
     "termsLink": "términos y condiciones de uso",
-    "errors": {
-      "emptyFields": "Ingresa tu correo y contraseña.",
-      "invalidCredentials": "Correo o contraseña incorrectos."
-    }
+    "subtitleGoogle": "entra con tu cuenta de Google",
+    "sessionExpired": "Tu sesión expiró. Vuelve a iniciar sesión para continuar."
   },
   "incentivos": {
     "tituloParte1": "Programa de",
@@ -1066,7 +1064,12 @@
     "totalEstimado": "Total estimado:",
     "botonCambiar": "Cambiar meta",
     "anios_one": "{{count}} año",
-    "anios_other": "{{count}} años"
+    "anios_other": "{{count}} años",
+    "sinMeta": "Sin meta",
+    "exito": "Tu meta se actualizó correctamente.",
+    "errorGuardar": "No pudimos actualizar tu meta. Intenta de nuevo.",
+    "errorCarga": "No pudimos cargar tu meta.",
+    "guardando": "Guardando…"
   },
   "authScreen": {
     "tagline1Pre": "Tu",
@@ -1078,7 +1081,6 @@
     "title": "Regístrate",
     "subtitle1": "Tener tu futuro en tus manos",
     "subtitle2": "nunca había sido tan fácil",
-    "createWithEmail": "Crear cuenta con correo",
     "terms1": "Al hacer clic en “Continuar” aceptas",
     "terms2Pre": "los",
     "termsLink": "términos y condiciones de uso"
@@ -1096,13 +1098,67 @@
     "firstName": "Nombre(s)*",
     "paternalName": "Apellido paterno*",
     "maternalName": "Apellido materno*",
-    "createAccess": "Crear acceso",
-    "email": "Correo electrónico*",
-    "password": "Contraseña*",
-    "confirmPassword": "Confirma tu contraseña*",
     "processing": "Procesando...",
     "continue": "Continuar",
     "privacyPre": "Puedes revisar cómo tratamos y resguardamos tus datos conforme a lo establecido en la ley",
-    "privacyLink": "aquí"
+    "privacyLink": "aquí",
+    "contact": "Contacto",
+    "emailGoogle": "Correo de tu cuenta de Google"
+  },
+  "perfilMeta": {
+    "tituloParte1": "Perfil y",
+    "tituloParte2": "meta",
+    "descripcion": "Cuéntanos algunas cosas sobre ti para poder personalizar tu cuenta.",
+    "regresar": "Regresar",
+    "titulo": "Perfil y meta",
+    "cardTitulo": "Proyecta tu meta",
+    "fechaNacimiento": "Fecha de nacimiento",
+    "anio": "Año",
+    "mes": "Mes",
+    "dia": "Día",
+    "meses": [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre"
+    ],
+    "segmentacion": "Actividades y segmentación",
+    "segmentacionNota": "Estos datos no afectan tu perfil.",
+    "ocupacion": "Selecciona tu ocupación*",
+    "estudios": "Selecciona tu último grado de estudios*",
+    "ingreso": "Selecciona tu ingreso mensual*",
+    "genero": "Selecciona tu género*",
+    "estadoCivil": "Selecciona tu estado civil*",
+    "residencia": "Selecciona tu estado de residencia*",
+    "eligeMeta": "Elige tu meta",
+    "continuar": "Continuar",
+    "nota": "Puedes revisar cómo tratamos y resguardamos tus datos conforme a lo establecido en la ley",
+    "aqui": "aquí"
+  },
+  "apiErrors": {
+    "SYSTEM": "Ocurrió un error con el sistema. Intenta de nuevo más tarde.",
+    "UNAUTHENTICATED": "Tu sesión expiró. Inicia sesión de nuevo.",
+    "INVALID_INTENT": "La operación solicitada no es válida.",
+    "INSUFFICIENT_BALANCE": "Saldo insuficiente para completar la operación.",
+    "AMOUNT_BELOW_MINIMUM": "El monto es menor al mínimo permitido.",
+    "TRUSTLINE_MISSING": "Tu cuenta aún no está lista para recibir este activo.",
+    "LOCK_ACTIVE": "Tus fondos siguen bloqueados hasta la fecha de retiro.",
+    "LOAN_NOT_ELIGIBLE": "No cumples las condiciones para este préstamo.",
+    "IN_PROGRESS": "Esta operación ya se está procesando.",
+    "ACCOUNT_DEACTIVATED": "Esta cuenta está dada de baja.",
+    "KEY_DESTROYED": "Esta cuenta ya no puede operar.",
+    "ACCOUNT_NOT_FOUND": "No encontramos la cuenta.",
+    "SIMULATION_FAILED": "La operación fue rechazada. Revisa los datos e intenta de nuevo.",
+    "RATE_LIMITED": "Demasiadas operaciones seguidas. Espera un momento.",
+    "SUBMISSION_FAILED": "No se pudo enviar la operación a la red. Puedes reintentar.",
+    "TIMEOUT": "La operación no se confirmó a tiempo. Estamos verificando su estado."
   }
 }

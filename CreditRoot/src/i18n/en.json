@@ -14,7 +14,8 @@
     "cambiarIdioma": "Change language",
     "activarModoClaro": "Enable light mode",
     "activarModoOscuro": "Enable dark mode",
-    "toggleMenu": "Toggle menu"
+    "toggleMenu": "Toggle menu",
+    "perfil": "Profile"
   },
   "landing": {
     "badge": "Retirement savings · CETES · Mexico",
@@ -156,49 +157,39 @@
     "requestReady": "The request is ready to connect to the backend.",
     "aviso": "You can change your beneficiary later in settings. Changes are subject to security review."
   },
-  "changePassword": {
-    "back": "Back",
-    "forgot": "Need to change your password?",
-    "title": "Change your",
-    "titleAccent": "password",
-    "description": "Verify it is you, then change your password to a secure one.",
-    "cardTitle": "Password change",
-    "cardSubtitle": "Enter your new key to secure your account",
-    "newPassword": "New password",
-    "confirmPassword": "Confirm new password",
-    "showPassword": "Show or hide password",
-    "showConfirmPassword": "Show or hide password confirmation",
-    "requirementsTitle": "Your password must include",
-    "requirements": {
-      "length": "At least 12 characters",
-      "uppercase": "An uppercase letter",
-      "lowercase": "A lowercase letter",
-      "number": "A number",
-      "symbol": "A symbol (for example: !, #, $)"
-    },
-    "passwordsMatch": "Passwords match",
-    "passwordsDoNotMatch": "Passwords do not match",
-    "requestReady": "The request is ready to connect to the password-change service.",
-    "submit": "Change password"
-  },
   "emergencyWithdrawal": {
-    "brand": "We are",
-    "brandAccent": "MañanaSeguro.",
     "title": "Emergency",
     "titleAccent": "withdrawal",
     "accountLabel": "Main account",
     "availableLabel": "Available",
     "rateLabel": "CETES asset",
-    "stepOne": "Step 1: Select amount to withdraw:",
-    "stepTwo": "Step 2: Select the months to pay back your contribution:",
-    "optionLabel": "months",
-    "disposable": "30% available",
+    "stepOne": "Step 1: How much do you need? (MXN)",
+    "stepTwo": "Step 2: Review the terms",
+    "disposable": "Available: {{amount}} ({{pct}}% of your balance)",
     "terms": "I accept the terms and conditions of use",
     "submit": "Access emergency withdrawal",
-    "statusLabel": "Request ready",
-    "statusMessage": "The request is ready to be sent to the backend when the integration is connected.",
-    "availableExplanation": "Amount available for emergency withdrawal. This value is used as the basis for the 30% calculation.",
-    "termDetails": "Each month deferred reduces the yield by 1% for one year."
+    "statusLabel": "Request sent",
+    "statusMessage": "Your emergency withdrawal of {{amount}} ({{usdc}}) was recorded.",
+    "availableExplanation": "Amount available for emergency withdrawal: {{pct}}% of your balance.",
+    "intro": "We're with you when the unexpected happens. Borrow up to 30% of your savings and pay it back in monthly installments.",
+    "balanceLabel": "Deposited balance",
+    "balanceHint": "Based on your completed deposits.",
+    "approxUsdc": "≈ {{usdc}}",
+    "termMonths": "Paid back in {{months}} monthly installments.",
+    "termInterest": "{{rate}}% monthly interest on the outstanding balance.",
+    "termLock": "While you have an active loan you can't withdraw your savings.",
+    "firstPayment": "Estimated first installment: {{amount}}",
+    "amountErrors": {
+      "invalid": "Enter a valid amount.",
+      "min": "The minimum amount is {{min}} (1 USDC).",
+      "max": "Exceeds your available {{max}}.",
+      "sinSaldo": "You don't have an available balance yet."
+    },
+    "noBalance": "You don't have completed deposits yet. Once you have a balance you can request an emergency withdrawal.",
+    "goDeposit": "Make a deposit",
+    "retry": "Retry",
+    "submitting": "Sending request…",
+    "viewTx": "View transaction on Stellar"
   },
   "settings": {
     "back": "Back",
@@ -839,26 +830,12 @@
     "minimoInline": "Minimum ${{min}} MXN",
     "nombreDefault": "Main Retirement"
   },
-  "verificacion": {
-    "tituloIzq": "Verification",
-    "descIzq": "Confirm your identity with the one-time code we sent to your device.",
-    "titulo": "Verification code",
-    "subtitulo": "One-time code · valid for 3 minutes",
-    "instruccion": "We sent a 5-digit code to your {{medio}}, enter it below to access.",
-    "medio": "phone number",
-    "acceder": "Access",
-    "verificando": "Verifying...",
-    "reenviarEn": "Request another code in {{tiempo}} seconds",
-    "solicitarOtro": "Request another code",
-    "errorTitulo": "Error: incorrect data",
-    "errorCodigo": "The code entered is not valid. Check and try again.",
-    "regresar": "Go back"
-  },
   "errorBoundary": {
     "descripcion": "An unexpected error occurred while processing your request. Your money and information are safe. Try again or go back home.",
     "reintentar": "Try again",
     "volverInicio": "Back to home",
-    "detallesDev": "Technical details (development only)"
+    "detallesDev": "Technical details (development only)",
+    "titulo": "Something went wrong"
   },
   "goalCard": {
     "principal": "Main",
@@ -944,7 +921,15 @@
     "promoRest": "generated by your consistent savings.",
     "emergencyQuestion": "Have an emergency?",
     "weUnderstand": "We understand",
-    "emergencyText": "Learn how to borrow up to 30% of your savings."
+    "emergencyText": "Learn how to borrow up to 30% of your savings.",
+    "kycPending": "Verify your identity to start depositing.",
+    "kycInReview": "Your verification is under review. We'll let you know once it's approved.",
+    "kycApproved": "Identity verified! You can deposit now.",
+    "kycChecking": "Checking your verification status…",
+    "kycCta": "Verify identity",
+    "kycLoading": "Opening verification…",
+    "goalNone": "No goal set yet",
+    "kycUrlError": "We couldn't open the verification. Please try again."
   },
   "dataAccount": {
     "titleLead": "Bank details",
@@ -1002,8 +987,33 @@
     "status": {
       "processing": "Processing",
       "completed": "Completed",
-      "failed": "Failed"
-    }
+      "failed": "Failed",
+      "funded": "Payment received",
+      "cancelled": "Cancelled",
+      "unknown": "Unknown"
+    },
+    "step1Amount": "1- How much do you want to deposit? (MXN)",
+    "step1Transfer": "1- Send exactly {{amount}} MXN via SPEI to this CLABE",
+    "approxUsdc": "≈ {{usdc}} (exchange rate {{rate}} MXN/USD)",
+    "limits": "Minimum ${{min}} MXN · maximum ${{max}} MXN",
+    "amountErrors": {
+      "invalid": "Enter a valid amount (up to 2 decimals).",
+      "min": "The minimum amount is ${{min}} MXN.",
+      "max": "The maximum amount is ${{max}} MXN."
+    },
+    "generate": "Generate deposit CLABE",
+    "creating": "Generating CLABE…",
+    "exactAmountWarning": "The amount must be exact. This CLABE is only for this deposit.",
+    "newDeposit": "Make another deposit",
+    "orderStatus": "Deposit status",
+    "autoRefresh": "Refreshes automatically every 10 seconds.",
+    "colClabe": "CLABE",
+    "loading": "Loading transactions…",
+    "retry": "Retry",
+    "kycRequired": "You need to verify your identity before depositing.",
+    "kycCta": "Verify identity",
+    "kycLoading": "Opening verification…",
+    "bankPending": "Your bank account is still being verified. Try again in a few minutes."
   },
   "signIn": {
     "tagline1Pre": "Your",
@@ -1014,25 +1024,14 @@
     "tagline3Accent": "retirement",
     "title": "Sign in",
     "subtitle1": "Access your account,",
-    "subtitle2": "enter your email and password",
-    "accountCreated": "Account created successfully",
-    "email": "Email address",
-    "password": "Password",
-    "forgot": "Forgot your password?",
-    "recover": "Recover it",
-    "loading": "Signing in...",
-    "continue": "Continue",
-    "or": "or",
     "google": "Continue with Google",
     "noAccount": "Don't have an account?",
     "register": "Sign up",
     "terms1": "By clicking “Continue” you accept",
     "terms2Pre": "the",
     "termsLink": "terms and conditions of use",
-    "errors": {
-      "emptyFields": "Enter your email and password.",
-      "invalidCredentials": "Incorrect email or password."
-    }
+    "subtitleGoogle": "sign in with your Google account",
+    "sessionExpired": "Your session expired. Sign in again to continue."
   },
   "incentivos": {
     "tituloParte1": "Incentive",
@@ -1065,7 +1064,12 @@
     "totalEstimado": "Estimated total:",
     "botonCambiar": "Change goal",
     "anios_one": "{{count}} year",
-    "anios_other": "{{count}} years"
+    "anios_other": "{{count}} years",
+    "sinMeta": "No goal",
+    "exito": "Your goal was updated.",
+    "errorGuardar": "We couldn't update your goal. Please try again.",
+    "errorCarga": "We couldn't load your goal.",
+    "guardando": "Saving…"
   },
   "authScreen": {
     "tagline1Pre": "Your",
@@ -1077,7 +1081,6 @@
     "title": "Sign up",
     "subtitle1": "Having your future in your hands",
     "subtitle2": "has never been so easy",
-    "createWithEmail": "Create account with email",
     "terms1": "By clicking “Continue” you accept",
     "terms2Pre": "the",
     "termsLink": "terms and conditions of use"
@@ -1095,13 +1098,67 @@
     "firstName": "First name(s)*",
     "paternalName": "Paternal last name*",
     "maternalName": "Maternal last name*",
-    "createAccess": "Create access",
-    "email": "Email address*",
-    "password": "Password*",
-    "confirmPassword": "Confirm your password*",
     "processing": "Processing...",
     "continue": "Continue",
     "privacyPre": "You can review how we handle and protect your data in accordance with the law",
-    "privacyLink": "here"
+    "privacyLink": "here",
+    "contact": "Contact",
+    "emailGoogle": "Your Google account email"
+  },
+  "perfilMeta": {
+    "tituloParte1": "Profile and",
+    "tituloParte2": "goal",
+    "descripcion": "Tell us a few things about yourself so we can personalize your account.",
+    "regresar": "Back",
+    "titulo": "Profile and goal",
+    "cardTitulo": "Plan your goal",
+    "fechaNacimiento": "Date of birth",
+    "anio": "Year",
+    "mes": "Month",
+    "dia": "Day",
+    "meses": [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ],
+    "segmentacion": "Activities and segmentation",
+    "segmentacionNota": "This information doesn't affect your profile.",
+    "ocupacion": "Select your occupation*",
+    "estudios": "Select your highest level of education*",
+    "ingreso": "Select your monthly income*",
+    "genero": "Select your gender*",
+    "estadoCivil": "Select your marital status*",
+    "residencia": "Select your state of residence*",
+    "eligeMeta": "Choose your goal",
+    "continuar": "Continue",
+    "nota": "You can review how we handle and protect your data in accordance with the law",
+    "aqui": "here"
+  },
+  "apiErrors": {
+    "SYSTEM": "There was a system error. Please try again later.",
+    "UNAUTHENTICATED": "Your session expired. Please sign in again.",
+    "INVALID_INTENT": "The requested operation is not valid.",
+    "INSUFFICIENT_BALANCE": "Insufficient balance to complete the operation.",
+    "AMOUNT_BELOW_MINIMUM": "The amount is below the allowed minimum.",
+    "TRUSTLINE_MISSING": "Your account isn't ready to receive this asset yet.",
+    "LOCK_ACTIVE": "Your funds are locked until your withdrawal date.",
+    "LOAN_NOT_ELIGIBLE": "You don't meet the conditions for this loan.",
+    "IN_PROGRESS": "This operation is already being processed.",
+    "ACCOUNT_DEACTIVATED": "This account has been closed.",
+    "KEY_DESTROYED": "This account can no longer operate.",
+    "ACCOUNT_NOT_FOUND": "We couldn't find the account.",
+    "SIMULATION_FAILED": "The operation was rejected. Check the details and try again.",
+    "RATE_LIMITED": "Too many operations in a row. Please wait a moment.",
+    "SUBMISSION_FAILED": "The operation couldn't be sent to the network. You can retry.",
+    "TIMEOUT": "The operation wasn't confirmed in time. We're checking its status."
   }
 }

@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import LandingNavbar from './components/LandingNavbar'
 import Footer from './components/Footer'
+import { actualizarMeta, listarMetas } from '../lib/endpoints'
+import { elegirMetaPrincipal } from '../lib/mappers'
+import { mensajeDeError } from '../lib/errores'
 
 const GOALS = [5, 10, 15, 20]
 
@@ -65,7 +68,6 @@ function SelectField({ id, name, value, onChange, options = [], placeholder }) {
 }
 
 export function GoalEstablishedScreen({
-  meta = 15,                 // años. TODO: vendrá del perfil del usuario
   totalEstimado = 1000000,   // TODO: vendrá del cálculo de proyección
   onCambiarMeta,
 }) {
@@ -74,17 +76,54 @@ export function GoalEstablishedScreen({
   const [nuevaMeta, setNuevaMeta] = useState(10)
   const [aceptaTerminos, setAceptaTerminos] = useState(false)
 
+  // Meta principal del usuario (GET /api/metas)
+  const [metaPrincipal, setMetaPrincipal] = useState(null)
+  const [cargando, setCargando] = useState(true)
+  const [guardando, setGuardando] = useState(false)
+  const [aviso, setAviso] = useState(null) // { tipo: 'ok' | 'error', texto }
+
+  useEffect(() => {
+    let cancelado = false
+    listarMetas()
+      .then((metas) => {
+        if (cancelado) return
+        const principal = elegirMetaPrincipal(metas)
+        setMetaPrincipal(principal)
+        if (principal?.anosAlRetiro) setNuevaMeta(principal.anosAlRetiro)
+      })
+      .catch((err) => {
+        if (!cancelado) setAviso({ tipo: 'error', texto: err?.message ? mensajeDeError(err, t) : t('metaEstablecida.errorCarga') })
+      })
+      .finally(() => { if (!cancelado) setCargando(false) })
+    return () => { cancelado = true }
+  }, [t])
+
+  const meta = metaPrincipal?.anosAlRetiro ?? null
+
   const goalOptions = GOALS.map((y) => ({
     value: y,
     label: t('metaEstablecida.anios', { count: y }),
   }))
 
-  const puedeCambiar = nuevaMeta !== '' && aceptaTerminos
+  const puedeCambiar = Boolean(metaPrincipal) && nuevaMeta !== '' && nuevaMeta !== meta
+    && aceptaTerminos && !guardando
 
-  const handleCambiarMeta = () => {
+  const handleCambiarMeta = async () => {
     if (!puedeCambiar) return
-    // TODO: enviar cambio de meta al backend
-    onCambiarMeta?.(nuevaMeta)
+    setGuardando(true)
+    setAviso(null)
+    try {
+      // PATCH /api/metas?id=… (el id va en la query, no en el path)
+      const actualizada = await actualizarMeta(metaPrincipal.id, { anosAlRetiro: Number(nuevaMeta) })
+      setMetaPrincipal(actualizada ?? { ...metaPrincipal, anosAlRetiro: Number(nuevaMeta) })
+      setAceptaTerminos(false)
+      setAviso({ tipo: 'ok', texto: t('metaEstablecida.exito') })
+      onCambiarMeta?.(nuevaMeta)
+    } catch (err) {
+      setAviso({ tipo: 'error', texto: err?.message ? mensajeDeError(err, t) : t('metaEstablecida.errorGuardar') })
+    } finally {
+      setGuardando(false)
+    }
   }
 
   return (
@@ -103,14 +142,14 @@ export function GoalEstablishedScreen({
                 className="font-display font-bold text-white tracking-tight leading-[1.05]"
                 style={{ fontSize: 'clamp(3rem,6vw,5rem)' }}
               >
-                <em className="text-brand not-italic block">{t('metaEstablecida.tituloParte1', 'Meta')}</em>
-                {t('metaEstablecida.tituloParte2', 'establecida')}
+                <em className="text-brand not-italic block">{t('metaEstablecida.tituloParte1')}</em>
+                {t('metaEstablecida.tituloParte2')}
               </h1>
 
               {/* Tarjeta cambiar meta */}
               <div className="lg:max-w-md w-full bg-card border border-white/10 rounded-2xl p-5 sm:p-6">
                 <label htmlFor="nuevaMeta" className="block text-sm font-semibold text-white mb-3">
-                  {t('metaEstablecida.cambiarMeta', 'Cambiar meta')}
+                  {t('metaEstablecida.cambiarMeta')}
                 </label>
                 <SelectField
                   id="nuevaMeta"
@@ -120,7 +159,7 @@ export function GoalEstablishedScreen({
                   options={goalOptions}
                 />
                 <p className="text-xs text-white/60 mt-3 leading-relaxed">
-                  {t('metaEstablecida.aviso', 'Recuerda que solo se puede cambiar la meta 1 vez al año*')}
+                  {t('metaEstablecida.aviso')}
                 </p>
                 <label className="flex items-center gap-3 mt-4 cursor-pointer select-none">
                   <input
@@ -137,9 +176,9 @@ export function GoalEstablishedScreen({
                     )}
                   </span>
                   <span className="text-xs text-white/70">
-                    {t('metaEstablecida.acepto', 'Acepto los')}{' '}
+                    {t('metaEstablecida.acepto')}{' '}
                     <a href="#" className="underline underline-offset-2 hover:text-white">
-                      {t('metaEstablecida.terminos', 'términos y condiciones de uso')}
+                      {t('metaEstablecida.terminos')}
                     </a>
                   </span>
                 </label>
@@ -152,22 +191,37 @@ export function GoalEstablishedScreen({
               {/* Tarjeta gráfica */}
               <div className="bg-card border border-white/10 rounded-3xl p-5 sm:p-8 flex flex-col">
                 <p className="text-sm text-white/50">
-                  {t('metaEstablecida.tuMeta', 'Tu meta es a:')}
+                  {t('metaEstablecida.tuMeta')}
                 </p>
                 <p className="font-display font-bold text-white tracking-tight mt-1" style={{ fontSize: 'clamp(2.5rem,5vw,4rem)' }}>
-                  {t('metaEstablecida.anios', { count: meta })}
+                  {cargando
+                    ? '…'
+                    : meta !== null
+                      ? t('metaEstablecida.anios', { count: meta })
+                      : t('metaEstablecida.sinMeta')}
                 </p>
                 <p className="text-sm text-white/60 mt-2">
-                  {t('metaEstablecida.totalFinal', 'Total estimado al final de la meta')}
+                  {t('metaEstablecida.totalFinal')}
                 </p>
                 <div className="flex-1 flex items-end my-4">
-                  <GrowthChart label={t('metaEstablecida.graficaLabel', 'Proyección de crecimiento de tu ahorro')} />
+                  <GrowthChart label={t('metaEstablecida.graficaLabel')} />
                 </div>
                 <p className="text-sm text-white/50">
-                  {t('metaEstablecida.totalEstimado', 'Total estimado:')}{' '}
+                  {t('metaEstablecida.totalEstimado')}{' '}
                   <span className="font-bold text-brand">{formatMXN(totalEstimado)} MXN</span>
                 </p>
               </div>
+
+              {aviso && (
+                <p
+                  role={aviso.tipo === 'error' ? 'alert' : 'status'}
+                  className={`text-sm text-center rounded-xl px-4 py-3 border ${aviso.tipo === 'error'
+                    ? 'bg-red-500/8 border-red-400/40 text-red-400'
+                    : 'bg-green-500/10 border-green-500/30 text-green-400'}`}
+                >
+                  {aviso.texto}
+                </p>
+              )}
 
               {/* Botón cambiar meta */}
               <button
@@ -176,7 +230,7 @@ export function GoalEstablishedScreen({
                 onClick={handleCambiarMeta}
                 className="w-full bg-brand hover:bg-brand-dark active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-xl transition-all shadow-lg shadow-brand/20 text-base cursor-pointer"
               >
-                {t('metaEstablecida.botonCambiar', 'Cambiar meta')}
+                {guardando ? t('metaEstablecida.guardando') : t('metaEstablecida.botonCambiar')}
               </button>
             </div>
 
