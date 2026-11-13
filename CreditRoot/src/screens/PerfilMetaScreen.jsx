@@ -8,17 +8,18 @@ import Footer from './components/Footer'
 
 // TODO: estos datos pueden venir del backend
 const YEARS = Array.from({ length: 100 }, (_, i) => String(new Date().getFullYear() - i))
-const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
 const DAYS = Array.from({ length: 31 }, (_, i) => String(i + 1))
-const GOALS = ['5 años', '10 años', '15 años', '20 años']
+// Años de la meta; el texto ("10 años" / "10 years") sale de metaEstablecida.anios
+const GOALS = [5, 10, 15, 20]
 
+// Los textos de cada campo están en i18n: perfilMeta.<name>
 const SEGMENT_FIELDS = [
-  { name: 'ocupacion', key: 'perfilMeta.ocupacion', fallback: 'Selecciona tu ocupación*', options: [] },
-  { name: 'estudios', key: 'perfilMeta.estudios', fallback: 'Selecciona tu último grado de estudios*', options: [] },
-  { name: 'ingreso', key: 'perfilMeta.ingreso', fallback: 'Selecciona tu ingreso mensual*', options: [] },
-  { name: 'genero', key: 'perfilMeta.genero', fallback: 'Selecciona tu género*', options: [] },
-  { name: 'estadoCivil', key: 'perfilMeta.estadoCivil', fallback: 'Selecciona tu estado civil*', options: [] },
-  { name: 'residencia', key: 'perfilMeta.residencia', fallback: 'Selecciona tu estado de residencia*', options: [] },
+  { name: 'ocupacion', options: [] },
+  { name: 'estudios', options: [] },
+  { name: 'ingreso', options: [] },
+  { name: 'genero', options: [] },
+  { name: 'estadoCivil', options: [] },
+  { name: 'residencia', options: [] },
 ]
 
 const INITIAL_FORM = {
@@ -31,7 +32,7 @@ const INITIAL_FORM = {
   genero: '',
   estadoCivil: '',
   residencia: '',
-  meta: '10 años',
+  meta: '10',
 }
 
 /*  Select reutilizable con flecha  */
@@ -46,9 +47,11 @@ function SelectField({ name, value, onChange, placeholder, options = [], ariaLab
         className="w-full appearance-none bg-[#1c1b1a] text-white text-sm border border-white/20 rounded-xl py-3 pl-4 pr-10 outline-none transition-colors focus:border-[#d96b00] focus:ring-2 focus:ring-[#d96b00]/40 cursor-pointer"
       >
         {placeholder && <option value="" disabled>{placeholder}</option>}
-        {options.map((opt) => (
-          <option key={opt} value={opt} className="bg-[#1c1b1a]">{opt}</option>
-        ))}
+        {options.map((opt) => {
+          // Acepta 'texto' o { value, label } (para opciones traducidas)
+          const { value: v, label } = typeof opt === 'object' ? opt : { value: opt, label: opt }
+          return <option key={v} value={v} className="bg-[#1c1b1a]">{label}</option>
+        })}
       </select>
       <svg
         className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-3 h-3 text-white"
@@ -67,6 +70,11 @@ export function PerfilMetaScreen({ onSubmit }) {
   const { t } = useTranslation()
   const [form, setForm] = useState(INITIAL_FORM)
 
+  // Opciones traducidas: el valor es el número (1-12 / años), el texto sale de i18n
+  const monthOptions = t('perfilMeta.meses', { returnObjects: true })
+    .map((label, i) => ({ value: String(i + 1), label }))
+  const goalOptions = GOALS.map((y) => ({ value: String(y), label: t('metaEstablecida.anios', { count: y }) }))
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
@@ -80,7 +88,7 @@ export function PerfilMetaScreen({ onSubmit }) {
 
   return (
     <div className="bg-bg min-h-screen flex flex-col overflow-x-hidden">
-      <LandingNavbar soloVolver onVolver={() => navigate('/verificacion-registro')} />
+      <LandingNavbar soloVolver onVolver={() => navigate('/datos-personales')} />
 
       <section className="flex-1 py-10 px-4 sm:px-6 lg:px-12">
       <div className="w-full max-w-6xl mx-auto">
@@ -90,11 +98,11 @@ export function PerfilMetaScreen({ onSubmit }) {
           <div className="hidden lg:flex flex-col justify-start items-start space-y-6 pt-2">
             <h1 className="font-display font-bold text-white tracking-tight leading-[1.05]"
               style={{ fontSize: 'clamp(3rem,6vw,5rem)' }}>
-              {t('perfilMeta.tituloParte1', 'Perfil y')}{' '}
-              <em className="text-brand not-italic">{t('perfilMeta.tituloParte2', 'meta')}</em>
+              {t('perfilMeta.tituloParte1')}{' '}
+              <em className="text-brand not-italic">{t('perfilMeta.tituloParte2')}</em>
             </h1>
             <p className="text-white/55 text-base leading-relaxed max-w-md">
-              {t('perfilMeta.descripcion', 'Cuéntanos algunas cosas sobre ti para poder personalizar tu cuenta')}
+              {t('perfilMeta.descripcion')}
             </p>
           </div>
 
@@ -111,45 +119,45 @@ export function PerfilMetaScreen({ onSubmit }) {
                 <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                 </svg>
-                <span>{t('perfilMeta.regresar', 'Regresar')}</span>
+                <span>{t('perfilMeta.regresar')}</span>
               </button>
 
               {/* Encabezado Móvil */}
               <div className="lg:hidden mb-6 text-left">
                 <h2 className="font-display font-bold text-white text-3xl tracking-tight mb-2">
-                  {t('perfilMeta.titulo', 'Perfil y meta')}
+                  {t('perfilMeta.titulo')}
                 </h2>
                 <p className="text-white/55 text-sm leading-relaxed">
-                  {t('perfilMeta.descripcion', 'Cuéntanos algunas cosas sobre ti para poder personalizar tu cuenta.')}
+                  {t('perfilMeta.descripcion')}
                 </p>
               </div>
 
               {/* Encabezado Escritorio */}
               <div className="hidden lg:block mb-8 text-center">
                 <h3 className="font-display font-bold text-2xl text-white">
-                  {t('perfilMeta.cardTitulo', 'Proyecta tu meta')}
+                  {t('perfilMeta.cardTitulo')}
                 </h3>
               </div>
 
               {/*Fecha de nacimiento */}
               <fieldset className="mb-3">
                 <legend className="text-sm font-semibold text-white mb-2">
-                  {t('perfilMeta.fechaNacimiento', 'Fecha de nacimiento')}
+                  {t('perfilMeta.fechaNacimiento')}
                 </legend>
                 <div className="grid grid-cols-[1fr_1.4fr_1fr] gap-2">
-                  <SelectField name="anio" value={form.anio} onChange={handleChange} placeholder={t('perfilMeta.anio', 'Año')} options={YEARS} />
-                  <SelectField name="mes" value={form.mes} onChange={handleChange} placeholder={t('perfilMeta.mes', 'Mes')} options={MONTHS} />
-                  <SelectField name="dia" value={form.dia} onChange={handleChange} placeholder={t('perfilMeta.dia', 'Día')} options={DAYS} />
+                  <SelectField name="anio" value={form.anio} onChange={handleChange} placeholder={t('perfilMeta.anio')} options={YEARS} />
+                  <SelectField name="mes" value={form.mes} onChange={handleChange} placeholder={t('perfilMeta.mes')} options={monthOptions} />
+                  <SelectField name="dia" value={form.dia} onChange={handleChange} placeholder={t('perfilMeta.dia')} options={DAYS} />
                 </div>
               </fieldset>
 
               {/* Actividades y segmentación */}
               <fieldset className="mb-3">
                 <legend className="text-sm font-semibold text-white">
-                  {t('perfilMeta.segmentacion', 'Actividades y segmentación')}
+                  {t('perfilMeta.segmentacion')}
                 </legend>
                 <p className="text-xs text-white/60 mb-2">
-                  {t('perfilMeta.segmentacionNota', 'Estos datos no afectan tu perfil.')}
+                  {t('perfilMeta.segmentacionNota')}
                 </p>
                 <div className="flex flex-col gap-2">
                   {SEGMENT_FIELDS.map((field) => (
@@ -158,7 +166,7 @@ export function PerfilMetaScreen({ onSubmit }) {
                       name={field.name}
                       value={form[field.name]}
                       onChange={handleChange}
-                      placeholder={t(field.key, field.fallback)}
+                      placeholder={t(`perfilMeta.${field.name}`)}
                       options={field.options}
                     />
                   ))}
@@ -168,14 +176,14 @@ export function PerfilMetaScreen({ onSubmit }) {
               {/* Elige tu meta */}
               <fieldset className="mb-4">
                 <legend className="text-sm font-semibold text-white mb-2">
-                  {t('perfilMeta.eligeMeta', 'Elige tu meta')}
+                  {t('perfilMeta.eligeMeta')}
                 </legend>
                 <SelectField
                   name="meta"
                   value={form.meta}
                   onChange={handleChange}
-                  options={GOALS}
-                  ariaLabel={t('perfilMeta.eligeMeta', 'Elige tu meta')}
+                  options={goalOptions}
+                  ariaLabel={t('perfilMeta.eligeMeta')}
                 />
               </fieldset>
 
@@ -186,15 +194,15 @@ export function PerfilMetaScreen({ onSubmit }) {
                 onClick={handleSubmit}
                 className="w-full bg-brand hover:bg-brand-dark active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-xl transition-all hover:-translate-y-px hover:shadow-lg hover:shadow-brand/30 mb-5 text-base cursor-pointer"
               >
-                {t('perfilMeta.continuar', 'Continuar')}
+                {t('perfilMeta.continuar')}
               </button>
 
               {/* Nota al pie */}
               <p className="text-center text-white/60 text-xs leading-relaxed max-w-xs mx-auto">
-                {t('perfilMeta.nota', 'Puedes revisar cómo tratamos y resguardamos tus datos conforme a lo establecido en la ley')}{' '}
+                {t('perfilMeta.nota')}{' '}
                 {/* TODO: ruta real del aviso de privacidad */}
                 <a href="#" className="underline underline-offset-2 hover:text-white">
-                  {t('perfilMeta.aqui', 'aquí')}
+                  {t('perfilMeta.aqui')}
                 </a>
               </p>
 

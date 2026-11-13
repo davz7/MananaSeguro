@@ -43,7 +43,8 @@ export function SettingsScreen({ usuario, onLogout, onAction }) {
       return
     }
     if (actionId === 'privacy') {
-      navigate('/change-password', { state: { from: '/settings' } })
+      // El acceso es con Google: la contraseña y la seguridad se gestionan allá.
+      window.open('https://myaccount.google.com/security', '_blank', 'noopener,noreferrer')
       return
     }
     if (actionId === 'about') {

@@ -5,26 +5,19 @@ import LandingNavbar from './components/LandingNavbar'
 import Footer from './components/Footer'
 
 // TODO: estos datos pueden venir del backend
+// Los textos viven en i18n: incentivos.<id>.titulo / descripcion / boton
 const INCENTIVES = [
   {
     id: 'fidelidad',
     titleKey: 'incentivos.fidelidad.titulo',
-    titleFallback: 'Incentivo por fidelidad.',
     descKey: 'incentivos.fidelidad.descripcion',
-    descFallback:
-      'Opción 1: Tu reto es con tu futuro. Todos los 12 meses del año aporta a tu cuenta un mínimo de 5 dólares. Con tu constancia, tu incentivo pasará de 5% a 7%.',
     buttonKey: 'incentivos.fidelidad.boton',
-    buttonFallback: 'Seleccionar opción 1',
   },
   {
     id: 'confianza',
     titleKey: 'incentivos.confianza.titulo',
-    titleFallback: 'Incentivo por confianza.',
     descKey: 'incentivos.confianza.descripcion',
-    descFallback:
-      'Opción 2: Tus seres queridos también necesitan un Mañana Seguro. Con unos cuantos clics haz que dos personas comiencen a ahorrar y pasa del 5% al 7% de incentivos.',
     buttonKey: 'incentivos.confianza.boton',
-    buttonFallback: 'Seleccionar opción 2',
   },
 ]
 
@@ -90,17 +83,17 @@ export function IncentivesScreen({ initialSelected = null, onSelect }) {
                 className="font-display font-bold text-white tracking-tight leading-[1.05]"
                 style={{ fontSize: 'clamp(3rem,6vw,5rem)' }}
               >
-                {t('incentivos.tituloParte1', 'Programa de')}{' '}
-                <em className="text-brand not-italic block">{t('incentivos.tituloParte2', 'incentivos')}.</em>
+                {t('incentivos.tituloParte1')}{' '}
+                <em className="text-brand not-italic block">{t('incentivos.tituloParte2')}.</em>
               </h1>
 
               {/* Subtítulo + descripción */}
               <div>
                 <p className="border-l-2 border-white/40 pl-3 text-lg sm:text-xl font-medium leading-snug mb-3 max-w-md">
-                  {t('incentivos.subtitulo', 'Recibe una parte de todo tu esfuerzo.')}
+                  {t('incentivos.subtitulo')}
                 </p>
                 <p className="text-sm text-white/60 leading-relaxed max-w-md">
-                  {t('incentivos.descripcion', 'Mañana Seguro te recompensa con un 5% de tu esfuerzo. Porque ahorrar no tiene que ser aburrido, cada 5 años te damos ese empujón que necesitas.')}
+                  {t('incentivos.descripcion')}
                 </p>
               </div>
             </div>
@@ -110,11 +103,11 @@ export function IncentivesScreen({ initialSelected = null, onSelect }) {
               {INCENTIVES.map((incentive) => (
                 <IncentiveCard
                   key={incentive.id}
-                  title={t(incentive.titleKey, incentive.titleFallback)}
-                  description={t(incentive.descKey, incentive.descFallback)}
-                  buttonLabel={t(incentive.buttonKey, incentive.buttonFallback)}
-                  selectedLabel={t('incentivos.seleccionada', 'Opción seleccionada')}
-                  note={t('incentivos.nota', 'Una vez seleccionada, tendrás solo 1 mes para modificar la selección. Pasado ese tiempo no se podrá hacer ningún cambio.')}
+                  title={t(incentive.titleKey)}
+                  description={t(incentive.descKey)}
+                  buttonLabel={t(incentive.buttonKey)}
+                  selectedLabel={t('incentivos.seleccionada')}
+                  note={t('incentivos.nota')}
                   isSelected={selected === incentive.id}
                   onSelect={() => handleSelect(incentive.id)}
                 />

@@ -1,6 +1,11 @@
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowUpRight, ArrowDownLeft, ExternalLink, Flame } from 'lucide-react'
+import { ArrowUpRight, ArrowDownLeft, ExternalLink, Flame, ShieldCheck } from 'lucide-react'
+import { useKyc } from '../hooks/useKyc'
+import { mensajeDeError } from '../lib/errores'
+import { useMetaPrincipal } from '../hooks/useMetaPrincipal'
+import { useEtherfuseRate } from '../hooks/useEtherfuseRate'
 import { BrandLogo } from '../components/ui/BrandLogo'
 import Footer from './components/Footer'
 import LandingNavbar from './components/LandingNavbar'
@@ -60,15 +65,79 @@ function PromoCard({ children, onKnowMore }) {
   )
 }
 
+// Banner de verificación de identidad (KYC con Etherfuse).
+//  - Al volver de Etherfuse llega con ?kyc=done (ver ruta /dashboard en AppShell):
+//    se consulta el estado y se informa si quedó aprobado o sigue en revisión.
+//  - Si el KYC no está aprobado, invita a verificarse (sin KYC no hay depósitos).
+function KycBanner({ usuario, onUsuarioActualizado }) {
+  const { t } = useTranslation()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const volvioDeKyc = searchParams.get('kyc') === 'done'
+  const [resultado, setResultado] = useState(null) // 'aprobado' | 'revision' | null
+  const kyc = useKyc({ onAprobado: onUsuarioActualizado })
+  const { verificar } = kyc
+  const yaConsultado = useRef(false)
+
+  useEffect(() => {
+    if (!volvioDeKyc || yaConsultado.current) return
+    yaConsultado.current = true
+    verificar().then(({ aprobado, error }) => {
+      if (!error) setResultado(aprobado ? 'aprobado' : 'revision')
+      setSearchParams({}, { replace: true })
+    })
+  }, [volvioDeKyc, verificar, setSearchParams])
+
+  const aprobado = usuario?.kycStatus === 'approved'
+
+  if (resultado === 'aprobado') {
+    return (
+      <div className="mb-3 bg-green-500/10 border border-green-500/30 text-green-400 text-sm rounded-xl px-4 py-3" role="status">
+        ✓ {t('mainScreen.kycApproved')}
+      </div>
+    )
+  }
+  if (volvioDeKyc && kyc.cargando) {
+    return (
+      <div className="mb-3 bg-white/5 border border-white/10 text-white/70 text-sm rounded-xl px-4 py-3" role="status">
+        {t('mainScreen.kycChecking')}
+      </div>
+    )
+  }
+  if (aprobado) return null
+
+  return (
+    <div className="mb-3 bg-yellow-500/10 border border-yellow-500/30 rounded-xl px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
+      <p className="flex-1 text-yellow-200 text-sm flex items-start gap-2">
+        <ShieldCheck size={16} className="shrink-0 mt-0.5" aria-hidden="true" />
+        {resultado === 'revision' ? t('mainScreen.kycInReview') : t('mainScreen.kycPending')}
+      </p>
+      <button
+        type="button"
+        onClick={kyc.iniciar}
+        disabled={kyc.cargando}
+        className="self-start sm:self-auto bg-brand hover:bg-brand-dark disabled:opacity-60 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-all cursor-pointer"
+      >
+        {kyc.cargando ? t('mainScreen.kycLoading') : t('mainScreen.kycCta')}
+      </button>
+      {kyc.error && <p className="text-red-400 text-xs" role="alert">{mensajeDeError(kyc.error, t)}</p>}
+    </div>
+  )
+}
+
 // ── MainScreen ───────────────────────────────────────────────────────────────
 
-export function MainScreen({ usuario }) {
+export function MainScreen({ usuario, onUsuarioActualizado }) {
   const navigate = useNavigate()
   const { t } = useTranslation()
+
+  // Datos reales: tasa (GET /api/cetes-rate) y meta principal (GET /api/metas)
+  const { userRate, loading: cargandoTasa } = useEtherfuseRate()
+  const { meta, cargando: cargandoMeta } = useMetaPrincipal()
+
+  // TODO(back): saldo, meses activos e historial necesitan GET /api/cuenta y
+  // GET /api/movimientos, que todavía no existen.
   const u = {
     saldoMXN: 0,
-    tasaCetes: 0,
-    metaAnios: 10,
     totalEstimadoMXN: 0,
     mesesActivo: 0,
     historial: [],
@@ -80,6 +149,8 @@ export function MainScreen({ usuario }) {
       <LandingNavbar appMode />
 
       <div className="container mx-auto px-4 py-5 max-w-5xl">
+
+        <KycBanner usuario={usuario} onUsuarioActualizado={onUsuarioActualizado} />
 
         {/* Fila 1: Hero + Balance */}
         <div className="grid lg:grid-cols-2 gap-3 mb-3">
@@ -110,7 +181,8 @@ export function MainScreen({ usuario }) {
               {mxnFmtInt.format(u.saldoMXN)}
             </p>
             <p className="text-white/50 text-xs">
-              {t('mainScreen.cetesAsset')} <span className="text-brand font-semibold">{u.tasaCetes}%</span>
+              {t('mainScreen.cetesAsset')}{' '}
+              <span className="text-brand font-semibold">{cargandoTasa ? '…' : `${userRate}%`}</span>
             </p>
             <div className="grid grid-cols-2 gap-2 mt-1">
               <button
@@ -135,7 +207,11 @@ export function MainScreen({ usuario }) {
             {/* Meta */}
             <div className={`${cardCls} p-4 flex flex-col gap-2`}>
               <p className="text-white/70 text-base font-medium">
-                {t('mainScreen.goalPrefix')} <span className="text-white font-bold">{t('mainScreen.goalYears', { years: u.metaAnios })}</span>
+                {cargandoMeta
+                  ? <span className="text-white/40">…</span>
+                  : meta?.anosAlRetiro
+                    ? <>{t('mainScreen.goalPrefix')} <span className="text-white font-bold">{t('mainScreen.goalYears', { years: meta.anosAlRetiro })}</span></>
+                    : <span className="text-white/60">{t('mainScreen.goalNone')}</span>}
               </p>
               <svg viewBox="0 0 120 44" className="w-full h-10" preserveAspectRatio="none">
                 <defs>

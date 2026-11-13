@@ -1,15 +1,13 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
-import { TriangleAlert } from 'lucide-react'
 import Footer from './components/Footer'
 import LandingNavbar from './components/LandingNavbar'
+import { GoogleSignInButton } from './components/GoogleSignInButton'
 import ardilla from '../assets/Ardilla_vector.png'
 
-export function AuthScreen({ onVolver, onIrADatosPersonales }) {
+// Registro. El alta se hace con Google: /api/auth/google crea el usuario
+// (y su wallet custodial) la primera vez y responde esNuevo=true.
+export function AuthScreen({ onVolver, onAuth, onLogin }) {
   const { t } = useTranslation()
-  const navigate = useNavigate()
-  const [error] = useState(null)
 
   return (
     <div className="bg-[#0f0e0d] min-h-screen overflow-x-hidden">
@@ -50,23 +48,15 @@ export function AuthScreen({ onVolver, onIrADatosPersonales }) {
                   className="h-44 object-contain float-squirrel"
                 />
 
-                {error && (
-                  <div className="w-full bg-red-500/8 border border-dashed border-red-400/40 text-red-500 text-sm text-center px-4 py-3 rounded-xl" role="alert">
-                    <TriangleAlert size={16} className="inline shrink-0" aria-hidden="true" /> {error}
-                  </div>
-                )}
-
-                <button
-                  className="w-full bg-brand hover:bg-brand-dark text-white font-semibold py-4 rounded-xl transition-all hover:-translate-y-px hover:shadow-lg hover:shadow-brand/30 cursor-pointer text-base"
-                  onClick={onIrADatosPersonales}
-                >
-                  {t('authScreen.createWithEmail')}
-                </button>
+                <div className="w-full">
+                  <GoogleSignInButton onAuth={onAuth} />
+                </div>
 
                 <p className="text-sm text-white/45">
                   {t('calc.yaTienesCuenta')}{' '}
                   <button
-                    onClick={() => navigate('/signin-registro')}
+                    type="button"
+                    onClick={onLogin}
                     className="text-white font-semibold underline underline-offset-2 hover:text-brand transition-colors cursor-pointer"
                   >
                     {t('calc.iniciarSesion')}

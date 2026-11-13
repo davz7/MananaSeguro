@@ -9,10 +9,16 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TriangleAlert } from 'lucide-react'
 import { guardarSesion } from '../../lib/api'
+import { autenticarConGoogle } from '../../lib/endpoints'
+import { config } from '../../config'
+import { mensajeDeError } from '../../lib/errores'
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
+const GOOGLE_CLIENT_ID = config.googleClientId
 const GSI_SRC = 'https://accounts.google.com/gsi/client'
 
+/**
+ * @param {{ onAuth: (usuario: object, info: { esNuevo: boolean }) => void }} props
+ */
 export function GoogleSignInButton({ onAuth }) {
   const { t } = useTranslation()
   const contenedorRef = useRef(null)
@@ -28,17 +34,12 @@ export function GoogleSignInButton({ onAuth }) {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/auth/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken: response.credential }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || t('auth.errorLogin'))
+      const data = await autenticarConGoogle(response.credential)
+      if (!data?.sesion?.token || !data?.usuario) throw new Error(t('auth.errorLogin'))
       guardarSesion(data.sesion)
-      onAuth(data.usuario)
+      onAuth(data.usuario, { esNuevo: Boolean(data.esNuevo) })
     } catch (err) {
-      setError(err.message || t('auth.errorLoginReintentar'))
+      setError(mensajeDeError(err, t))
       setLoading(false)
     }
   }, [onAuth, t])

@@ -39,7 +39,7 @@ export function LandingScreen({ onLogin, onRegister }) {
             <div className="flex items-center gap-4 mb-6">
               <BrandLogo size="lg" />
               <div>
-                <p className="text-white/60 text-sm font-medium leading-tight">Somos</p>
+                <p className="text-white/60 text-sm font-medium leading-tight">{t('mainScreen.weAre')}</p>
                 <p className="text-white font-display font-black text-xl leading-tight">MañanaSeguro.</p>
               </div>
             </div>

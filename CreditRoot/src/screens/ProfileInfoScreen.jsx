@@ -7,7 +7,8 @@ import Footer from './components/Footer'
 
 // TODO: reemplazar por catálogos reales (API / constantes)
 const BANKS = ['BBVA', 'Santander', 'Banorte', 'Citibanamex', 'HSBC', 'Scotiabank']
-const RELATIONSHIPS = ['Madre biológica', 'Padre biológico', 'Cónyuge', 'Hijo(a)', 'Hermano(a)', 'Otro']
+// Códigos de parentesco; el texto sale de i18n (dataAccount.relations.*), igual que en Datos de cuenta
+const RELATIONSHIPS = ['mother', 'father', 'spouse', 'child', 'sibling', 'other']
 
 const INITIAL_FORM = {
   foto: null,
@@ -64,9 +65,11 @@ function SelectField({ label, name, value, onChange, options = [] }) {
         className={`${inputBase} appearance-none pr-10 cursor-pointer ${value ? '' : 'text-white/50'}`}
       >
         <option value="" disabled>{label}</option>
-        {options.map((opt) => (
-          <option key={opt} value={opt} className="bg-[#1c1b1a] text-white">{opt}</option>
-        ))}
+        {options.map((opt) => {
+          // Acepta 'texto' o { value, label } (para opciones traducidas)
+          const { value: v, label: texto } = typeof opt === 'object' ? opt : { value: opt, label: opt }
+          return <option key={v} value={v} className="bg-[#1c1b1a] text-white">{texto}</option>
+        })}
       </select>
       <svg
         className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-3 h-3 text-white"
@@ -143,23 +146,23 @@ export function ProfileInfoScreen({ initialData = {}, onSubmit }) {
                 <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                 </svg>
-                <span>{t('perfilInfo.regresar', 'Regresar')}</span>
+                <span>{t('perfilInfo.regresar')}</span>
               </button>
 
               <h1
                 className="font-display font-bold text-white tracking-tight leading-[1.05]"
                 style={{ fontSize: 'clamp(3rem,6vw,5rem)' }}
               >
-                {t('perfilInfo.tituloParte1', 'Información')} {t('perfilInfo.tituloParte2', 'de tu')}{' '}
-                <em className="text-brand not-italic">{t('perfilInfo.tituloParte3', 'perfil')}</em>
+                {t('perfilInfo.tituloParte1')} {t('perfilInfo.tituloParte2')}{' '}
+                <em className="text-brand not-italic">{t('perfilInfo.tituloParte3')}</em>
               </h1>
 
               <div>
                 <p className="border-l-4 border-brand pl-3 text-lg font-medium leading-snug mb-3 text-white">
-                  {t('perfilInfo.subtitulo', 'Tus datos, seguros')}
+                  {t('perfilInfo.subtitulo')}
                 </p>
                 <p className="text-white/55 text-base leading-relaxed max-w-md">
-                  {t('perfilInfo.descripcion', 'Toda la información que compartes está protegida bajo los más altos estándares de seguridad.')}
+                  {t('perfilInfo.descripcion')}
                 </p>
               </div>
 
@@ -175,17 +178,17 @@ export function ProfileInfoScreen({ initialData = {}, onSubmit }) {
             >
 
               {/* ---------- Foto de perfil ---------- */}
-              <FormSection title={t('perfilInfo.foto', 'Foto de perfil')}>
+              <FormSection title={t('perfilInfo.foto')}>
                 <div className="flex items-center justify-between gap-4">
                   <label className="flex-1 cursor-pointer">
                     <input type="file" accept="image/*" onChange={handleFile} className="peer sr-only" />
                     <span className="block w-full text-sm text-white/80 border border-white/20 rounded-xl py-3 px-4 transition-colors hover:border-white/40 peer-focus-visible:border-[#d96b00] peer-focus-visible:ring-2 peer-focus-visible:ring-[#d96b00]/40 truncate">
-                      {form.foto?.name || t('perfilInfo.seleccionarArchivo', 'Seleccionar archivo')}
+                      {form.foto?.name || t('perfilInfo.seleccionarArchivo')}
                     </span>
                   </label>
                   <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-[#1c1b1a] border border-white/10 shrink-0 flex items-center justify-center">
                     {fotoPreview ? (
-                      <img src={fotoPreview} alt={t('perfilInfo.fotoAlt', 'Vista previa de tu foto')} className="w-full h-full object-cover" />
+                      <img src={fotoPreview} alt={t('perfilInfo.fotoAlt')} className="w-full h-full object-cover" />
                     ) : (
                       <svg className="w-8 h-8 text-white/30" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5Z" />
@@ -196,17 +199,17 @@ export function ProfileInfoScreen({ initialData = {}, onSubmit }) {
               </FormSection>
 
               {/* ---------- Nombre completo ---------- */}
-              <FormSection title={t('perfilInfo.nombreCompleto', 'Nombre completo')}>
-                <TextField name="nombre" value={form.nombre} onChange={handleChange} autoComplete="given-name" label={t('perfilInfo.nombre', 'Nombre(s)*')} />
-                <TextField name="apellidoPaterno" value={form.apellidoPaterno} onChange={handleChange} autoComplete="family-name" label={t('perfilInfo.apellidoPaterno', 'Apellido paterno*')} />
-                <TextField name="apellidoMaterno" value={form.apellidoMaterno} onChange={handleChange} label={t('perfilInfo.apellidoMaterno', 'Apellido materno*')} />
+              <FormSection title={t('perfilInfo.nombreCompleto')}>
+                <TextField name="nombre" value={form.nombre} onChange={handleChange} autoComplete="given-name" label={t('perfilInfo.nombre')} />
+                <TextField name="apellidoPaterno" value={form.apellidoPaterno} onChange={handleChange} autoComplete="family-name" label={t('perfilInfo.apellidoPaterno')} />
+                <TextField name="apellidoMaterno" value={form.apellidoMaterno} onChange={handleChange} label={t('perfilInfo.apellidoMaterno')} />
               </FormSection>
 
               {/* ---------- Crear acceso ---------- */}
-              <FormSection title={t('perfilInfo.crearAcceso', 'Crear acceso')}>
-                <PhoneField name="telefono" value={form.telefono} onChange={handleChange} label={t('perfilInfo.telefono', 'Número de teléfono*')} />
-                <TextField type="email" name="correo" value={form.correo} onChange={handleChange} autoComplete="email" label={t('perfilInfo.correo', 'Correo electrónico*')} />
-                <TextField type="password" name="contrasena" value={form.contrasena} onChange={handleChange} autoComplete="new-password" label={t('perfilInfo.contrasena', 'Contraseña*')} />
+              <FormSection title={t('perfilInfo.crearAcceso')}>
+                <PhoneField name="telefono" value={form.telefono} onChange={handleChange} label={t('perfilInfo.telefono')} />
+                <TextField type="email" name="correo" value={form.correo} onChange={handleChange} autoComplete="email" label={t('perfilInfo.correo')} />
+                <TextField type="password" name="contrasena" value={form.contrasena} onChange={handleChange} autoComplete="new-password" label={t('perfilInfo.contrasena')} />
                 <TextField
                   type="password"
                   name="confirmarContrasena"
@@ -214,27 +217,27 @@ export function ProfileInfoScreen({ initialData = {}, onSubmit }) {
                   onChange={handleChange}
                   autoComplete="new-password"
                   aria-invalid={passwordsMismatch}
-                  label={t('perfilInfo.confirmarContrasena', 'Valida tu contraseña*')}
+                  label={t('perfilInfo.confirmarContrasena')}
                 />
                 {passwordsMismatch && (
                   <p className="text-xs text-red-400" role="alert">
-                    {t('perfilInfo.errorContrasena', 'Las contraseñas no coinciden.')}
+                    {t('perfilInfo.errorContrasena')}
                   </p>
                 )}
               </FormSection>
 
               {/* ---------- Datos bancarios ---------- */}
-              <FormSection title={t('perfilInfo.datosBancarios', 'Datos bancarios')}>
-                <TextField name="titular" value={form.titular} onChange={handleChange} autoComplete="cc-name" label={t('perfilInfo.titular', 'Nombre del titular*')} />
-                <SelectField name="banco" value={form.banco} onChange={handleChange} options={BANKS} label={t('perfilInfo.banco', 'Selecciona tu banco*')} />
-                <TextField name="cuenta" value={form.cuenta} onChange={handleChange} inputMode="numeric" autoComplete="off" label={t('perfilInfo.cuenta', 'Número de tarjeta o CLABE*')} />
+              <FormSection title={t('perfilInfo.datosBancarios')}>
+                <TextField name="titular" value={form.titular} onChange={handleChange} autoComplete="cc-name" label={t('perfilInfo.titular')} />
+                <SelectField name="banco" value={form.banco} onChange={handleChange} options={BANKS} label={t('perfilInfo.banco')} />
+                <TextField name="cuenta" value={form.cuenta} onChange={handleChange} inputMode="numeric" autoComplete="off" label={t('perfilInfo.cuenta')} />
               </FormSection>
 
               {/* ---------- Beneficiario principal ---------- */}
-              <FormSection title={t('perfilInfo.beneficiario', 'Beneficiario principal')}>
-                <TextField name="beneficiarioNombre" value={form.beneficiarioNombre} onChange={handleChange} label={t('perfilInfo.beneficiarioNombre', 'Nombre completo del beneficiario*')} />
-                <SelectField name="beneficiarioParentesco" value={form.beneficiarioParentesco} onChange={handleChange} options={RELATIONSHIPS} label={t('perfilInfo.parentesco', 'Parentesco*')} />
-                <PhoneField name="beneficiarioTelefono" value={form.beneficiarioTelefono} onChange={handleChange} label={t('perfilInfo.beneficiarioTelefono', 'Teléfono del beneficiario*')} />
+              <FormSection title={t('perfilInfo.beneficiario')}>
+                <TextField name="beneficiarioNombre" value={form.beneficiarioNombre} onChange={handleChange} label={t('perfilInfo.beneficiarioNombre')} />
+                <SelectField name="beneficiarioParentesco" value={form.beneficiarioParentesco} onChange={handleChange} options={RELATIONSHIPS.map((r) => ({ value: r, label: t(`dataAccount.relations.${r}`) }))} label={t('perfilInfo.parentesco')} />
+                <PhoneField name="beneficiarioTelefono" value={form.beneficiarioTelefono} onChange={handleChange} label={t('perfilInfo.beneficiarioTelefono')} />
               </FormSection>
 
               {/* Botón principal */}
@@ -243,7 +246,7 @@ export function ProfileInfoScreen({ initialData = {}, onSubmit }) {
                 disabled={passwordsMismatch}
                 className="w-full bg-[#d96b00] hover:bg-[#c45f00] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 text-white font-semibold py-4 px-6 rounded-xl transition-all shadow-lg shadow-[#d96b00]/20 text-base cursor-pointer"
               >
-                {t('perfilInfo.cambiar', 'Cambiar')}
+                {t('perfilInfo.cambiar')}
               </button>
             </form>
 

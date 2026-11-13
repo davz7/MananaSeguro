@@ -57,7 +57,7 @@ function LandingNavbar({ onVolver, soloVolver, appMode }) {
                         <button
                             onClick={() => navigate('/settings')}
                             className="w-8 h-8 rounded-full flex items-center justify-center border border-white/20 text-white/70 hover:text-white hover:border-white/40 transition-all cursor-pointer"
-                            aria-label="Perfil"
+                            aria-label={t('nav.perfil')}
                         >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                                 <circle cx="12" cy="8" r="4" />
