@@ -4,6 +4,8 @@
 //   SESSION_SIGNING_KEY   → clave de firma de los tokens de sesión
 //   KMS_CUSTODY_KEY_ID    → alias o ARN de la CMK de custodia
 //   AWS_REGION            → región de la CMK (us-east-1)
+//   GOOGLE_CLIENT_ID      → client ID web de Google. Obligatoria: sin ella
+//                           el login se rechaza (falla cerrada)
 //
 // La llave global WALLET_ENCRYPTION_KEY quedó retirada: cada usuario tiene
 // ahora su propia data key bajo la CMK de KMS. Ver _lib/custody.js.
@@ -13,6 +15,7 @@ import { randomUUID } from 'crypto'
 import { createLogger, errorBody } from './_lib/logger.js'
 import { createCustodialAccount } from './_lib/custody.js'
 import { issueSession } from './_lib/session.js'
+import { verificarTokenGoogle, GoogleConfigError } from './_lib/googleToken.js'
 
 //  Constantes 
 
@@ -23,7 +26,6 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
-const GOOGLE_CERTS_URL = 'https://www.googleapis.com/oauth2/v3/certs'
 const STELLAR_NETWORK = 'TESTNET' // cambiar a 'PUBLIC' para mainnet
 
 //  Custodia de llaves 
@@ -32,49 +34,10 @@ const STELLAR_NETWORK = 'TESTNET' // cambiar a 'PUBLIC' para mainnet
 // AWS KMS con envelope encryption. Esta función ya no manipula material
 // de llave: recibe columnas listas para persistir.
 
-//  Helper: verificar token de Google 
-
-/**
- * Verifica el ID token de Google usando su endpoint de tokeninfo.
- * En producción considera usar google-auth-library para verificación local.
- * Retorna el payload del token si es válido, lanza error si no.
- */
-async function verificarTokenGoogle(idToken) {
-  const res = await fetch(
-    `https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`,
-    { method: 'GET' }
-  )
-
-  if (!res.ok) {
-    throw new Error(`Token de Google inválido: HTTP ${res.status}`)
-  }
-
-  const payload = await res.json()
-
-  // Validar que el token no haya expirado
-  const ahora = Math.floor(Date.now() / 1000)
-  if (payload.exp && parseInt(payload.exp) < ahora) {
-    throw new Error('Token de Google expirado')
-  }
-
-  // Validar audience — el token debe ser para NUESTRA app, no otra
-  // ISO 25010 Seguridad: previene ataques de confused deputy
-  const clientId = process.env.GOOGLE_CLIENT_ID
-  if (clientId && payload.aud !== clientId) {
-    throw new Error('Token de Google no corresponde a esta aplicación')
-  }
-
-  // Validar que tenga email verificado
-  if (!payload.email || payload.email_verified !== 'true') {
-    throw new Error('Email de Google no verificado')
-  }
-
-  return {
-    email: payload.email,
-    nombre: payload.name || payload.given_name || payload.email.split('@')[0],
-    googleId: payload.sub,
-  }
-}
+//  Verificación del token de Google
+//
+// Vive en _lib/googleToken.js, donde todas las comprobaciones fallan
+// cerradas (audiencia, emisor, expiración, email verificado).
 
 //  Handler principal ──
 
@@ -116,6 +79,17 @@ export async function handler(event) {
     }
   }
 
+  if (!process.env.GOOGLE_CLIENT_ID?.trim()) {
+    // Sin client ID no hay forma de validar la audiencia del token. Antes se
+    // saltaba la comprobación; ahora se rechaza todo el login.
+    log.error('GOOGLE_CLIENT_ID no configurada')
+    return {
+      statusCode: 500,
+      headers: CORS_HEADERS,
+      body: errorBody(log, 'Error de configuración del servidor'),
+    }
+  }
+
   if (!process.env.SESSION_SIGNING_KEY) {
     log.error('SESSION_SIGNING_KEY no configurada')
     return {
@@ -144,6 +118,14 @@ export async function handler(event) {
   try {
     usuarioGoogle = await verificarTokenGoogle(idToken)
   } catch (err) {
+    if (err instanceof GoogleConfigError) {
+      log.error('Configuración de Google inválida', { detail: err.message })
+      return {
+        statusCode: 500,
+        headers: CORS_HEADERS,
+        body: errorBody(log, 'Error de configuración del servidor'),
+      }
+    }
     log.warn('Token inválido', { detail: err.message })
     return {
       statusCode: 401,
