@@ -457,3 +457,65 @@ fn test_meta_defecto_diez_veces_primer_deposito() {
     let meta = cliente.ver_meta(&usuario);
     assert_eq!(meta, primer_deposito * 10);
 }
+
+// ─── Inicialización única ─────────────────────────────────────────────────────
+
+#[test]
+fn test_inicializar_dos_veces_falla() {
+    let (env, cliente, admin, usuario, usdc) = setup();
+    let usdc_client = token::Client::new(&env, &usdc);
+
+    cliente.depositar(&usuario, &100_000_000i128, &1);
+
+    // Un tercero intenta reemplazar admin y token.
+    let atacante = Address::generate(&env);
+    let token_falso = env
+        .register_stellar_asset_contract_v2(atacante.clone())
+        .address();
+    let r = cliente.try_inicializar(&atacante, &token_falso);
+    assert_eq!(r, Err(Ok(Error::YaInicializado)));
+
+    // El contrato sigue con el admin y el token originales: el usuario
+    // retira sus USDC y la comisión llega al admin real.
+    env.ledger().with_mut(|l| l.timestamp += 366 * 24 * 3600);
+    cliente.retirar(&usuario);
+
+    assert_eq!(usdc_client.balance(&cliente.address), 0);
+    assert_eq!(usdc_client.balance(&admin), 1_000_000); // 1 % de 10 USDC
+    assert_eq!(usdc_client.balance(&atacante), 0);
+}
+
+#[test]
+fn test_inicializar_dos_veces_falla_aun_con_el_mismo_admin() {
+    let (_env, cliente, admin, _usuario, usdc) = setup();
+    assert_eq!(
+        cliente.try_inicializar(&admin, &usdc),
+        Err(Ok(Error::YaInicializado))
+    );
+}
+
+// ─── TTL ──────────────────────────────────────────────────────────────────────
+
+#[test]
+fn test_depositar_extiende_ttl() {
+    use soroban_sdk::testutils::storage::{Instance as _, Persistent as _};
+
+    let (env, cliente, _admin, usuario, _usdc) = setup();
+    cliente.depositar(&usuario, &100_000_000i128, &20);
+
+    let (ttl_instancia, ttl_balance, ttl_retiro) = env.as_contract(&cliente.address, || {
+        (
+            env.storage().instance().get_ttl(),
+            env.storage()
+                .persistent()
+                .get_ttl(&DataKey::Balance(usuario.clone())),
+            env.storage()
+                .persistent()
+                .get_ttl(&DataKey::RetiroFecha(usuario.clone())),
+        )
+    });
+
+    assert!(ttl_instancia >= TTL_UMBRAL, "instancia: {}", ttl_instancia);
+    assert!(ttl_balance >= TTL_UMBRAL, "balance: {}", ttl_balance);
+    assert!(ttl_retiro >= TTL_UMBRAL, "retiro: {}", ttl_retiro);
+}
