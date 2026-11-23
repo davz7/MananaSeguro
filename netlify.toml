@@ -69,6 +69,11 @@ functions.ignore = ["**/*.test.js", "**/*.spec.js"]
   to = "/.netlify/functions/sign-intent"
   status = 200
 
+[[redirects]]
+  from = "/api/cuenta/preparar"
+  to = "/.netlify/functions/cuenta-preparar"
+  status = 200
+
 #  SPA fallback — debe ir al final siempre
 [[redirects]]
   from = "/*"

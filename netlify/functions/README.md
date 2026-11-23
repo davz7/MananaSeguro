@@ -169,6 +169,41 @@ On failure, returns fallback data:
 
 ---
 
+### cuenta-preparar
+
+Prepara la cuenta testnet del usuario de la sesión para que pueda depositar en el contrato (T03).
+
+**Endpoint**: `POST /api/cuenta/preparar` · **Sesión**: sí · **Cuerpo**: ninguno
+
+Pasos, todos reanudables:
+
+1. Crea la cuenta con XLM (Friendbot) si no existe.
+2. Crea la trustline a USDC de Circle, firmada con la llave custodial del usuario.
+3. Envía 5 USDC desde la cuenta tesorera (`cuentas_sistema`, id `tesoreria-testnet`).
+
+**Controles**:
+
+- Solo opera en testnet. Sin `STELLAR_NETWORK_PASSPHRASE` igual a la de testnet, o si Horizon o el RPC responden con otra red, se niega **antes** de descifrar cualquier llave.
+- Una sola vez por usuario y con monto fijo: `fondeos_testnet` tiene al usuario como clave primaria. Llamarlo de nuevo tras éxito devuelve el mismo resultado con `replayed: true`.
+- El pago se firma y se guarda (hash y XDR) antes de enviarse. Un reintento verifica ese hash en la red y, si no ha vencido, reenvía el mismo sobre. Nunca arma un segundo pago mientras el primero pueda entrar.
+- Si la tesorería no tiene al menos 5 USDC, responde `TREASURY_LOW` sin firmar nada. Por debajo de 25 USDC se registra un aviso.
+
+**Respuesta 200**:
+
+```json
+{ "ok": true, "cuenta": "G...", "montoUsdc": "5", "trustlineHash": "...", "pagoHash": "..." }
+```
+
+**Errores** (`code`): `IN_PROGRESS` 409 · `ACCOUNT_NOT_FOUND` 404 · `ACCOUNT_DEACTIVATED` / `KEY_DESTROYED` 403 · `NETWORK_NOT_TESTNET` / `TREASURY_NOT_CONFIGURED` / `TREASURY_LOW` 503 · `SUBMISSION_FAILED` 502 · `TIMEOUT` 504 · `INTERNAL` 500. Los tres 503 muestran el mismo mensaje al usuario.
+
+**Puesta en marcha (una vez)**:
+
+1. Correr `supabase/migrations/20261122_t03_cuentas_sistema_y_fondeos.sql` en el editor SQL de Supabase.
+2. Definir `STELLAR_NETWORK_PASSPHRASE=Test SDF Network ; September 2015` en Netlify. Es obligatoria aunque `soroban.js` use testnet por defecto.
+3. `node scripts/crear-tesoreria.mjs`: genera la llave con KMS (contexto `{ userId: 'tesoreria-testnet' }`), la guarda, la fondea con XLM y crea la trustline. No sobrescribe una tesorería existente.
+4. Mandar USDC de testnet a la dirección que imprime, desde el faucet de Circle.
+5. `node scripts/ver-tesoreria.mjs` para ver saldo y cuántos fondeos alcanza.
+
 ### etherfuse-deposit
 
 Creates a deposit order in Etherfuse, generates a unique CLABE for SPEI transfer, and saves the order to Supabase. Requires approved KYC and active bank account.
