@@ -7,3 +7,21 @@ members = [
 
 [workspace.dependencies]
 soroban-sdk = "23.0.2"
+
+# Los perfiles solo se respetan en el Cargo.toml raíz del workspace: el de
+# retiro_chain/Cargo.toml se ignoraba. Sin overflow-checks, un desbordamiento
+# de enteros en saldos o comisiones daría la vuelta en silencio en lugar de
+# abortar la transacción; stellar contract build se niega a compilar así.
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+debug = 0
+strip = "symbols"
+debug-assertions = false
+panic = "abort"
+codegen-units = 1
+lto = true
+
+[profile.release-with-logs]
+inherits = "release"
+debug-assertions = true
