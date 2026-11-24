@@ -214,7 +214,6 @@ impl MananaSeguroContract {
         }
         .publish(&env);
 
-
         extender_instancia(&env);
         extender_usuario(&env, &usuario);
         Ok(())
@@ -339,7 +338,6 @@ impl MananaSeguroContract {
         }
         .publish(&env);
 
-
         extender_instancia(&env);
         Ok(())
     }
@@ -406,7 +404,6 @@ impl MananaSeguroContract {
             monto,
         }
         .publish(&env);
-
 
         extender_instancia(&env);
         extender_usuario(&env, &usuario);
@@ -484,7 +481,6 @@ impl MananaSeguroContract {
             monto: pago_total,
         }
         .publish(&env);
-
 
         extender_instancia(&env);
         extender_usuario(&env, &usuario);
