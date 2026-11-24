@@ -32,6 +32,8 @@ pub enum Error {
     PrestamoYaLiquidado = 10,
     /// La meta ingresada no es válida (debe ser mayor a 0).
     MetaInvalida = 11,
+    /// El contrato ya fue inicializado: admin y token no se pueden reemplazar.
+    YaInicializado = 12,
 }
 
 // Storage Keys
@@ -71,6 +73,18 @@ const PRESTAMO_MAX_MESES: u32 = 24;
 /// 1 USDC = 10_000_000 stroops.
 const STROOP: i128 = 10_000_000;
 
+// TTL del almacenamiento
+//
+// Sin extensión, la instancia y las entradas persistentes se archivan cuando
+// vence su TTL; archivadas no se pierden, pero hay que restaurarlas antes de
+// volver a operar. Se extienden en cada operación que escribe.
+/// Ledgers por día (un ledger cada ~5 s).
+const DIA_EN_LEDGERS: u32 = 17_280;
+/// Hasta dónde se extiende el TTL en cada escritura.
+const TTL_EXTENDER_A: u32 = 30 * DIA_EN_LEDGERS;
+/// Solo se extiende si queda menos de esto, para no pagar en cada llamada.
+const TTL_UMBRAL: u32 = TTL_EXTENDER_A - DIA_EN_LEDGERS;
+
 #[contractevent]
 pub struct Deposito {
     #[topic]
@@ -107,12 +121,24 @@ pub struct MananaSeguroContract;
 #[contractimpl]
 impl MananaSeguroContract {
     /// Inicializa el contrato con la dirección del administrador y del token USDC.
-    pub fn inicializar(env: Env, admin: Address, usdc_token: Address) {
+    ///
+    /// Solo se puede llamar una vez. Antes no había guarda: cualquiera podía
+    /// volver a llamarlo con su propia dirección y otro token, quedarse con
+    /// las comisiones y dejar atrapados los USDC depositados.
+    ///
+    /// # Errors
+    /// Retorna `Error::YaInicializado` si el contrato ya tiene administrador.
+    pub fn inicializar(env: Env, admin: Address, usdc_token: Address) -> Result<(), Error> {
+        if env.storage().instance().has(&DataKey::Admin) {
+            return Err(Error::YaInicializado);
+        }
         admin.require_auth();
         env.storage().instance().set(&DataKey::Admin, &admin);
         env.storage()
             .instance()
             .set(&DataKey::UsdcToken, &usdc_token);
+        extender_instancia(&env);
+        Ok(())
     }
 
     /// Deposita USDC al contrato y bloquea los fondos hasta la fecha de retiro.
@@ -188,6 +214,8 @@ impl MananaSeguroContract {
         }
         .publish(&env);
 
+        extender_instancia(&env);
+        extender_usuario(&env, &usuario);
         Ok(())
     }
 
@@ -310,6 +338,7 @@ impl MananaSeguroContract {
         }
         .publish(&env);
 
+        extender_instancia(&env);
         Ok(())
     }
 
@@ -376,6 +405,8 @@ impl MananaSeguroContract {
         }
         .publish(&env);
 
+        extender_instancia(&env);
+        extender_usuario(&env, &usuario);
         Ok(())
     }
 
@@ -451,6 +482,8 @@ impl MananaSeguroContract {
         }
         .publish(&env);
 
+        extender_instancia(&env);
+        extender_usuario(&env, &usuario);
         Ok(())
     }
 
@@ -483,9 +516,37 @@ impl MananaSeguroContract {
         }
         env.storage()
             .persistent()
-            .set(&DataKey::Meta(usuario), &nueva_meta);
+            .set(&DataKey::Meta(usuario.clone()), &nueva_meta);
 
+        extender_instancia(&env);
+        extender_usuario(&env, &usuario);
         Ok(())
+    }
+}
+
+// ─── TTL ──────────────────────────────────────────────────────────────────────
+
+fn extender_instancia(env: &Env) {
+    env.storage()
+        .instance()
+        .extend_ttl(TTL_UMBRAL, TTL_EXTENDER_A);
+}
+
+/// Extiende las entradas persistentes del usuario que existan.
+fn extender_usuario(env: &Env, usuario: &Address) {
+    let claves = [
+        DataKey::Balance(usuario.clone()),
+        DataKey::DepositCount(usuario.clone()),
+        DataKey::RetiroFecha(usuario.clone()),
+        DataKey::Meta(usuario.clone()),
+        DataKey::Prestamo(usuario.clone()),
+        DataKey::PrestamoMeses(usuario.clone()),
+    ];
+    let persistente = env.storage().persistent();
+    for clave in claves.iter() {
+        if persistente.has(clave) {
+            persistente.extend_ttl(clave, TTL_UMBRAL, TTL_EXTENDER_A);
+        }
     }
 }
 
