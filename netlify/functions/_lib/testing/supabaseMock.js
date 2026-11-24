@@ -19,7 +19,7 @@ export function crearSupabaseMock(resolver) {
       ...Object.fromEntries(
         [
           'from', 'select', 'insert', 'update', 'delete',
-          'eq', 'neq', 'order', 'limit',
+          'eq', 'neq', 'or', 'order', 'limit',
         ].map((metodo) => [
           metodo,
           (...args) => {
@@ -30,6 +30,10 @@ export function crearSupabaseMock(resolver) {
       ),
       single: (...args) => {
         llamadas.push({ metodo: 'single', args })
+        return objetivo
+      },
+      maybeSingle: (...args) => {
+        llamadas.push({ metodo: 'maybeSingle', args })
         return objetivo
       },
       // Thenable: await en cualquier punto de la cadena resuelve aquí.
