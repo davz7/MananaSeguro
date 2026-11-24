@@ -36,30 +36,112 @@ const ANOS_MAX = 40
 const AHORRO_MIN = 40
 const AHORRO_MAX = 100_000
 
-function validarMeta({ nombre, monto_objetivo_mxn, ahorro_mensual_mxn, anos_al_retiro }) {
-  if (!nombre || typeof nombre !== 'string' || nombre.trim().length === 0) {
-    return 'El nombre de la meta es requerido'
+/** Entrada del cliente mal formada: siempre 400, nunca 500. */
+class EntradaInvalida extends Error {}
+
+/**
+ * Lee el cuerpo como objeto JSON. JSON inválido, `null`, arreglos o
+ * primitivos son error del cliente.
+ */
+function leerCuerpo(event) {
+  let cuerpo
+  try {
+    cuerpo = JSON.parse(event.body || '{}')
+  } catch {
+    throw new EntradaInvalida('El cuerpo de la petición no es JSON válido')
   }
-  if (nombre.length > NOMBRES_VALIDOS_MAX) {
-    return `El nombre no puede exceder ${NOMBRES_VALIDOS_MAX} caracteres`
+  if (cuerpo === null || typeof cuerpo !== 'object' || Array.isArray(cuerpo)) {
+    throw new EntradaInvalida('El cuerpo de la petición debe ser un objeto JSON')
   }
-  if (!monto_objetivo_mxn || Number(monto_objetivo_mxn) < MONTO_MIN) {
-    return `El monto objetivo mínimo es $${MONTO_MIN.toLocaleString('es-MX')} MXN`
-  }
-  if (Number(monto_objetivo_mxn) > MONTO_MAX) {
-    return `El monto objetivo máximo es $${MONTO_MAX.toLocaleString('es-MX')} MXN`
-  }
-  if (!ahorro_mensual_mxn || Number(ahorro_mensual_mxn) < AHORRO_MIN) {
-    return `El ahorro mensual mínimo es $${AHORRO_MIN} MXN`
-  }
-  if (Number(ahorro_mensual_mxn) > AHORRO_MAX) {
-    return `El ahorro mensual máximo es $${AHORRO_MAX.toLocaleString('es-MX')} MXN`
-  }
-  if (!anos_al_retiro || Number(anos_al_retiro) < ANOS_MIN || Number(anos_al_retiro) > ANOS_MAX) {
-    return `Los años al retiro deben estar entre ${ANOS_MIN} y ${ANOS_MAX}`
-  }
-  return null
+  return cuerpo
 }
+
+/**
+ * Acepta números o texto numérico ("5000"). Cualquier otra cosa da NaN,
+ * que se rechaza explícitamente: NaN pasaría las comparaciones de rango
+ * porque toda comparación con NaN es falsa. Tampoco acepta arreglos
+ * (Number([5000]) === 5000) ni booleanos.
+ */
+function aNumero(valor) {
+  if (typeof valor === 'number') return valor
+  if (typeof valor === 'string' && valor.trim() !== '') return Number(valor)
+  return NaN
+}
+
+function validarNombre(nombre) {
+  if (typeof nombre !== 'string' || nombre.trim().length === 0) {
+    throw new EntradaInvalida('El nombre de la meta es requerido')
+  }
+  const limpio = nombre.trim()
+  if (limpio.length > NOMBRES_VALIDOS_MAX) {
+    throw new EntradaInvalida(`El nombre no puede exceder ${NOMBRES_VALIDOS_MAX} caracteres`)
+  }
+  return limpio
+}
+
+function validarDescripcion(descripcion) {
+  if (descripcion === null) return null
+  if (typeof descripcion !== 'string') {
+    throw new EntradaInvalida('La descripción debe ser texto')
+  }
+  return descripcion.trim() || null
+}
+
+function validarMonto(valor) {
+  const m = aNumero(valor)
+  if (!Number.isFinite(m) || m < MONTO_MIN) {
+    throw new EntradaInvalida(`El monto objetivo mínimo es $${MONTO_MIN.toLocaleString('es-MX')} MXN`)
+  }
+  if (m > MONTO_MAX) {
+    throw new EntradaInvalida(`El monto objetivo máximo es $${MONTO_MAX.toLocaleString('es-MX')} MXN`)
+  }
+  return m
+}
+
+function validarAhorro(valor) {
+  const a = aNumero(valor)
+  if (!Number.isFinite(a) || a < AHORRO_MIN) {
+    throw new EntradaInvalida(`El ahorro mensual mínimo es $${AHORRO_MIN} MXN`)
+  }
+  if (a > AHORRO_MAX) {
+    throw new EntradaInvalida(`El ahorro mensual máximo es $${AHORRO_MAX.toLocaleString('es-MX')} MXN`)
+  }
+  return a
+}
+
+function validarAnos(valor) {
+  const y = aNumero(valor)
+  if (!Number.isInteger(y) || y < ANOS_MIN || y > ANOS_MAX) {
+    throw new EntradaInvalida(`Los años al retiro deben ser un número entero entre ${ANOS_MIN} y ${ANOS_MAX}`)
+  }
+  return y
+}
+
+/**
+ * Valida y normaliza los campos de una meta.
+ * - parcial=false (POST): nombre, monto, ahorro y años son obligatorios.
+ * - parcial=true (PATCH): solo se validan los campos presentes.
+ * Devuelve solo columnas conocidas: cualquier otro campo se ignora.
+ */
+function validarCampos(cuerpo, { parcial }) {
+  const campos = {}
+  const presente = (k) => cuerpo[k] !== undefined
+
+  if (!parcial || presente('nombre')) campos.nombre = validarNombre(cuerpo.nombre)
+  if (presente('descripcion')) campos.descripcion = validarDescripcion(cuerpo.descripcion)
+  if (!parcial || presente('monto_objetivo_mxn')) {
+    campos.monto_objetivo_mxn = validarMonto(cuerpo.monto_objetivo_mxn)
+  }
+  if (!parcial || presente('ahorro_mensual_mxn')) {
+    campos.ahorro_mensual_mxn = validarAhorro(cuerpo.ahorro_mensual_mxn)
+  }
+  if (!parcial || presente('anos_al_retiro')) {
+    campos.anos_al_retiro = validarAnos(cuerpo.anos_al_retiro)
+  }
+  return campos
+}
+
+const respuesta400 = (mensaje) => ({ statusCode: 400, body: JSON.stringify({ error: mensaje }) })
 
 //  Supabase client factory ──
 
@@ -91,12 +173,12 @@ async function handleGet(event, usuarioId) {
 
 // POST /api/metas — crear meta
 async function handlePost(event, usuarioId) {
-  const body = JSON.parse(event.body || '{}')
-  const { nombre, descripcion, monto_objetivo_mxn, ahorro_mensual_mxn, anos_al_retiro } = body
-
-  const errorValidacion = validarMeta({ nombre, monto_objetivo_mxn, ahorro_mensual_mxn, anos_al_retiro })
-  if (errorValidacion) {
-    return { statusCode: 400, body: JSON.stringify({ error: errorValidacion }) }
+  let campos
+  try {
+    campos = validarCampos(leerCuerpo(event), { parcial: false })
+  } catch (err) {
+    if (err instanceof EntradaInvalida) return respuesta400(err.message)
+    throw err
   }
 
   const supabase = getSupabase()
@@ -114,11 +196,11 @@ async function handlePost(event, usuarioId) {
     .from('metas')
     .insert({
       usuario_id: usuarioId,
-      nombre: nombre.trim(),
-      descripcion: descripcion?.trim() || null,
-      monto_objetivo_mxn: Number(monto_objetivo_mxn),
-      ahorro_mensual_mxn: Number(ahorro_mensual_mxn),
-      anos_al_retiro: Number(anos_al_retiro),
+      nombre: campos.nombre,
+      descripcion: campos.descripcion ?? null,
+      monto_objetivo_mxn: campos.monto_objetivo_mxn,
+      ahorro_mensual_mxn: campos.ahorro_mensual_mxn,
+      anos_al_retiro: campos.anos_al_retiro,
       es_principal: esPrincipal,
     })
     .select()
@@ -142,31 +224,13 @@ async function handlePatch(event, usuarioId) {
     return { statusCode: 400, body: JSON.stringify({ error: 'id de meta requerido' }) }
   }
 
-  const body = JSON.parse(event.body || '{}')
-  const { nombre, descripcion, monto_objetivo_mxn, ahorro_mensual_mxn, anos_al_retiro } = body
-
-  // Solo validar campos que vienen en el body
-  const updates = {}
-  if (nombre !== undefined) {
-    if (!nombre || nombre.trim().length === 0) return { statusCode: 400, body: JSON.stringify({ error: 'El nombre no puede estar vacío' }) }
-    if (nombre.length > NOMBRES_VALIDOS_MAX) return { statusCode: 400, body: JSON.stringify({ error: `Nombre máximo ${NOMBRES_VALIDOS_MAX} caracteres` }) }
-    updates.nombre = nombre.trim()
-  }
-  if (descripcion !== undefined) updates.descripcion = descripcion?.trim() || null
-  if (monto_objetivo_mxn !== undefined) {
-    const m = Number(monto_objetivo_mxn)
-    if (m < MONTO_MIN || m > MONTO_MAX) return { statusCode: 400, body: JSON.stringify({ error: `Monto entre $${MONTO_MIN} y $${MONTO_MAX} MXN` }) }
-    updates.monto_objetivo_mxn = m
-  }
-  if (ahorro_mensual_mxn !== undefined) {
-    const a = Number(ahorro_mensual_mxn)
-    if (a < AHORRO_MIN || a > AHORRO_MAX) return { statusCode: 400, body: JSON.stringify({ error: `Ahorro entre $${AHORRO_MIN} y $${AHORRO_MAX} MXN` }) }
-    updates.ahorro_mensual_mxn = a
-  }
-  if (anos_al_retiro !== undefined) {
-    const y = Number(anos_al_retiro)
-    if (y < ANOS_MIN || y > ANOS_MAX) return { statusCode: 400, body: JSON.stringify({ error: `Años entre ${ANOS_MIN} y ${ANOS_MAX}` }) }
-    updates.anos_al_retiro = y
+  // Solo se validan los campos que vienen en el cuerpo
+  let updates
+  try {
+    updates = validarCampos(leerCuerpo(event), { parcial: true })
+  } catch (err) {
+    if (err instanceof EntradaInvalida) return respuesta400(err.message)
+    throw err
   }
 
   if (Object.keys(updates).length === 0) {
