@@ -5,7 +5,6 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  excluded_patterns = ["**/*.test.js", "**/*.spec.js"]
 
 [dev]
   command = "npm run dev --prefix CreditRoot"

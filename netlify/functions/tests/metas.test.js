@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { crearSupabaseMock } from './_lib/testing/supabaseMock.js'
-import { issueSession } from './_lib/session.js'
-import { claveDePrueba } from './_lib/testing/claves.js'
+import { crearSupabaseMock } from '../_lib/testing/supabaseMock.js'
+import { issueSession } from '../_lib/session.js'
+import { claveDePrueba } from '../_lib/testing/claves.js'
 
 // Supabase simulado: cada consulta responde según la tabla y la operación.
 let mock
@@ -9,7 +9,7 @@ vi.mock('@supabase/supabase-js', () => ({
   createClient: () => mock.cliente,
 }))
 
-const { handler } = await import('./metas.js')
+const { handler } = await import('../metas.js')
 
 const META = {
   id: 'm-1',
