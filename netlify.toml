@@ -14,7 +14,6 @@
   framework = "vite"
   publish = "CreditRoot/dist"
 
-#  API: tasas financieras 
 [[redirects]]
   from = "/api/cetes-rate"
   to = "/.netlify/functions/cetes-rate"
@@ -25,43 +24,36 @@
   to = "/.netlify/functions/exchange-rate"
   status = 200
 
-#  API: autenticación 
 [[redirects]]
   from = "/api/auth/google"
   to = "/.netlify/functions/auth-google"
   status = 200
 
-#  API: onboarding Etherfuse (KYC) 
 [[redirects]]
   from = "/api/etherfuse/onboarding"
   to = "/.netlify/functions/etherfuse-onboarding"
   status = 200
 
-#  API: depósito (crear orden + CLABE) 
 [[redirects]]
   from = "/api/etherfuse/deposit"
   to = "/.netlify/functions/etherfuse-deposit"
   status = 200
 
-#  API: webhooks de Etherfuse 
 [[redirects]]
   from = "/api/etherfuse/webhook"
   to = "/.netlify/functions/etherfuse-webhook"
   status = 200
 
-#  API: estado de órdenes 
 [[redirects]]
   from = "/api/etherfuse/order-status"
   to = "/.netlify/functions/order-status"
   status = 200
 
-#  API: metas de ahorro 
 [[redirects]]
   from = "/api/metas"
   to = "/.netlify/functions/metas"
   status = 200
 
-#  API: firma custodial de intenciones
 [[redirects]]
   from = "/api/sign-intent"
   to = "/.netlify/functions/sign-intent"
@@ -72,7 +64,6 @@
   to = "/.netlify/functions/cuenta-preparar"
   status = 200
 
-#  SPA fallback — debe ir al final siempre
 [[redirects]]
   from = "/*"
   to = "/index.html"
