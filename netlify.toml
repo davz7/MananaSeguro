@@ -5,9 +5,7 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-
-# Ignorar archivos de prueba globalmente usando sintaxis de arreglo
-functions.ignore = ["**/*.test.js", "**/*.spec.js"]
+  excluded_patterns = ["**/*.test.js", "**/*.spec.js"]
 
 [dev]
   command = "npm run dev --prefix CreditRoot"
