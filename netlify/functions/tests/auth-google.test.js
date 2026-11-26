@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { handler } from './auth-google.js'
+import { handler } from '../auth-google.js'
 
 // Solo se prueba la ruta de configuración: el handler debe negarse a
 // operar sin GOOGLE_CLIENT_ID antes de consultar a Google o a Supabase.

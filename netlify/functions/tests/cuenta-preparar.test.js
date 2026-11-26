@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { crearHandler } from './cuenta-preparar.js'
-import { issueSession } from './_lib/session.js'
-import { claveDePrueba } from './_lib/testing/claves.js'
+import { crearHandler } from '../cuenta-preparar.js'
+import { issueSession } from '../_lib/session.js'
+import { claveDePrueba } from '../_lib/testing/claves.js'
 
 let envOriginal
 
